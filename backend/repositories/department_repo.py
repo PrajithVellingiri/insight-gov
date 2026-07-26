@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 
 from models.department import Department
@@ -6,6 +8,9 @@ from models.department import Department
 class DepartmentRepository:
     def __init__(self, db: Session) -> None:
         self._db = db
+
+    def get_by_id(self, dept_id: UUID) -> Department | None:
+        return self._db.query(Department).filter(Department.id == dept_id).first()
 
     def get_all(self) -> list[Department]:
         return self._db.query(Department).order_by(Department.name).all()

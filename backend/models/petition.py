@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, Text, Float
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -15,6 +15,8 @@ class Petition(Base):
     title = Column(String, nullable=False)
     description = Column(Text, nullable=False)
     location = Column(String, nullable=False)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
     status = Column(String, nullable=False, default="pending")
     # status values: pending | analysed | under_review | resolved | rejected
 
@@ -49,15 +51,15 @@ class Petition(Base):
 
     # Relationships
     citizen = relationship(
-        "User", foreign_keys=[submitted_by], back_populates="submitted_petitions"
+        "User", foreign_keys=[submitted_by], back_populates="submitted_petitions", lazy="selectin"
     )
     officer = relationship(
         "User", foreign_keys=[officer_id], back_populates="assigned_petitions"
     )
     department = relationship("Department", back_populates="petitions")
     ai_analysis = relationship(
-        "AIAnalysis", back_populates="petition", uselist=False, lazy="select"
+        "AIAnalysis", back_populates="petition", uselist=False, lazy="selectin"
     )
     history = relationship(
-        "PetitionHistory", back_populates="petition", lazy="select"
+        "PetitionHistory", back_populates="petition", lazy="selectin"
     )

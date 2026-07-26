@@ -1,3 +1,3 @@
-from routers import auth, petitions, dashboard, analytics, notifications, search
+from routers import auth, petitions, dashboard, analytics, notifications, search, admin
 
-__all__ = ["auth", "petitions", "dashboard", "analytics", "notifications", "search"]
+__all__ = ["auth", "petitions", "dashboard", "analytics", "notifications", "search", "admin"]

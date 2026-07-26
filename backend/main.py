@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import settings
-from routers import auth, petitions, dashboard, analytics, notifications, search
+from routers import auth, petitions, dashboard, analytics, notifications, search, admin
 
 app = FastAPI(
     title="InsightGov AI — Backend API",
@@ -36,6 +36,7 @@ app.include_router(dashboard.router, tags=["Dashboard"])
 app.include_router(analytics.router, tags=["Analytics"])
 app.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
 app.include_router(search.router, prefix="/ai", tags=["AI Search"])
+app.include_router(admin.router, prefix="/admin", tags=["Admin"])
 
 
 @app.get("/health", tags=["Health"])

@@ -28,7 +28,7 @@ class User(Base):
     )
 
     # Relationships
-    department = relationship("Department", back_populates="users")
+    department = relationship("Department", back_populates="users", lazy="selectin")
     submitted_petitions = relationship(
         "Petition",
         foreign_keys="Petition.submitted_by",

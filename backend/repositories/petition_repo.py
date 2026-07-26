@@ -4,6 +4,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from models.petition import Petition
+from models.ai_analysis import AIAnalysis
 
 
 class PetitionRepository:
@@ -28,6 +29,8 @@ class PetitionRepository:
         limit: int = 20,
     ) -> list[Petition]:
         query = self._db.query(Petition)
+        if priority:
+            query = query.join(AIAnalysis).filter(AIAnalysis.priority == priority)
         if status:
             query = query.filter(Petition.status == status)
         if department_id:

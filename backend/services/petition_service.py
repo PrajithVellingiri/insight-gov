@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -44,11 +44,12 @@ class PetitionService:
     ) -> Petition:
         """Create, analyse, and return a petition."""
 
-        # 1. Persist petition with status = pending
         petition = Petition(
             title=data.title,
             description=data.description,
             location=data.location,
+            latitude=data.latitude,
+            longitude=data.longitude,
             submitted_by=citizen_id,
             status="pending",
         )
@@ -62,10 +63,17 @@ class PetitionService:
             description=petition.description,
             location=petition.location,
             submitted_by=citizen_name,
+            latitude=petition.latitude,
+            longitude=petition.longitude,
         )
 
         if analysis_data:
             # 3. Store AI analysis
+            try:
+                analyzed_at = datetime.fromisoformat(analysis_data["analyzed_at"].replace("Z", "+00:00"))
+            except (ValueError, KeyError, TypeError):
+                analyzed_at = datetime.now(timezone.utc)
+
             analysis = AIAnalysis(
                 petition_id=petition.id,
                 category=analysis_data["category"],
@@ -76,9 +84,7 @@ class PetitionService:
                 similarity_scores=analysis_data.get("similarity_scores", []),
                 explanation=analysis_data.get("explanation", {}),
                 confidence=analysis_data["confidence"],
-                analyzed_at=datetime.fromisoformat(
-                    analysis_data["analyzed_at"].replace("Z", "+00:00")
-                ),
+                analyzed_at=analyzed_at,
             )
             self._ai_analysis_repo.create(analysis)
 
@@ -145,14 +151,15 @@ class PetitionService:
         old_status = petition.status
 
         # Apply overrides to ai_analysis if provided
-        if petition.ai_analysis:
-            if department_override:
+        # Apply overrides to ai_analysis if provided
+        if department_override:
+            dept = self._department_repo.get_or_create(department_override)
+            petition.department_id = dept.id
+            if petition.ai_analysis:
                 petition.ai_analysis.department = department_override
-                dept = self._department_repo.get_or_create(department_override)
-                petition.department_id = dept.id
-            if priority_override:
-                petition.ai_analysis.priority = priority_override
-            self._db.commit()
+        if priority_override and petition.ai_analysis:
+            petition.ai_analysis.priority = priority_override
+        self._db.commit()
 
         petition = self._petition_repo.update_status(petition, new_status)
 

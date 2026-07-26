@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from database import get_db
+from middleware.auth import get_current_user
 from models.user import User
 from repositories.user_repo import UserRepository
-from schemas.auth import LoginRequest, RegisterRequest, TokenResponse, UserOut
+from schemas.auth import CitizenRegisterRequest, LoginRequest, TokenResponse, UserOut
 from services.auth_service import AuthService
 
 router = APIRouter()
@@ -14,9 +15,17 @@ router = APIRouter()
     "/register",
     response_model=TokenResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Register a new user",
+    summary="Register a new citizen account",
 )
-def register(data: RegisterRequest, db: Session = Depends(get_db)) -> TokenResponse:
+def register(
+    data: CitizenRegisterRequest, db: Session = Depends(get_db)
+) -> TokenResponse:
+    """
+    Public registration endpoint — creates citizen accounts only.
+
+    Officers are created exclusively through the admin panel
+    (POST /admin/officers).
+    """
     repo = UserRepository(db)
 
     if repo.get_by_email(data.email):
@@ -29,8 +38,8 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)) -> TokenRespo
         name=data.name,
         email=data.email,
         hashed_password=AuthService.hash_password(data.password),
-        role=data.role,
-        department_id=data.department_id,
+        role="citizen",
+        department_id=None,  # Citizens never belong to a department
     )
     user = repo.create(user)
 
@@ -55,3 +64,17 @@ def login(data: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
 
     token = AuthService.create_access_token(str(user.id), user.role)
     return TokenResponse(access_token=token, user=UserOut.model_validate(user))
+
+
+@router.get(
+    "/me",
+    response_model=UserOut,
+    summary="Get the current user's profile",
+)
+def get_me(current_user: User = Depends(get_current_user)) -> UserOut:
+    """
+    Returns the authenticated user's profile.
+    Called by the frontend AuthContext on initial load to validate a stored JWT
+    and restore the user session without requiring re-login.
+    """
+    return UserOut.model_validate(current_user)

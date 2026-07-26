@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, DateTime, Float, ForeignKey, String, Text
+from sqlalchemy import Column, DateTime, Float, ForeignKey, String, Text, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
@@ -24,12 +24,12 @@ class AIAnalysis(Base):
     summary = Column(Text, nullable=False)
 
     # Stored as JSON arrays — parallel arrays keyed by position
-    duplicate_ids = Column(JSONB, nullable=False, default=list)
-    similarity_scores = Column(JSONB, nullable=False, default=list)
+    duplicate_ids = Column(JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb"))
+    similarity_scores = Column(JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb"))
 
     # Structured explanation block from the LLM
     # {"category_reason": "...", "priority_reason": "...", "department_reason": "..."}
-    explanation = Column(JSONB, nullable=False, default=dict)
+    explanation = Column(JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb"))
 
     confidence = Column(Float, nullable=False)
     analyzed_at = Column(DateTime(timezone=True), nullable=False)

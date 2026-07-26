@@ -36,7 +36,15 @@ def get_current_user(
             detail="Token is invalid or has expired.",
         )
 
-    user = UserRepository(db).get_by_id(UUID(user_id))
+    try:
+        user_uuid = UUID(user_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid user ID format in token.",
+        )
+
+    user = UserRepository(db).get_by_id(user_uuid)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

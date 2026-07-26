@@ -20,3 +20,6 @@ class UserRepository:
         self._db.commit()
         self._db.refresh(user)
         return user
+
+    def get_officers(self) -> list[User]:
+        return self._db.query(User).filter(User.role == "officer").order_by(User.name).all()

@@ -31,7 +31,7 @@ class AIClient:
             response.raise_for_status()
             return response.json()
 
-    async def analyze(self, petition_id: str, title: str, description: str, location: str, submitted_by: str | None = None) -> dict[str, Any] | None:
+    async def analyze(self, petition_id: str, title: str, description: str, location: str, submitted_by: str | None = None, latitude: float | None = None, longitude: float | None = None) -> dict[str, Any] | None:
         """
         POST /ai/analyze — run the full AI analysis pipeline on a petition.
 
@@ -46,6 +46,10 @@ class AIClient:
         }
         if submitted_by:
             payload["submitted_by"] = submitted_by
+        if latitude is not None:
+            payload["latitude"] = latitude
+        if longitude is not None:
+            payload["longitude"] = longitude
 
         try:
             async with httpx.AsyncClient(timeout=_ANALYZE_TIMEOUT) as client:

@@ -1,4 +1,10 @@
-from schemas.auth import RegisterRequest, LoginRequest, TokenResponse, UserOut
+from schemas.auth import (
+    CitizenRegisterRequest,
+    OfficerCreateRequest,
+    LoginRequest,
+    TokenResponse,
+    UserOut,
+)
 from schemas.petition import (
     PetitionCreate,
     PetitionOut,
@@ -12,7 +18,8 @@ from schemas.notification import NotificationOut
 from schemas.analytics import DashboardStats, AnalyticsOut
 
 __all__ = [
-    "RegisterRequest",
+    "CitizenRegisterRequest",
+    "OfficerCreateRequest",
     "LoginRequest",
     "TokenResponse",
     "UserOut",

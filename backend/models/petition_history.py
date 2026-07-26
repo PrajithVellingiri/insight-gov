@@ -33,4 +33,4 @@ class PetitionHistory(Base):
 
     # Relationships
     petition = relationship("Petition", back_populates="history")
-    officer = relationship("User", back_populates="petition_history")
+    officer = relationship("User", back_populates="petition_history", lazy="selectin")

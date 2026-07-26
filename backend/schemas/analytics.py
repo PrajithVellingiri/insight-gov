@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-
+from typing import Any
 
 class StatusBreakdown(BaseModel):
     pending: int = 0
@@ -8,13 +8,11 @@ class StatusBreakdown(BaseModel):
     resolved: int = 0
     rejected: int = 0
 
-
 class PriorityBreakdown(BaseModel):
     low: int = 0
     medium: int = 0
     high: int = 0
     critical: int = 0
-
 
 class DashboardStats(BaseModel):
     total_petitions: int
@@ -23,22 +21,30 @@ class DashboardStats(BaseModel):
     pending_count: int
     duplicate_count: int
 
+class AdminStats(BaseModel):
+    total_petitions: int
+    resolved_petitions: int
+    active_officers: int
+    total_departments: int
+
+class ChartPoint(BaseModel):
+    date: str
+    count: int
+
+class StatusCount(BaseModel):
+    status: str
+    count: int
 
 class CategoryCount(BaseModel):
     category: str
     count: int
 
-
-class DepartmentCount(BaseModel):
-    department: str
-    count: int
-
+class AdminCharts(BaseModel):
+    trend: list[ChartPoint]
+    by_status: list[StatusCount]
+    by_category: list[CategoryCount]
 
 class AnalyticsOut(BaseModel):
-    total_petitions: int
-    status_breakdown: StatusBreakdown
-    priority_breakdown: PriorityBreakdown
-    category_distribution: list[CategoryCount]
-    department_distribution: list[DepartmentCount]
-    duplicate_count: int
-    resolution_rate: float  # resolved / total (0.0–1.0)
+    stats: AdminStats
+    charts: AdminCharts
+    mapData: list[Any]

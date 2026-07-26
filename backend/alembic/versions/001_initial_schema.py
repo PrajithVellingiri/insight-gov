@@ -126,9 +126,9 @@ def upgrade() -> None:
         sa.Column("department", sa.String(), nullable=False),
         sa.Column("priority", sa.String(), nullable=False),
         sa.Column("summary", sa.Text(), nullable=False),
-        sa.Column("duplicate_ids", JSONB(), nullable=False, server_default="'[]'"),
-        sa.Column("similarity_scores", JSONB(), nullable=False, server_default="'[]'"),
-        sa.Column("explanation", JSONB(), nullable=False, server_default="'{}'"),
+        sa.Column("duplicate_ids", JSONB(), nullable=False, server_default=sa.text("'[]'::jsonb")),
+        sa.Column("similarity_scores", JSONB(), nullable=False, server_default=sa.text("'[]'::jsonb")),
+        sa.Column("explanation", JSONB(), nullable=False, server_default=sa.text("'{}'::jsonb")),
         sa.Column("confidence", sa.Float(), nullable=False),
         sa.Column("analyzed_at", sa.DateTime(timezone=True), nullable=False),
     )

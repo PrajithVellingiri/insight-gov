@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, DateTime, Float, ForeignKey, String, Text, text
+from sqlalchemy import Column, DateTime, Float, ForeignKey, String, Text, text, Boolean
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
@@ -21,6 +21,7 @@ class AIAnalysis(Base):
     category = Column(String, nullable=False)
     department = Column(String, nullable=False)
     priority = Column(String, nullable=False)  # low | medium | high | critical
+    is_priority_overridden = Column(Boolean, nullable=False, default=False, server_default=text("false"))
     summary = Column(Text, nullable=False)
 
     # Stored as JSON arrays — parallel arrays keyed by position

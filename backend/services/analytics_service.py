@@ -1,6 +1,8 @@
 from collections import Counter
 from datetime import datetime, timedelta, timezone
+from uuid import UUID
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from repositories.ai_analysis_repo import AIAnalysisRepository
@@ -14,10 +16,12 @@ from schemas.analytics import (
     CategoryCount,
     ChartPoint,
     DashboardStats,
+    OfficerAnalyticsResponse,
     PriorityBreakdown,
     StatusBreakdown,
     StatusCount,
 )
+from models.petition import Petition
 
 
 class AnalyticsService:
@@ -123,4 +127,75 @@ class AnalyticsService:
             stats=stats,
             charts=charts,
             mapData=map_data,
+        )
+
+    def get_officer_analytics(self, officer_id: UUID) -> OfficerAnalyticsResponse:
+        user = self._user_repo.get_by_id(officer_id)
+        if not user or user.role != "officer":
+            raise ValueError("Officer not found")
+
+        department_name = user.department.name if user.department else None
+
+        # Efficiently group and count petitions assigned to this officer by status
+        status_counts = (
+            self._db.query(Petition.status, func.count(Petition.id))
+            .filter(Petition.officer_id == officer_id)
+            .group_by(Petition.status)
+            .all()
+        )
+        counts = {status: count for status, count in status_counts}
+
+        pending = counts.get("pending", 0) + counts.get("analysed", 0)
+        in_progress = counts.get("under_review", 0)
+        resolved = counts.get("resolved", 0)
+        rejected = counts.get("rejected", 0)
+        duplicate = counts.get("duplicate", 0)
+        withdrawn = counts.get("withdrawn", 0)
+
+        total_assigned = pending + in_progress + resolved + rejected + duplicate + withdrawn
+        active_workload = pending + in_progress
+
+        resolution_rate = 0.0
+        eligible = total_assigned - withdrawn
+        if eligible > 0:
+            resolution_rate = ((resolved + duplicate) / eligible) * 100
+
+        # Fetch detailed metrics (priority breakdown and average resolution time)
+        petitions = self._db.query(Petition).filter(Petition.officer_id == officer_id).all()
+        
+        priority_breakdown = {"critical": 0, "high": 0, "medium": 0, "low": 0, "unassigned": 0}
+        resolution_times = []
+
+        for p in petitions:
+            # Priority
+            pri = p.ai_analysis.priority.lower() if p.ai_analysis and p.ai_analysis.priority else "unassigned"
+            if pri in priority_breakdown:
+                priority_breakdown[pri] += 1
+            else:
+                priority_breakdown["unassigned"] += 1
+
+            # Average resolution time (resolved, rejected, duplicate)
+            if p.status in ["resolved", "rejected", "duplicate"] and p.created_at and p.updated_at:
+                diff = p.updated_at - p.created_at
+                resolution_times.append(diff.total_seconds() / 86400.0) # In days
+
+        avg_resolution_days = None
+        if resolution_times:
+            avg_resolution_days = round(sum(resolution_times) / len(resolution_times), 2)
+
+        return OfficerAnalyticsResponse(
+            officer_id=user.id,
+            officer_name=user.name,
+            department_name=department_name,
+            total_assigned=total_assigned,
+            pending=pending,
+            in_progress=in_progress,
+            resolved=resolved,
+            rejected=rejected,
+            duplicate=duplicate,
+            withdrawn=withdrawn,
+            active_workload=active_workload,
+            resolution_rate=round(resolution_rate, 1),
+            average_resolution_days=avg_resolution_days,
+            priority_breakdown=priority_breakdown
         )

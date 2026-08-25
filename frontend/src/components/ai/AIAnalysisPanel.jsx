@@ -5,11 +5,11 @@ import ExplainabilityPanel from './ExplainabilityPanel';
 import DuplicateAlert from './DuplicateAlert';
 import { formatDate } from '@/lib/utils';
 
-export default function AIAnalysisPanel({ analysis, role = 'officer', showOverride = false }) {
+export default function AIAnalysisPanel({ analysis, role = 'officer', petition = null }) {
   if (!analysis) {
     return (
       <div className="ai-panel">
-        <div className="flex items-center gap-2 text-slate-400 text-sm">
+        <div className="flex items-center gap-2 text-muted-foreground text-sm">
           <Brain size={16} className="animate-pulse-soft" />
           <span>AI analysis pending…</span>
         </div>
@@ -38,7 +38,7 @@ export default function AIAnalysisPanel({ analysis, role = 'officer', showOverri
         <div className="flex items-center gap-2">
           <Brain size={16} className="text-primary-600" />
           <span className="ai-label">AI Recommendation</span>
-          <span className="ml-auto text-xs text-slate-400 flex items-center gap-1">
+          <span className="ml-auto text-xs text-muted-foreground flex items-center gap-1">
             <Calendar size={11} />
             {formatDate(analyzed_at)}
           </span>
@@ -52,19 +52,35 @@ export default function AIAnalysisPanel({ analysis, role = 'officer', showOverri
           )}
         </div>
 
-        {/* Department */}
-        {department && (
-          <div>
-            <p className="text-xs text-slate-500 mb-0.5">Recommended Department</p>
-            <p className="text-sm font-semibold text-slate-800">{department}</p>
-          </div>
-        )}
+        {/* Department Info */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {petition?.citizen_department_id && (
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Citizen Suggested</p>
+              <p className="text-sm text-foreground">{petition.department_name || "Unknown"}</p>
+            </div>
+          )}
+          {department && (
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">AI Recommended</p>
+              <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                {department}
+                {petition?.department_match === true && (
+                  <span className="text-[10px] uppercase tracking-wider font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">Match</span>
+                )}
+                {petition?.department_match === false && (
+                  <span className="text-[10px] uppercase tracking-wider font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">Mismatch</span>
+                )}
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* Summary */}
         {summary && (
-          <div className="bg-white rounded-lg p-3.5 border border-primary-100">
-            <p className="text-xs text-slate-500 mb-1 font-medium">Executive Summary</p>
-            <p className="text-sm text-slate-700 leading-relaxed">{summary}</p>
+          <div className="bg-card rounded-lg p-3.5 border border-primary-100">
+            <p className="text-xs text-muted-foreground mb-1 font-medium">Executive Summary</p>
+            <p className="text-sm text-foreground leading-relaxed">{summary}</p>
           </div>
         )}
 

@@ -4,7 +4,7 @@ import sys
 # Add current directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from database import engine, SessionLocal
+from database import SessionLocal
 from sqlalchemy import text
 
 def truncate_tables():

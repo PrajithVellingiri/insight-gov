@@ -37,6 +37,7 @@ class UserOut(BaseModel):
     role: str
     department_id: UUID | None
     department_name: str | None = None
+    preferences: dict[str, Any]
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -55,3 +56,10 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserOut
+
+class PreferencesUpdate(BaseModel):
+    language: str | None = None
+    voice_input: bool | None = None
+    high_contrast: bool | None = None
+    font_size: str | None = None
+    theme: Literal["light", "dark", "system"] | None = None

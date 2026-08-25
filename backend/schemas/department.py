@@ -1,16 +1,19 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class DepartmentCreate(BaseModel):
-    name: str = Field(..., min_length=1, max_length=256)
+    name: str
+    department_code: str
 
 
 class DepartmentOut(BaseModel):
     id: UUID
+    department_code: str
     name: str
     created_at: datetime
 
-    model_config = {"from_attributes": True}
+    class Config:
+        from_attributes = True

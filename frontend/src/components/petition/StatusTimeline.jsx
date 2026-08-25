@@ -13,7 +13,7 @@ const iconMap = {
 
 export default function StatusTimeline({ history = [] }) {
   if (!history.length) {
-    return <p className="text-sm text-slate-400 text-center py-4">No history yet.</p>;
+    return <p className="text-sm text-muted-foreground text-center py-4">No history yet.</p>;
   }
 
   return (
@@ -30,14 +30,14 @@ export default function StatusTimeline({ history = [] }) {
               {!isLast && <div className="w-0.5 flex-1 bg-slate-200 my-1" />}
             </div>
             <div className="pb-4">
-              <p className="text-sm font-semibold text-slate-800 capitalize">
+              <p className="text-sm font-semibold text-foreground capitalize">
                 {item.new_status?.replace('_', ' ')}
               </p>
-              {item.note && <p className="text-xs text-slate-500 mt-0.5">{item.note}</p>}
+              {item.note && <p className="text-xs text-muted-foreground mt-0.5">{item.note}</p>}
               {item.officer_name && (
-                <p className="text-xs text-slate-400 mt-0.5">by {item.officer_name}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">by {item.officer_name}</p>
               )}
-              <p className="text-xs text-slate-400 mt-0.5">{formatDate(item.created_at)}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{formatDate(item.created_at)}</p>
             </div>
           </li>
         );

@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Tag, AlertTriangle, Building2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Tag, AlertTriangle, Building2, Image, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const reasons = [
   { key: 'category_reason',   icon: Tag,           label: 'Category Reasoning' },
   { key: 'priority_reason',   icon: AlertTriangle, label: 'Priority Reasoning' },
   { key: 'department_reason', icon: Building2,     label: 'Department Routing' },
+  { key: 'image_evidence_reason', icon: Image,     label: 'Visual Evidence' },
+  { key: 'image_relevance',   icon: Search,        label: 'Image Relevance' },
 ];
 
 export default function ExplainabilityPanel({ explanation }) {
@@ -14,10 +16,10 @@ export default function ExplainabilityPanel({ explanation }) {
   if (!explanation) return null;
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 overflow-hidden">
+    <div className="rounded-lg border border-border bg-muted overflow-hidden">
       <button
         onClick={() => setOpen((p) => !p)}
-        className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-foreground hover:bg-secondary transition-colors"
       >
         <span className="flex items-center gap-2">
           <span className="text-primary-600">🧠</span>
@@ -31,11 +33,11 @@ export default function ExplainabilityPanel({ explanation }) {
           {reasons.map(({ key, icon: Icon, label }) => (
             explanation[key] ? (
               <div key={key} className="px-4 py-3">
-                <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
                   <Icon size={12} />
                   {label}
                 </div>
-                <p className="text-sm text-slate-700 leading-relaxed">{explanation[key]}</p>
+                <p className="text-sm text-foreground leading-relaxed">{explanation[key]}</p>
               </div>
             ) : null
           ))}

@@ -2,11 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useNotifications, useMarkRead } from '@/hooks/useNotifications';
-import { Bell, ChevronDown, LogOut, User, Menu, X, ShieldCheck, Check } from 'lucide-react';
+import { Bell, ChevronDown, LogOut, Menu, X, ShieldCheck, Check, Settings as SettingsIcon } from 'lucide-react';
 import { cn, formatDateShort } from '@/lib/utils';
+import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
+import SettingsModal from '@/components/ui/SettingsModal';
 
 const roleLabels = { citizen: 'Citizen', officer: 'Government Officer', admin: 'Administrator' };
-const roleColors = { citizen: 'bg-accent-50 text-accent-700', officer: 'bg-primary-50 text-primary-700', admin: 'bg-purple-50 text-purple-700' };
+const roleColors = { citizen: 'bg-accent/10 text-accent', officer: 'bg-primary/10 text-primary', admin: 'bg-destructive/10 text-destructive' };
 
 export default function Navbar({ onMenuClick, sidebarOpen }) {
   const { user, role, logout } = useAuth();
@@ -15,13 +17,17 @@ export default function Navbar({ onMenuClick, sidebarOpen }) {
   const navigate = useNavigate();
   const [dropOpen, setDropOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const navRef = useRef(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const notifRef = useRef(null);
+  const userMenuRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (navRef.current && !navRef.current.contains(event.target)) {
-        setDropOpen(false);
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
         setNotifOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setDropOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -36,11 +42,11 @@ export default function Navbar({ onMenuClick, sidebarOpen }) {
   };
 
   return (
-    <header ref={navRef} className="fixed top-0 left-0 right-0 z-40 h-16 bg-white border-b border-slate-200 flex items-center px-4 gap-4">
+    <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-card border-b border-border flex items-center px-4 gap-4 transition-colors duration-200">
       {/* Mobile menu toggle */}
       <button
         onClick={onMenuClick}
-        className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors lg:hidden"
+        className="p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors lg:hidden"
         aria-label="Toggle menu"
       >
         {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
@@ -48,11 +54,11 @@ export default function Navbar({ onMenuClick, sidebarOpen }) {
 
       {/* Logo */}
       <Link to="/" className="flex items-center gap-2.5 no-underline">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-700">
-          <ShieldCheck size={16} className="text-white" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+          <ShieldCheck size={16} className="text-primary-foreground" />
         </div>
-        <span className="font-bold text-slate-900 text-base tracking-tight hidden sm:block">
-          InsightGov <span className="text-primary-600">AI</span>
+        <span className="font-bold text-foreground text-base tracking-tight hidden sm:block">
+          InsightGov <span className="text-primary">AI</span>
         </span>
       </Link>
 
@@ -65,11 +71,23 @@ export default function Navbar({ onMenuClick, sidebarOpen }) {
         </span>
       )}
 
+      {/* Language Switcher */}
+      <LanguageSwitcher />
+
+      {/* Settings */}
+      <button
+        onClick={() => { setSettingsOpen(true); setDropOpen(false); setNotifOpen(false); }}
+        className="p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors"
+        aria-label="Settings"
+      >
+        <SettingsIcon size={20} />
+      </button>
+
       {/* Notifications */}
-      <div className="relative">
+      <div className="relative" ref={notifRef}>
         <button
           onClick={() => { setNotifOpen((p) => !p); setDropOpen(false); }}
-          className="relative p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
+          className="relative p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors"
           aria-label="Notifications"
         >
           <Bell size={20} />
@@ -81,10 +99,22 @@ export default function Navbar({ onMenuClick, sidebarOpen }) {
         </button>
 
         {notifOpen && (
-          <div className="absolute right-0 top-full mt-1 w-80 bg-white rounded-xl shadow-card-hover border border-slate-100 py-2 animate-fade-in z-50">
-            <div className="px-4 py-2 border-b border-slate-50 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-800">Notifications</h3>
-              <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{unread} unread</span>
+          <div className="absolute right-0 top-full mt-1 w-80 bg-card rounded-xl shadow-card-hover border border-border py-2 animate-fade-in z-50">
+            <div className="px-4 py-2 border-b border-border flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
+              <div className="flex items-center gap-2">
+                <span className="text-xs bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full">{unread} unread</span>
+                {unread > 0 && (
+                  <button 
+                    onClick={() => {
+                      notifData.filter(n => !n.is_read).forEach(n => markRead(n.id));
+                    }}
+                    className="text-xs text-primary hover:text-primary/80 font-medium"
+                  >
+                    Mark all read
+                  </button>
+                )}
+              </div>
             </div>
             <div className="max-h-[300px] overflow-y-auto">
               {notifData?.length > 0 ? (
@@ -95,19 +125,19 @@ export default function Navbar({ onMenuClick, sidebarOpen }) {
                       if (!n.is_read) markRead(n.id);
                     }}
                     className={cn(
-                      'w-full text-left px-4 py-3 hover:bg-slate-50 border-b border-slate-50 transition-colors flex items-start justify-between gap-2',
-                      !n.is_read ? 'bg-primary-50/30' : 'opacity-70'
+                      'w-full text-left px-4 py-3 hover:bg-secondary border-b border-border transition-colors flex items-start justify-between gap-2',
+                      !n.is_read ? 'bg-primary/5' : 'opacity-70'
                     )}
                   >
                     <div>
-                      <p className={cn("text-sm", !n.is_read ? 'font-medium text-slate-800' : 'text-slate-600')}>{n.message}</p>
-                      <p className="text-xs text-slate-400 mt-1">{formatDateShort(n.created_at)}</p>
+                      <p className={cn("text-sm", !n.is_read ? 'font-medium text-foreground' : 'text-muted-foreground')}>{n.message}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{formatDateShort(n.created_at)}</p>
                     </div>
-                    {n.is_read && <Check size={14} className="text-slate-400 mt-0.5" />}
+                    {n.is_read && <Check size={14} className="text-muted-foreground mt-0.5" />}
                   </button>
                 ))
               ) : (
-                <div className="p-4 text-center text-sm text-slate-400">No notifications yet.</div>
+                <div className="p-4 text-center text-sm text-muted-foreground">No notifications yet.</div>
               )}
             </div>
           </div>
@@ -115,38 +145,40 @@ export default function Navbar({ onMenuClick, sidebarOpen }) {
       </div>
 
       {/* User dropdown */}
-      <div className="relative">
+      <div className="relative" ref={userMenuRef}>
         <button
           onClick={() => { setDropOpen((p) => !p); setNotifOpen(false); }}
-          className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-100 transition-colors"
+          className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-secondary transition-colors"
         >
-          <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
-            <span className="text-sm font-semibold text-primary-700">
+          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
+            <span className="text-sm font-semibold text-primary">
               {user?.name?.charAt(0)?.toUpperCase() ?? 'U'}
             </span>
           </div>
           <div className="hidden sm:flex flex-col items-start">
-            <span className="text-sm font-medium text-slate-800 leading-tight">{user?.name ?? 'User'}</span>
-            <span className="text-xs text-slate-500">{user?.email ?? ''}</span>
+            <span className="text-sm font-medium text-foreground leading-tight">{user?.name ?? 'User'}</span>
+            <span className="text-xs text-muted-foreground">{user?.email ?? ''}</span>
           </div>
-          <ChevronDown size={14} className={cn('text-slate-400 transition-transform', dropOpen && 'rotate-180')} />
+          <ChevronDown size={14} className={cn('text-muted-foreground transition-transform', dropOpen && 'rotate-180')} />
         </button>
 
         {dropOpen && (
-          <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-card-hover border border-slate-100 py-1 animate-fade-in z-50">
-            <div className="px-3 py-2 border-b border-slate-100">
-              <p className="text-xs text-slate-500">Signed in as</p>
-              <p className="text-sm font-medium text-slate-800 truncate">{user?.email}</p>
+          <div className="absolute right-0 top-full mt-1 w-48 bg-card rounded-xl shadow-card-hover border border-border py-1 animate-fade-in z-50">
+            <div className="px-3 py-2 border-b border-border">
+              <p className="text-xs text-muted-foreground">Signed in as</p>
+              <p className="text-sm font-medium text-foreground truncate">{user?.email}</p>
             </div>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
             >
               <LogOut size={14} /> Sign out
             </button>
           </div>
         )}
       </div>
+
+      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
     </header>
   );
 }

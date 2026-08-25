@@ -47,11 +47,14 @@ export default function PetitionMap({ petitions = [], center = [20.5937, 78.9629
           <Marker key={p.id} position={[lat, lng]} icon={priorityIcon(priority)}>
             <Popup>
               <div className="min-w-[180px]">
-                <p className="font-semibold text-sm text-slate-900 mb-1">{p.title}</p>
+                <p className="font-semibold text-sm text-foreground mb-1">{p.title}</p>
                 <div className="flex gap-1 mb-1">
                   {priority && <PriorityBadge priority={priority} />}
                 </div>
-                <p className="text-xs text-slate-500 mb-1">{p.location}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold mb-1 border-b border-border pb-1">
+                  {p.petition_number}
+                </p>
+                <p className="text-xs text-muted-foreground mb-1">{p.location}</p>
                 <Link to={`/${role}/petitions/${p.id}`} className="text-xs text-primary-600 underline">
                   View petition
                 </Link>

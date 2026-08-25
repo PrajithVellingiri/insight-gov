@@ -3,8 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { ShieldCheck, Loader2, Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import usePageTitle from '@/hooks/usePageTitle';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginPage() {
+  const { t } = useTranslation();
+  usePageTitle(t('login', 'Login'));
   const { login } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
@@ -34,17 +38,17 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 border border-white/20 mb-4">
+          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-card/10 border border-white/20 mb-4">
             <ShieldCheck size={28} className="text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white">InsightGov AI</h1>
-          <p className="text-primary-200 text-sm mt-1">Sign in to your account</p>
+          <h1 className="text-2xl font-bold text-white">{t('app_name', 'InsightGov AI')}</h1>
+          <p className="text-primary-200 text-sm mt-1">{t('sign_in_to_account', 'Sign in to your account')}</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-6">
+        <div className="bg-card rounded-2xl shadow-xl p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="login-email" className="form-label">Email address</label>
+              <label htmlFor="login-email" className="form-label">{t('email_address', 'Email address')}</label>
               <input
                 id="login-email"
                 type="email"
@@ -58,7 +62,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="login-password" className="form-label">Password</label>
+              <label htmlFor="login-password" className="form-label">{t('password', 'Password')}</label>
               <div className="relative">
                 <input
                   id="login-password"
@@ -72,30 +76,30 @@ export default function LoginPage() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPw((p) => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  tabIndex={-1}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setShowPw(!showPw)}
                 >
-                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
             {error && (
-              <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
+              <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive font-medium">
                 {error}
               </div>
             )}
 
-            <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
-              {loading ? <><Loader2 size={14} className="animate-spin" /> Signing in…</> : 'Sign In'}
+            <button type="submit" disabled={loading} className="btn-primary w-full py-2.5 mt-2">
+              {loading ? <><Loader2 size={16} className="animate-spin" /> {t('signing_in', 'Signing in...')}</> : t('sign_in', 'Sign In')}
             </button>
           </form>
-
-          <p className="mt-5 text-center text-sm text-slate-500">
-            New citizen?{' '}
-            <Link to="/register" className="font-medium text-primary-700">Create an account</Link>
-          </p>
         </div>
+
+        <p className="text-center text-primary-200/80 text-sm mt-6">
+          {t('dont_have_account', 'Don\'t have an account?')} <Link to="/register" className="text-white font-medium hover:underline">{t('register_here', 'Register here')}</Link>
+        </p>
 
         <p className="mt-6 text-center text-xs text-primary-300">
           Government officers and admins receive login credentials from the administrator.

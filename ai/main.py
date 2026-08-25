@@ -78,13 +78,31 @@ app.include_router(search.router, tags=["Search"])
 async def health_check() -> dict:
     """Return the operational status of the AI service and its dependencies."""
 
-    # Check Ollama connectivity
+    text_model_status = "missing"
+    embedding_model_status = "missing"
     ollama_status = "unreachable"
+
     try:
+        from config import OLLAMA_LLM_MODEL, OLLAMA_EMBED_MODEL
         async with httpx.AsyncClient(timeout=5.0) as client:
             resp = await client.get(f"{OLLAMA_BASE_URL}/api/tags")
             if resp.status_code == 200:
                 ollama_status = "reachable"
+                models = resp.json().get("models", [])
+                model_names = [m.get("name") for m in models]
+                
+                # Check for exact matches or matches without the tag if default is 'latest'
+                def has_model(target: str) -> bool:
+                    if target in model_names:
+                        return True
+                    if ":" not in target and f"{target}:latest" in model_names:
+                        return True
+                    return False
+
+                if has_model(OLLAMA_LLM_MODEL):
+                    text_model_status = "ready"
+                if has_model(OLLAMA_EMBED_MODEL):
+                    embedding_model_status = "ready"
     except Exception:
         pass
 
@@ -100,7 +118,10 @@ async def health_check() -> dict:
     return {
         "status": "ok",
         "ollama": ollama_status,
+        "text_model": text_model_status,
+        "embedding_model": embedding_model_status,
         "chromadb": chroma_status,
+        "semantic_search": "ready" if embedding_model_status == "ready" and chroma_status.startswith("ok") else "unavailable"
     }
 
 
@@ -109,5 +130,6 @@ async def health_check() -> dict:
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
     import uvicorn
+    from config import AI_HOST
 
-    uvicorn.run("main:app", host="0.0.0.0", port=AI_PORT, reload=True)
+    uvicorn.run("main:app", host=AI_HOST, port=AI_PORT, reload=True)

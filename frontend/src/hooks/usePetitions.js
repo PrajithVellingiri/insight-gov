@@ -4,8 +4,11 @@ import {
   getPetitionById,
   submitPetition,
   updatePetition,
+  withdrawPetition,
   semanticSearch,
   getMyPetitions,
+  getActivePetitions,
+  getResolutionHistory,
 } from '@/api/petitions.api';
 
 export function usePetitions(filters = {}) {
@@ -59,8 +62,43 @@ export function useUpdatePetition() {
   });
 }
 
+export function useWithdrawPetition() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }) => withdrawPetition(id, reason),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['petition', id] });
+      queryClient.invalidateQueries({ queryKey: ['petitions'] });
+    },
+  });
+}
+
 export function useSemanticSearch() {
   return useMutation({
     mutationFn: semanticSearch,
+  });
+}
+
+export function useActivePetitions() {
+  const queryClient = useQueryClient();
+  return useQuery({
+    queryKey: ['petitions', 'active'],
+    queryFn: getActivePetitions,
+    refetchInterval: (query) => {
+      const data = query.state?.data;
+      if (Array.isArray(data) && data.some(p => p.status === 'pending')) return 5000;
+      return false;
+    },
+    onSuccess: () => {
+      // Also invalidate the generic petitions list so the dashboard stays in sync
+      queryClient.invalidateQueries({ queryKey: ['petitions'] });
+    },
+  });
+}
+
+export function useResolutionHistory(filters = {}) {
+  return useQuery({
+    queryKey: ['resolution-history', filters],
+    queryFn: () => getResolutionHistory(filters),
   });
 }

@@ -27,22 +27,42 @@ logger = get_logger(__name__)
 # Load prompt template and department mapping once at module import time.
 # Both are plain data files — no Python logic embedded.
 # ---------------------------------------------------------------------------
+from database import fetch_departments
+
 _BASE = Path(__file__).parent.parent
+_CACHED_DEPARTMENTS: list[dict] = []
+_BASE_SYSTEM_PROMPT: str | None = None
 
-_SYSTEM_PROMPT: str | None = None
-_DEPARTMENT_MAPPING: dict[str, str] | None = None
-
-def get_system_prompt() -> str:
-    global _SYSTEM_PROMPT
-    if _SYSTEM_PROMPT is None:
-        _SYSTEM_PROMPT = (_BASE / "prompts" / "analysis.md").read_text(encoding="utf-8")
-    return _SYSTEM_PROMPT
-
-def get_department_mapping() -> dict[str, str]:
-    global _DEPARTMENT_MAPPING
-    if _DEPARTMENT_MAPPING is None:
-        _DEPARTMENT_MAPPING = json.loads((_BASE / "department_mapping.json").read_text(encoding="utf-8"))
-    return _DEPARTMENT_MAPPING
+async def get_system_prompt() -> str:
+    global _BASE_SYSTEM_PROMPT, _CACHED_DEPARTMENTS
+    if _BASE_SYSTEM_PROMPT is None:
+        _BASE_SYSTEM_PROMPT = (_BASE / "prompts" / "analysis.md").read_text(encoding="utf-8")
+        
+    if not _CACHED_DEPARTMENTS:
+        _CACHED_DEPARTMENTS = await fetch_departments()
+        if not _CACHED_DEPARTMENTS:
+            logger.error(
+                "fetch_departments() returned empty list. Check DATABASE_URL in ai/.env "
+                "and ensure PostgreSQL is reachable and departments are seeded."
+            )
+        
+    # Build dynamic department list
+    dept_text = "## Valid Departments & Mandates\n\n"
+    for dept in _CACHED_DEPARTMENTS:
+        dept_text += f"- {dept['name']}: {dept['description']}\n"
+        
+    # Replace the placeholder in the base prompt (or just append if not using a placeholder)
+    # The current analysis.md has a hardcoded list under "## Valid Departments & Mandates".
+    # We will strip out the hardcoded list by splitting the text or just rebuilding it.
+    prompt = _BASE_SYSTEM_PROMPT
+    if "## Valid Departments & Mandates" in prompt:
+        parts = prompt.split("## Valid Departments & Mandates")
+        head = parts[0]
+        # Find where the next section starts
+        tail = "## Priority Levels" + parts[1].split("## Priority Levels")[1]
+        prompt = head + dept_text + "\n" + tail
+        
+    return prompt
 
 
 async def analyze(request: PetitionAnalyzeRequest) -> AnalysisResult:
@@ -79,21 +99,31 @@ async def analyze(request: PetitionAnalyzeRequest) -> AnalysisResult:
     # --- Step 3: LLM analysis ---
     logger.info(f"[{request.id}] Running LLM analysis.")
     user_prompt = petition_text  # Reuse the same formatted string
+    system_prompt = await get_system_prompt()
     llm_output = await llm_service.generate_json(
-        system_prompt=get_system_prompt(),
+        system_prompt=system_prompt,
         user_prompt=user_prompt,
     )
 
     # --- Step 4: Deterministic department resolution ---
-    department_mapping = get_department_mapping()
-    category: str = llm_output.get("category", "Other")
-    if category not in department_mapping:
-        logger.warning(
-            f"[{request.id}] LLM returned unknown category '{category}'; falling back to 'Other'."
-        )
-        category = "Other"
+    valid_names = [d["name"] for d in _CACHED_DEPARTMENTS]
 
-    department: str = department_mapping[category]
+    if not valid_names:
+        # This means the DB fetch failed at startup — do not crash, raise clearly
+        raise RuntimeError(
+            "Department list is empty. The AI service cannot connect to the database "
+            "or no departments have been seeded. Check DATABASE_URL in ai/.env and "
+            "ensure the database is reachable."
+        )
+
+    category: str = llm_output.get("category", "Other")
+    if category not in valid_names:
+        logger.warning(
+            f"[{request.id}] LLM returned unknown category '{category}'; falling back to default."
+        )
+        category = "Mudalvarin Mugavari Department" if "Mudalvarin Mugavari Department" in valid_names else valid_names[0]
+
+    department: str = category
 
     metadata = {
         "title": request.title,

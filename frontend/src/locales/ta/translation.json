@@ -1,0 +1,103 @@
+{
+  "login": "Login",
+  "register": "Register",
+  "dashboard": "Dashboard",
+  "logout": "Logout",
+  "settings": "Settings",
+  "language": "Language",
+  "dark_mode": "Dark Mode",
+  "voice_input": "Voice Input",
+  "theme": "Theme",
+  "save_changes": "Save Changes",
+  
+  "citizen": {
+    "welcome": "Welcome, Citizen",
+    "submit_petition": "Submit Petition",
+    "my_petitions": "My Petitions",
+    "track_status": "Track Status",
+    "petition_title": "Petition Title",
+    "title_placeholder": "Brief title describing your concern",
+    "description": "Description",
+    "desc_placeholder": "Describe your issue in detail — what happened, who is affected, how long it has been going on...",
+    "suggested_department": "Suggested Department (Optional)",
+    "let_ai_decide": "Let AI decide",
+    "dept_suggestion_desc": "You can suggest a department, but our AI will review and route it appropriately.",
+    "location_desc": "Location Description",
+    "loc_placeholder": "e.g. MG Road, Gandhi Nagar, Chennai",
+    "pin_location": "Pin Exact Location on Map",
+    "use_current_location": "Use Current Location",
+    "detecting": "Detecting...",
+    "attach_photos": "Attach Photos",
+    "required_fields": "Required fields",
+    "submitting": "Submitting...",
+    "petition_submitted": "Petition Submitted!",
+    "petition_received_desc": "Your petition has been received and is being analysed by our AI system.",
+    "reference_id": "Reference ID:",
+    "go_to_dashboard": "Go to Dashboard",
+    "withdraw_petition": "Withdraw Petition",
+    "withdrawn": "Withdrawn"
+  },
+  
+  "officer": {
+    "welcome": "Welcome, Officer",
+    "petition_queue": "Petition Queue",
+    "semantic_search": "Semantic Search",
+    "analytics": "Analytics",
+    "review_petition": "Review Petition",
+    "mark_resolved": "Mark Resolved",
+    "reject": "Reject",
+    "override_department": "Override Department",
+    "resolution_details": "Resolution Details",
+    "resolution_desc": "Resolution Description",
+    "resolution_proof": "Resolution Proof Image",
+    "submit_resolution": "Submit Resolution"
+  },
+  
+  "admin": {
+    "welcome": "Welcome, Admin",
+    "platform_analytics": "Platform Analytics",
+    "departments": "Departments",
+    "officers": "Officers",
+    "manage_departments": "Manage Departments",
+    "manage_officers": "Manage Officers",
+    "total_petitions": "Total Petitions",
+    "active_officers": "Active Officers"
+  },
+  
+  "status": {
+    "pending": "Pending",
+    "analysed": "Analysed",
+    "under_review": "Under Review",
+    "resolved": "Resolved",
+    "rejected": "Rejected",
+    "withdrawn": "Withdrawn"
+  },
+  
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "critical": "Critical"
+  },
+
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "edit": "Edit",
+    "delete": "Delete",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "no_data": "No data available",
+    "back": "Back"
+  },
+  
+  "validation": {
+    "required": "This field is required",
+    "min_length": "Must be at least {{count}} characters",
+    "max_length": "Cannot exceed {{count}} characters",
+    "invalid_email": "Invalid email address",
+    "resolution_required": "Resolution description and proof image are required."
+  }
+}

@@ -65,14 +65,14 @@ export default function PetitionsByCategory({ data = [] }) {
   };
 
   if (!processedData.length) {
-    return <div className="flex items-center justify-center h-48 text-sm text-slate-400">No data available</div>;
+    return <div className="flex items-center justify-center h-48 text-sm text-muted-foreground">No data available</div>;
   }
 
   return (
     <div className="relative">
       <button 
         onClick={handleCopy}
-        className="absolute -top-10 right-0 p-2 text-slate-400 hover:text-primary-600 transition-colors bg-white hover:bg-slate-50 rounded-lg border border-slate-200 shadow-sm"
+        className="absolute -top-10 right-0 p-2 text-muted-foreground hover:text-primary-600 transition-colors bg-card hover:bg-muted rounded-lg border border-border shadow-sm"
         aria-label="Copy data"
       >
         {copied ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
@@ -85,7 +85,7 @@ export default function PetitionsByCategory({ data = [] }) {
           return (
             <div key={i} className="flex items-center gap-4 text-sm">
               <div 
-                className="w-32 sm:w-40 shrink-0 truncate font-medium text-slate-700"
+                className="w-32 sm:w-40 shrink-0 truncate font-medium text-foreground"
                 title={item.category} // Tooltip with full name on hover
               >
                 {getShortName(item.category)}
@@ -96,7 +96,7 @@ export default function PetitionsByCategory({ data = [] }) {
                   style={{ width: `${percentage}%` }}
                 />
               </div>
-              <div className="w-12 text-right shrink-0 font-semibold text-slate-900">
+              <div className="w-12 text-right shrink-0 font-semibold text-foreground">
                 {item.count}
               </div>
             </div>

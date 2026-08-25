@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { login as loginApi, register as registerApi, getProfile } from '@/api/auth.api';
+import i18n from '@/i18n';
 
 const AuthContext = createContext(null);
 
@@ -10,6 +12,7 @@ export function AuthProvider({ children }) {
   const [user, setUser]   = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   // Hydrate from localStorage on mount
   useEffect(() => {
@@ -21,7 +24,20 @@ export function AuthProvider({ children }) {
           const validUser = await getProfile();
           setUser(validUser);
           localStorage.setItem(USER_KEY, JSON.stringify(validUser));
-        } catch (err) {
+          if (validUser.preferences) {
+            if (validUser.preferences.language) i18n.changeLanguage(validUser.preferences.language);
+            if (validUser.preferences.high_contrast) document.documentElement.classList.add('high-contrast');
+            else document.documentElement.classList.remove('high-contrast');
+            if (validUser.preferences.font_size === 'large') document.documentElement.classList.add('font-large');
+            else document.documentElement.classList.remove('font-large');
+            
+            if (validUser.preferences.theme === 'dark' || (validUser.preferences.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+              document.documentElement.classList.add('dark');
+            } else {
+              document.documentElement.classList.remove('dark');
+            }
+          }
+        } catch (_err) {
           console.warn("Session expired or invalid token.");
           localStorage.removeItem(TOKEN_KEY);
           localStorage.removeItem(USER_KEY);
@@ -39,6 +55,19 @@ export function AuthProvider({ children }) {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
     setToken(token);
     setUser(user);
+    if (user.preferences) {
+      if (user.preferences.language) i18n.changeLanguage(user.preferences.language);
+      if (user.preferences.high_contrast) document.documentElement.classList.add('high-contrast');
+      else document.documentElement.classList.remove('high-contrast');
+      if (user.preferences.font_size === 'large') document.documentElement.classList.add('font-large');
+      else document.documentElement.classList.remove('font-large');
+      
+      if (user.preferences.theme === 'dark' || (user.preferences.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
   };
 
   const login = useCallback(async (credentials) => {
@@ -58,7 +87,8 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(USER_KEY);
     setToken(null);
     setUser(null);
-  }, []);
+    queryClient.clear();
+  }, [queryClient]);
 
   const value = {
     user,
@@ -74,6 +104,7 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used inside AuthProvider');

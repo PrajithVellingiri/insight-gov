@@ -1,7 +1,7 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
-  LayoutDashboard, FilePlus, FileSearch, BarChart3,
-  Building2, Users, ClipboardList, Home,
+  LayoutDashboard, FilePlus, FileSearch,
+  Building2, Users, Home, History, Activity
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -13,11 +13,13 @@ const navConfigs = {
   officer: [
     { to: '/officer/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/officer/search', icon: FileSearch, label: 'Semantic Search' },
+    { to: '/officer/resolution-history', icon: History, label: 'Resolution History' },
   ],
   admin: [
     { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/admin/departments', icon: Building2, label: 'Departments' },
     { to: '/admin/officers', icon: Users, label: 'Officers' },
+    { to: '/admin/officer-analytics', icon: Activity, label: 'Officer Analytics' },
   ],
 };
 
@@ -36,7 +38,7 @@ export default function Sidebar({ role, open, onClose }) {
 
       <aside
         className={cn(
-          'fixed top-16 left-0 z-30 h-[calc(100vh-4rem)] w-60 bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 ease-out',
+          'fixed top-16 left-0 z-30 h-[calc(100vh-4rem)] w-60 bg-card border-r border-border flex flex-col transition-transform duration-300 ease-out',
           open ? 'translate-x-0' : '-translate-x-full',
           'lg:translate-x-0'
         )}
@@ -57,7 +59,7 @@ export default function Sidebar({ role, open, onClose }) {
           ))}
         </nav>
 
-        <div className="p-3 border-t border-slate-100">
+        <div className="p-3 border-t border-border">
           <NavLink to="/" className="nav-item">
             <Home size={17} />
             <span>Home</span>

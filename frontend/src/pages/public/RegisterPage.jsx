@@ -3,8 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { ShieldCheck, Loader2, Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import usePageTitle from '@/hooks/usePageTitle';
+import { useTranslation } from 'react-i18next';
 
 export default function RegisterPage() {
+  const { t } = useTranslation();
+  usePageTitle(t('register', 'Register'));
   const { register } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', password: '' });
@@ -42,17 +46,17 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-gradient-to-br from-primary-950 to-primary-800 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 border border-white/20 mb-4">
+          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-card/10 border border-white/20 mb-4">
             <ShieldCheck size={28} className="text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Create Account</h1>
-          <p className="text-primary-200 text-sm mt-1">Register as a citizen to submit petitions</p>
+          <h1 className="text-2xl font-bold text-white">{t('create_account', 'Create Account')}</h1>
+          <p className="text-primary-200 text-sm mt-1">{t('register_citizen_desc', 'Register as a citizen to submit petitions')}</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-6">
+        <div className="bg-card rounded-2xl shadow-xl p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="reg-name" className="form-label">Full Name</label>
+              <label htmlFor="reg-name" className="form-label">{t('full_name', 'Full Name')}</label>
               <input id="reg-name" type="text" value={form.name} onChange={set('name')}
                 placeholder="Rajesh Kumar" className={cn('form-input', errors.name && 'border-red-400')} />
               {errors.name && <p className="form-error">{errors.name}</p>}
@@ -72,7 +76,7 @@ export default function RegisterPage() {
                   onChange={set('password')} placeholder="Min. 8 characters"
                   className={cn('form-input pr-10', errors.password && 'border-red-400')} />
                 <button type="button" onClick={() => setShowPw(p => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground">
                   {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
@@ -80,19 +84,20 @@ export default function RegisterPage() {
             </div>
 
             {errors.submit && (
-              <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">{errors.submit}</div>
+              <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive font-medium">
+                {errors.submit}
+              </div>
             )}
 
-            <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
-              {loading ? <><Loader2 size={14} className="animate-spin" /> Creating account…</> : 'Create Account'}
+            <button type="submit" disabled={loading} className="btn-primary w-full py-2.5 mt-2">
+              {loading ? <><Loader2 size={16} className="animate-spin" /> {t('creating_account', 'Creating Account...')}</> : t('register', 'Register')}
             </button>
           </form>
-
-          <p className="mt-5 text-center text-sm text-slate-500">
-            Already have an account?{' '}
-            <Link to="/login" className="font-medium text-primary-700">Sign in</Link>
-          </p>
         </div>
+        
+        <p className="text-center text-primary-200/80 text-sm mt-6">
+          {t('already_have_account', 'Already have an account?')} <Link to="/login" className="text-white font-medium hover:underline">{t('login_here', 'Login here')}</Link>
+        </p>
       </div>
     </div>
   );

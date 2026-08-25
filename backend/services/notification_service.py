@@ -2,7 +2,6 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from models.notification import Notification
 from repositories.notification_repo import NotificationRepository
 from schemas.notification import NotificationOut
 

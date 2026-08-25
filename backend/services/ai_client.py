@@ -71,6 +71,9 @@ class AIClient:
                 "AI service unreachable for petition %s: %s", petition_id, exc
             )
             return None
+        except ValueError as exc:
+            logger.error("JSON decode error from AI service for petition %s: %s", petition_id, exc)
+            return None
 
     async def search(self, query: str, top_k: int = 5) -> dict[str, Any]:
         """
@@ -89,7 +92,12 @@ class AIClient:
                 return response.json()
         except httpx.HTTPStatusError as exc:
             logger.error("AI search failed (%s): %s", exc.response.status_code, exc.response.text)
-            return {"results": []}
+            if exc.response.status_code == 503:
+                raise ValueError("Semantic search service is unavailable (model or database not ready)")
+            raise ValueError(f"Semantic search failed: {exc.response.text}")
         except httpx.RequestError as exc:
             logger.error("AI service unreachable during search: %s", exc)
-            return {"results": []}
+            raise ValueError("AI service is currently unreachable")
+        except ValueError as exc:
+            logger.error("JSON decode error during AI search: %s", exc)
+            raise ValueError("Invalid response from AI service")

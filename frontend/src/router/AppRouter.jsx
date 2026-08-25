@@ -17,11 +17,13 @@ import PetitionStatus from '@/pages/citizen/PetitionStatus';
 import OfficerDashboard from '@/pages/officer/OfficerDashboard';
 import PetitionReview from '@/pages/officer/PetitionReview';
 import SemanticSearch from '@/pages/officer/SemanticSearch';
+import ResolutionHistory from '@/pages/officer/ResolutionHistory';
 
 // Admin pages
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import DepartmentManagement from '@/pages/admin/DepartmentManagement';
 import OfficerManagement from '@/pages/admin/OfficerManagement';
+import OfficerAnalyticsPage from '@/pages/admin/OfficerAnalyticsPage';
 
 // Layout
 import PageWrapper from '@/components/layout/PageWrapper';
@@ -61,6 +63,7 @@ const router = createBrowserRouter([
         children: [
           { path: '/officer/dashboard', element: <OfficerDashboard /> },
           { path: '/officer/search', element: <SemanticSearch /> },
+          { path: '/officer/resolution-history', element: <ResolutionHistory /> },
           { path: '/officer/petitions/:id', element: <PetitionReview /> },
         ],
       },
@@ -77,6 +80,7 @@ const router = createBrowserRouter([
           { path: '/admin/dashboard', element: <AdminDashboard /> },
           { path: '/admin/departments', element: <DepartmentManagement /> },
           { path: '/admin/officers', element: <OfficerManagement /> },
+          { path: '/admin/officer-analytics', element: <OfficerAnalyticsPage /> },
         ],
       },
     ],

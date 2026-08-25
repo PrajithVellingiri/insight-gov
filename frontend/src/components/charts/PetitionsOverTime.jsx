@@ -6,8 +6,8 @@ import {
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-slate-200 rounded-lg shadow-card px-3 py-2">
-      <p className="text-xs text-slate-500">{label}</p>
+    <div className="bg-card border border-border rounded-lg shadow-card px-3 py-2">
+      <p className="text-xs text-muted-foreground">{label}</p>
       <p className="text-sm font-bold text-primary-700">{payload[0].value} petitions</p>
     </div>
   );
@@ -15,7 +15,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export default function PetitionsOverTime({ data = [] }) {
   if (!data.length) {
-    return <div className="flex items-center justify-center h-48 text-sm text-slate-400">No data available</div>;
+    return <div className="flex items-center justify-center h-48 text-sm text-muted-foreground">No data available</div>;
   }
   return (
     <ResponsiveContainer width="100%" height={220}>

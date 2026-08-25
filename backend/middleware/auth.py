@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Query
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 from sqlalchemy.orm import Session
@@ -13,15 +13,7 @@ from services.auth_service import AuthService
 _bearer = HTTPBearer(auto_error=True)
 
 
-def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
-    db: Session = Depends(get_db),
-) -> User:
-    """
-    FastAPI dependency — decodes JWT and returns the authenticated User object.
-    Raises 401 if the token is missing, expired, or invalid.
-    """
-    token = credentials.credentials
+def _verify_and_get_user(token: str, db: Session) -> User:
     try:
         payload = AuthService.decode_token(token)
         user_id: str = payload.get("sub")
@@ -51,6 +43,27 @@ def get_current_user(
             detail="User not found.",
         )
     return user
+
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+    db: Session = Depends(get_db),
+) -> User:
+    """
+    FastAPI dependency — decodes JWT and returns the authenticated User object.
+    Raises 401 if the token is missing, expired, or invalid.
+    """
+    return _verify_and_get_user(credentials.credentials, db)
+
+
+def get_current_user_from_token(
+    token: str = Query(..., description="JWT access token"),
+    db: Session = Depends(get_db),
+) -> User:
+    """
+    FastAPI dependency — authenticates using a raw token string (e.g. from a query param).
+    """
+    return _verify_and_get_user(token, db)
 
 
 def require_officer(current_user: User = Depends(get_current_user)) -> User:

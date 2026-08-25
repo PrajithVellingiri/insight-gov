@@ -39,6 +39,22 @@ class CategoryCount(BaseModel):
     category: str
     count: int
 
+class OfficerAnalyticsResponse(BaseModel):
+    officer_id: Any
+    officer_name: str
+    department_name: str | None
+    total_assigned: int
+    pending: int
+    in_progress: int
+    resolved: int
+    rejected: int
+    duplicate: int
+    withdrawn: int
+    active_workload: int
+    resolution_rate: float
+    average_resolution_days: float | None = None
+    priority_breakdown: dict[str, int] = {}
+
 class AdminCharts(BaseModel):
     trend: list[ChartPoint]
     by_status: list[StatusCount]

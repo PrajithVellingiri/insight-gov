@@ -1,11 +1,18 @@
 import { useAuth } from '@/context/AuthContext';
-import { usePetitions } from '@/hooks/usePetitions';
+import { useActivePetitions } from '@/hooks/usePetitions';
 import PetitionTable from '@/components/petition/PetitionTable';
 import { AlertTriangle, FileText, CheckCircle } from 'lucide-react';
+import usePageTitle from '@/hooks/usePageTitle';
+import { useTranslation } from 'react-i18next';
 
 export default function OfficerDashboard() {
+  const { t } = useTranslation();
+  usePageTitle(t('officer.dashboard', 'Officer Dashboard'));
   const { user } = useAuth();
-  const { data: petitions = [], isLoading } = usePetitions({ department_id: user?.department_id });
+  // useActivePetitions calls /petitions/active which applies the 2-day retention
+  // rule server-side: finalized petitions (resolved/rejected/duplicate) older than
+  // 2 days are excluded from this response.
+  const { data: petitions = [], isLoading } = useActivePetitions();
 
   const statusWeight = { pending: 2, analysed: 2, under_review: 2, resolved: 0, rejected: 0, duplicate: 0 };
   const priorityWeight = { critical: 4, high: 3, medium: 2, low: 1, undefined: 0 };
@@ -22,37 +29,40 @@ export default function OfficerDashboard() {
 
   const pending = petitions.filter((p) => p.status === 'analysed' || p.status === 'under_review');
   const critical = petitions.filter((p) => p.status !== 'resolved' && (p.priority === 'critical' || p.ai_analysis?.priority === 'critical'));
-  const resolved = petitions.filter((p) => p.status === 'resolved');
+  // Recently finalized petitions still in the dashboard due to the 2-day rule
+  const recentlyFinalized = petitions.filter((p) => ['resolved', 'rejected', 'duplicate'].includes(p.status));
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="page-header">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Officer Dashboard</h1>
-          <p className="text-slate-500 text-sm mt-1">{user?.department_name || 'Your Department'} Queue</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('officer.welcome', 'Officer Dashboard')}</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            {t('common.department', 'Department')}: {user?.department_name || t('common.unassigned', 'Unassigned')}
+          </p>
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="stat-card">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600"><FileText size={20} /></div>
-          <div><p className="text-2xl font-bold text-slate-900">{pending.length}</p><p className="text-sm text-slate-500">Pending Review</p></div>
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary"><FileText size={20} /></div>
+          <div><p className="text-2xl font-bold text-foreground">{pending.length}</p><p className="text-sm text-muted-foreground">{t('officer.pending_review', 'Pending Review')}</p></div>
         </div>
-        <div className="stat-card border border-red-100 bg-red-50/30">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-100 text-red-600"><AlertTriangle size={20} /></div>
-          <div><p className="text-2xl font-bold text-red-900">{critical.length}</p><p className="text-sm text-red-600 font-medium">Critical Alerts</p></div>
+        <div className="stat-card border-destructive/20 bg-destructive/5">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-destructive/10 text-destructive"><AlertTriangle size={20} /></div>
+          <div><p className="text-2xl font-bold text-destructive">{critical.length}</p><p className="text-sm text-destructive font-medium">{t('priority.critical', 'Critical Alerts')}</p></div>
         </div>
         <div className="stat-card">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent-50 text-accent-600"><CheckCircle size={20} /></div>
-          <div><p className="text-2xl font-bold text-slate-900">{resolved.length}</p><p className="text-sm text-slate-500">Resolved (This Month)</p></div>
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent"><CheckCircle size={20} /></div>
+          <div><p className="text-2xl font-bold text-foreground">{recentlyFinalized.length}</p><p className="text-sm text-muted-foreground">Recently Closed</p></div>
         </div>
       </div>
 
       {/* Queue Table */}
       <div>
-        <h2 className="text-lg font-semibold text-slate-800 mb-4">Department Queue</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-4">{t('officer.petition_queue', 'Department Queue')}</h2>
         <PetitionTable petitions={sortedPetitions} loading={isLoading} role="officer" />
       </div>
     </div>

@@ -17,6 +17,7 @@ from models.user import User
 from repositories.department_repo import DepartmentRepository
 from repositories.user_repo import UserRepository
 from schemas.auth import OfficerCreateRequest, UserOut
+from schemas.analytics import OfficerAnalyticsResponse
 from schemas.department import DepartmentCreate, DepartmentOut
 from services.auth_service import AuthService
 
@@ -58,9 +59,32 @@ def create_department(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"Department '{data.name}' already exists.",
         )
-    dept = repo.create(Department(name=data.name))
+    dept = repo.create(Department(name=data.name, department_code=data.department_code))
     return DepartmentOut.model_validate(dept)
 
+
+@router.delete(
+    "/departments/{dept_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a department (admin only)",
+)
+def delete_department(
+    dept_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    repo = DepartmentRepository(db)
+    dept = repo.get_by_id(dept_id)
+    if not dept:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Department not found.")
+        
+    success = repo.delete(dept_id)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot delete department because it has assigned officers or petitions.",
+        )
+    return None
 
 # ---------------------------------------------------------------------------
 # Officers
@@ -72,12 +96,34 @@ def create_department(
     summary="List all officers (admin only)",
 )
 def list_officers(
+    department_id: UUID | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin),
 ) -> list[UserOut]:
     repo = UserRepository(db)
-    officers = repo.get_officers()
+    officers = repo.get_officers(department_id=department_id)
     return [UserOut.model_validate(u) for u in officers]
+
+
+@router.get(
+    "/officers/{officer_id}/analytics",
+    response_model=OfficerAnalyticsResponse,
+    summary="Get analytics for a specific officer (admin only)",
+)
+def get_officer_analytics(
+    officer_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+) -> OfficerAnalyticsResponse:
+    from services.analytics_service import AnalyticsService
+    service = AnalyticsService(db)
+    try:
+        return service.get_officer_analytics(officer_id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
 
 
 @router.post(
@@ -123,3 +169,27 @@ def create_officer(
     )
     user = user_repo.create(user)
     return UserOut.model_validate(user)
+
+
+@router.delete(
+    "/officers/{officer_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete an officer (admin only)",
+)
+def delete_officer(
+    officer_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    repo = UserRepository(db)
+    officer = repo.get_by_id(officer_id)
+    if not officer or officer.role != "officer":
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Officer not found.")
+        
+    success = repo.delete_officer(officer_id)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot delete officer because they have petitions assigned to them.",
+        )
+    return None

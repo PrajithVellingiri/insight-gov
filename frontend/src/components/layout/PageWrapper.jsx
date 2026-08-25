@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
+import ChatWidget from '../chatbot/ChatWidget';
 
 export default function PageWrapper({ role }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-200">
       <Navbar
         onMenuClick={() => setSidebarOpen((p) => !p)}
         sidebarOpen={sidebarOpen}
@@ -22,6 +23,7 @@ export default function PageWrapper({ role }) {
           <Outlet />
         </div>
       </main>
+      <ChatWidget />
     </div>
   );
 }

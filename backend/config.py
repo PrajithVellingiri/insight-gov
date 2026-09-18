@@ -19,10 +19,19 @@ class Settings(BaseSettings):
     backend_host: str = "0.0.0.0"
     backend_port: int = 8000
 
-    # Storage
+    # Storage & Object Storage Provider
     upload_dir: str = "uploads"
+    storage_provider: str = "local"                      # local | s3 | supabase
+    storage_bucket: str = "petition-images"
+    storage_url: str = ""
+    storage_api_key: str = ""
+    storage_secret_key: str = ""
+    storage_region: str = "auto"
+    supabase_url: str = ""
+    supabase_key: str = ""
 
     # CORS
+    frontend_url: str = ""
     allowed_origins: str = "http://localhost:5173,http://localhost:3000"
 
     # ---------------------------------------------------------------
@@ -77,8 +86,23 @@ class Settings(BaseSettings):
     demo_mode: bool = False
 
     @property
+    def clean_database_url(self) -> str:
+        url = self.database_url
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://", 1)
+        return url
+
+    @property
     def allowed_origins_list(self) -> list[str]:
-        return [origin.strip() for origin in self.allowed_origins.split(",")]
+        origins: set[str] = set()
+        if self.frontend_url:
+            origins.add(self.frontend_url.strip().rstrip("/"))
+        if self.allowed_origins:
+            for item in self.allowed_origins.split(","):
+                cleaned = item.strip().rstrip("/")
+                if cleaned:
+                    origins.add(cleaned)
+        return list(origins) if origins else ["*"]
 
     model_config = {
         "env_file": [".env", str(Path(__file__).resolve().parent / ".env")],

@@ -361,10 +361,9 @@ async def upload_petition_images(
                    f"(already has {existing_count}).",
         )
 
-    upload_dir_base = Path(settings.upload_dir)
+    from services.storage import get_storage_provider
+    storage = get_storage_provider()
     image_folder = "petition_images" if image_type == "petition" else "resolution_proofs"
-    upload_dir = upload_dir_base / image_folder / str(petition_id)
-    upload_dir.mkdir(parents=True, exist_ok=True)
 
     saved: list[PetitionImage] = []
 
@@ -391,12 +390,9 @@ async def upload_petition_images(
         if file.filename and "." in file.filename:
             ext = file.filename.rsplit(".", 1)[-1].lower()
         unique_name = f"{uuid_lib.uuid4()}.{ext}"
-        file_path = upload_dir / unique_name
+        dest_path = f"{image_folder}/{petition_id}/{unique_name}"
 
-        file_path.write_bytes(content)
-
-        # Store relative identifier
-        stored_path = f"{image_folder}/{petition_id}/{unique_name}"
+        stored_path = await storage.save_file(content, dest_path, file.content_type or "image/jpeg")
 
         img = PetitionImage(
             petition_id=petition_id,
@@ -420,14 +416,14 @@ async def upload_petition_images(
     "/{petition_id}/images/{filename}",
     summary="Securely fetch a petition image",
 )
-def get_petition_image(
+async def get_petition_image(
     petition_id: UUID,
     filename: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user_from_token),
 ):
-    from fastapi.responses import FileResponse
-    from pathlib import Path
+    from fastapi.responses import FileResponse, Response
+    from services.storage import get_storage_provider
     
     repo = PetitionRepository(db)
     petition = repo.get_by_id(petition_id)
@@ -449,9 +445,6 @@ def get_petition_image(
         PetitionImage.filename == filename
     ).first()
     
-    # If not found by original filename, check if the requested filename IS the stored path filename
-    # Our updated logic sets stored_path = config.upload_dir / petition_id / uuid.jpg
-    # The frontend is going to request whatever the stored_path filename is.
     if not img_record:
         img_record = db.query(PetitionImage).filter(
             PetitionImage.petition_id == petition_id,
@@ -461,20 +454,13 @@ def get_petition_image(
     if not img_record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image not found.")
 
-    # Security: Ensure resolved file path is within upload_dir to prevent path traversal
-    base_upload_dir = Path(settings.upload_dir).resolve()
-    
-    # Backward compatibility: strip "uploads/" if it's already in the stored_path
-    relative_path = img_record.stored_path
-    if relative_path.startswith("uploads/"):
-        relative_path = relative_path[len("uploads/"):]
-        
-    file_path = (base_upload_dir / relative_path).resolve()
-    
-    if not str(file_path).startswith(str(base_upload_dir)):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid file path.")
+    storage = get_storage_provider()
+    local_path = storage.get_local_path(img_record.stored_path)
+    if local_path and local_path.is_file():
+        return FileResponse(local_path, media_type=img_record.mime_type)
 
-    if not file_path.is_file():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image file is missing from disk.")
+    file_bytes = await storage.get_file_bytes(img_record.stored_path)
+    if file_bytes:
+        return Response(content=file_bytes, media_type=img_record.mime_type)
 
-    return FileResponse(file_path, media_type=img_record.mime_type)
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image file is missing from storage.")

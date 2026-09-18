@@ -117,35 +117,33 @@ class PetitionService:
         petition = self._petition_repo.create(petition)
         logger.info("Petition %s created (status=pending)", petition.id)
 
-        # 1.5 Save images
-        from pathlib import Path
-        import shutil
+        # 1.5 Save images using storage provider abstraction
         import uuid
         from models.petition_image import PetitionImage
-        
-        upload_dir = Path(settings.upload_dir) / "petition_images" / str(petition.id)
-        upload_dir.mkdir(parents=True, exist_ok=True)
-        
+        from services.storage import get_storage_provider
+
+        storage = get_storage_provider()
         uploaded_image_paths = []
+
         for file in files:
             file_extension = Path(file.filename).suffix if file.filename else ".jpg"
-            # Fully sanitized filename
             safe_filename = f"{uuid.uuid4().hex}{file_extension}"
-            file_path = upload_dir / safe_filename
-            
-            with file_path.open("wb") as buffer:
-                shutil.copyfileobj(file.file, buffer)
-                
+            dest_rel_path = f"petition_images/{petition.id}/{safe_filename}"
+            content = await file.read() if hasattr(file, "read") else file.file.read()
+
+            stored_path = await storage.save_file(content, dest_rel_path, file.content_type or "image/jpeg")
+
             img = PetitionImage(
                 petition_id=petition.id,
-                filename=file.filename or 'image.jpg',  # original name for reference if needed
-                stored_path=f"petition_images/{petition.id}/{safe_filename}",
+                filename=file.filename or 'image.jpg',
+                stored_path=stored_path,
                 mime_type=file.content_type,
-                file_size=file.size,
+                file_size=len(content),
                 image_type="petition",
             )
             self._db.add(img)
-            uploaded_image_paths.append((file_path, file.content_type))
+            local_path = storage.get_local_path(stored_path)
+            uploaded_image_paths.append((local_path or dest_rel_path, file.content_type))
         self._db.commit()
 
         # Execute AI analysis task synchronously

@@ -4,7 +4,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from config import settings
 
 engine = create_engine(
-    settings.database_url,
+    settings.clean_database_url,
     pool_pre_ping=True,  # Detect stale connections before using them
 )
 

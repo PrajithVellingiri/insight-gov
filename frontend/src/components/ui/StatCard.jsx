@@ -1,13 +1,11 @@
 ﻿import React, { useState, useEffect } from 'react';
-import Card3D from './Card3D';
 import { cn } from '@/lib/utils';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
-function useCounter(endValue, duration = 1200) {
+function useCounter(endValue, duration = 900) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    let start = 0;
     const end = typeof endValue === 'number' ? endValue : parseInt(endValue, 10) || 0;
     if (end === 0) {
       setCount(0);
@@ -20,7 +18,6 @@ function useCounter(endValue, duration = 1200) {
     const update = (now) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      // easeOutExpo
       const current = Math.floor((progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress)) * end);
       setCount(current);
 
@@ -38,12 +35,16 @@ function useCounter(endValue, duration = 1200) {
   return count;
 }
 
+/**
+ * Minimalist GovTech KPI Card.
+ * Clean, flat, spacious, with subtle editorial variations.
+ */
 export default function StatCard({
   label,
   value = 0,
   Icon,
-  color = 'text-blue-400 bg-blue-500/10 border-blue-500/25',
-  glowColor = 'rgba(59, 130, 246, 0.2)',
+  color, // optional override
+  variant = 'default', // 'applications' | 'pending' | 'resolved' | 'departments' | 'default'
   trend,
   trendType = 'positive', // positive | negative | neutral
   description,
@@ -51,57 +52,99 @@ export default function StatCard({
 }) {
   const animatedValue = useCounter(value);
 
+  // Determine variant styling based on explicit prop or label text
+  let styleVariant = variant;
+  const lowerLabel = (label || '').toLowerCase();
+  if (styleVariant === 'default') {
+    if (lowerLabel.includes('pending') || lowerLabel.includes('review') || lowerLabel.includes('critical')) {
+      styleVariant = 'pending';
+    } else if (lowerLabel.includes('resolved') || lowerLabel.includes('approved') || lowerLabel.includes('closed')) {
+      styleVariant = 'resolved';
+    } else if (lowerLabel.includes('department') || lowerLabel.includes('ministr') || lowerLabel.includes('rate')) {
+      styleVariant = 'departments';
+    } else {
+      styleVariant = 'applications';
+    }
+  }
+
+  // Styles per variant
+  const variantClasses = {
+    applications: {
+      card: 'bg-white border-[#E5E5DE]',
+      iconBox: 'bg-[#EFF4F0] text-[#315C4A]',
+      accentText: 'text-[#315C4A]',
+      badge: 'bg-[#EFF4F0] text-[#315C4A]',
+    },
+    pending: {
+      card: 'bg-[#FBF9F5] border-[#EFE8DC]',
+      iconBox: 'bg-[#FDF6F0] text-[#C58B5B]',
+      accentText: 'text-[#C58B5B]',
+      badge: 'bg-[#FDF6F0] text-[#C58B5B]',
+    },
+    resolved: {
+      card: 'bg-[#F2F6F3] border-[#DFE9E3]',
+      iconBox: 'bg-[#E2ECE6] text-[#315C4A]',
+      accentText: 'text-[#315C4A]',
+      badge: 'bg-[#E2ECE6] text-[#315C4A]',
+    },
+    departments: {
+      card: 'bg-white border-[#E5E5DE]',
+      iconBox: 'bg-[#FAF6ED] text-[#9A7B38]',
+      accentText: 'text-[#9A7B38]',
+      badge: 'bg-[#FAF6ED] text-[#9A7B38]',
+    },
+  }[styleVariant] || {
+    card: 'bg-white border-[#E5E5DE]',
+    iconBox: 'bg-[#EFF4F0] text-[#315C4A]',
+    accentText: 'text-[#315C4A]',
+    badge: 'bg-[#EFF4F0] text-[#315C4A]',
+  };
+
   return (
-    <Card3D className={cn('relative overflow-hidden group', className)}>
-      {/* Background soft ambient glow */}
-      <div
-        className="pointer-events-none absolute -right-6 -bottom-6 h-28 w-28 rounded-full opacity-40 blur-2xl transition-opacity duration-300 group-hover:opacity-75"
-        style={{ backgroundColor: glowColor }}
-        aria-hidden="true"
-      />
-
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-          <div className="flex items-baseline gap-2">
-            <span
-              className="text-3xl font-extrabold tracking-tight text-foreground"
-              style={{ textShadow: '0 0 25px rgba(255, 255, 255, 0.08)' }}
-            >
-              {typeof value === 'number' ? animatedValue.toLocaleString() : value}
-            </span>
-            {trend && (
-              <span
-                className={cn(
-                  'inline-flex items-center gap-0.5 text-xs font-semibold px-2 py-0.5 rounded-full border',
-                  trendType === 'positive' && 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-                  trendType === 'negative' && 'text-rose-400 bg-rose-500/10 border-rose-500/20',
-                  trendType === 'neutral' && 'text-slate-400 bg-slate-500/10 border-slate-500/20'
-                )}
-              >
-                {trendType === 'positive' && <TrendingUp size={12} />}
-                {trendType === 'negative' && <TrendingDown size={12} />}
-                {trend}
-              </span>
-            )}
-          </div>
-        </div>
-
+    <div
+      className={cn(
+        'rounded-2xl border p-6 transition-all duration-200 shadow-card hover:shadow-card-hover hover:-translate-y-0.5',
+        variantClasses.card,
+        className
+      )}
+    >
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <span className="text-xs font-semibold uppercase tracking-wider text-[#68716B]">
+          {label}
+        </span>
         {Icon && (
-          <div
-            className={cn(
-              'flex h-12 w-12 items-center justify-center rounded-2xl border shadow-sm transition-transform duration-300 group-hover:scale-105',
-              color
-            )}
-          >
-            <Icon size={22} />
+          <div className={cn('p-2 rounded-lg transition-colors', variantClasses.iconBox)}>
+            <Icon size={18} strokeWidth={1.8} />
           </div>
         )}
       </div>
 
+      <div className="flex items-baseline justify-between gap-2">
+        <div className="text-3xl lg:text-4xl font-bold font-sans tracking-tight text-[#202522]">
+          {typeof value === 'number' ? animatedValue.toLocaleString() : value}
+        </div>
+
+        {trend && (
+          <span
+            className={cn(
+              'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium',
+              trendType === 'positive' && 'bg-[#EFF4F0] text-[#315C4A]',
+              trendType === 'negative' && 'bg-[#FDF2F2] text-[#B91C1C]',
+              trendType === 'neutral' && 'bg-[#F0EFEA] text-[#68716B]'
+            )}
+          >
+            {trendType === 'positive' && <TrendingUp size={12} />}
+            {trendType === 'negative' && <TrendingDown size={12} />}
+            {trend}
+          </span>
+        )}
+      </div>
+
       {description && (
-        <p className="text-xs text-muted-foreground mt-2 border-t border-border/40 pt-2">{description}</p>
+        <p className="mt-2 text-xs text-[#68716B] leading-relaxed">
+          {description}
+        </p>
       )}
-    </Card3D>
+    </div>
   );
 }

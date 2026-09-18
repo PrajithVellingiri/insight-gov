@@ -1,37 +1,33 @@
 ﻿import { cn } from '@/lib/utils';
-import { AlertTriangle, CheckCircle, ShieldCheck } from 'lucide-react';
+import { Shield } from 'lucide-react';
 
 export default function ConfidenceBar({ confidence }) {
   const pct = Math.round((confidence ?? 0) * 100);
   const isLow = pct < 60;
 
   return (
-    <div className="space-y-2 pt-1">
+    <div className="space-y-1.5 pt-1">
       <div className="flex items-center justify-between text-xs">
-        <span className="font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-          <ShieldCheck size={13} className="text-blue-400" />
-          Model Confidence Score
+        <span className="font-mono text-[10px] uppercase tracking-wider font-bold text-[#68716B] flex items-center gap-1.5">
+          <Shield size={12} className="text-[#315C4A]" />
+          Confidence Assessment
         </span>
-        <span className={cn('flex items-center gap-1 font-mono font-bold text-xs', isLow ? 'text-amber-400' : 'text-emerald-400')}>
-          {isLow ? <AlertTriangle size={12} /> : <CheckCircle size={12} />}
+        <span className={cn('font-mono font-bold text-xs', isLow ? 'text-[#C58B5B]' : 'text-[#315C4A]')}>
           {pct}%
         </span>
       </div>
-      <div className="h-2 w-full rounded-full bg-slate-800/80 overflow-hidden p-0.5 border border-slate-700/50">
+      <div className="h-1.5 w-full rounded-full bg-white overflow-hidden border border-[#D4E2D8]">
         <div
           className={cn(
-            'h-full rounded-full transition-all duration-700 shadow-sm',
-            isLow
-              ? 'bg-gradient-to-r from-amber-500 to-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.5)]'
-              : 'bg-gradient-to-r from-blue-500 via-cyan-400 to-emerald-400 shadow-[0_0_10px_rgba(6,182,212,0.5)]'
+            'h-full rounded-full transition-all duration-500',
+            isLow ? 'bg-[#C58B5B]' : 'bg-[#315C4A]'
           )}
           style={{ width: `${pct}%` }}
         />
       </div>
       {isLow && (
-        <p className="text-[11px] text-amber-400 flex items-center gap-1 font-medium">
-          <AlertTriangle size={11} />
-          Low confidence recommendation — human verification advised
+        <p className="text-[11px] text-[#C58B5B] font-medium mt-1">
+          Low confidence score — manual officer assessment recommended
         </p>
       )}
     </div>

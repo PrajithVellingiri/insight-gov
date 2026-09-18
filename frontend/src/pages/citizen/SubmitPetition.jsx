@@ -1,4 +1,4 @@
-﻿import { ArrowLeft, Sparkles, Brain } from 'lucide-react';
+﻿import { ArrowLeft, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PetitionForm from '@/components/petition/PetitionForm';
 import usePageTitle from '@/hooks/usePageTitle';
@@ -13,24 +13,24 @@ export default function SubmitPetition() {
       <div>
         <Link
           to="/citizen/dashboard"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-400 hover:text-blue-300 mb-3 no-underline transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#315C4A] hover:underline mb-3 no-underline"
         >
-          <ArrowLeft size={14} /> {t('citizen.back_to_dashboard', 'Back to Dashboard')}
+          <ArrowLeft size={14} /> {t('citizen.back_to_dashboard', 'Back to Overview')}
         </Link>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+        <h1 className="text-3xl font-extrabold text-[#202522] tracking-tight">
           {t('citizen.submit_a_petition', 'Submit a Civic Grievance')}
         </h1>
-        <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
-          {t('citizen.submit_petition_desc', 'Describe your concern clearly. Our AI will automatically categorise, prioritise, and route it to the right department.')}
+        <p className="text-[#68716B] text-sm mt-1 leading-relaxed">
+          {t('citizen.submit_petition_desc', 'Describe your concern clearly. Our system will automatically categorise, prioritise, and route it to the appropriate state ministry.')}
         </p>
       </div>
 
-      <div className="glass-panel rounded-2xl border border-blue-500/25 p-4 flex items-center gap-3.5 shadow-sm">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/20 text-cyan-400 border border-blue-400/30 flex-shrink-0">
-          <Brain size={18} />
+      <div className="bg-[#EFF4F0] rounded-2xl border border-[#D4E2D8] p-4 flex items-center gap-3.5">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-[#315C4A] border border-[#D4E2D8] flex-shrink-0">
+          <Shield size={16} />
         </div>
-        <p className="text-xs text-slate-300 leading-snug">
-          <strong className="text-blue-400 font-semibold">Autonomous Triage:</strong> {t('citizen.ai_analysis_notice', 'Your petition will be analysed by AI within seconds of submission, extracting geospatial coordinates and routing it to the appropriate state ministry.')}
+        <p className="text-xs text-[#202522] leading-snug">
+          <strong className="text-[#315C4A] font-semibold">InsightGov Intelligence:</strong> Your application will be analysed upon submission, establishing geospatial coordinates and routing directly to the corresponding ministry queue.
         </p>
       </div>
 

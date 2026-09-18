@@ -1,25 +1,22 @@
-/**
- * components/chatbot/ChatInput.jsx
- *
- * Text input + send button for the chat panel.
- * Handles Enter key (send) and Shift+Enter (newline).
- * Disabled while streaming.
- */
-import { useState, useRef } from 'react';
+﻿import { useState, useRef } from 'react';
 import { Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import MicButton from '@/components/ui/MicButton';
 import { useTranslation } from 'react-i18next';
 
-export default function ChatInput({ onSend, isStreaming }) {
+export default function ChatInput({ onSend, onSendMessage, isStreaming, disabled, placeholder }) {
   const { t, i18n } = useTranslation();
   const [value, setValue] = useState('');
   const textareaRef = useRef(null);
+  const isBusy = isStreaming || disabled;
 
   const handleSend = () => {
     const trimmed = value.trim();
-    if (!trimmed || isStreaming) return;
-    onSend(trimmed);
+    if (!trimmed || isBusy) return;
+    const sendFn = onSendMessage || onSend;
+    if (sendFn) {
+      sendFn(trimmed);
+    }
     setValue('');
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -35,7 +32,6 @@ export default function ChatInput({ onSend, isStreaming }) {
 
   const handleChange = (e) => {
     setValue(e.target.value);
-    // Auto-grow textarea
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
@@ -51,10 +47,10 @@ export default function ChatInput({ onSend, isStreaming }) {
   };
 
   return (
-    <div className="flex items-end gap-1.5 p-3 border-t border-border bg-card">
+    <div className="flex items-end gap-2 p-3 bg-white">
       <MicButton 
         onTranscript={handleTranscript} 
-        disabled={isStreaming} 
+        disabled={isBusy} 
         language={i18n.language}
         className="mb-0.5"
       />
@@ -63,23 +59,23 @@ export default function ChatInput({ onSend, isStreaming }) {
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        placeholder={isStreaming ? 'AI is responding...' : 'Ask a question…'}
-        disabled={isStreaming}
+        placeholder={placeholder || (isBusy ? 'AI is responding...' : 'Ask a question…')}
+        disabled={isBusy}
         rows={1}
         className={cn(
-          'flex-1 resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground',
-          'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
-          'placeholder:text-muted-foreground transition-all',
-          isStreaming && 'opacity-50 cursor-not-allowed'
+          'flex-1 resize-none rounded-xl border border-[#E5E5DE] bg-[#F8F7F2] px-3.5 py-2 text-sm text-[#202522]',
+          'focus:outline-none focus:border-[#315C4A] focus:bg-white',
+          'placeholder:text-[#68716B]/70 transition-all',
+          isBusy && 'opacity-50 cursor-not-allowed'
         )}
       />
       <button
         onClick={handleSend}
-        disabled={!value.trim() || isStreaming}
+        disabled={!value.trim() || isBusy}
         className={cn(
           'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl',
-          'bg-primary text-primary-foreground transition-all',
-          'hover:bg-primary/90 active:scale-95',
+          'bg-[#315C4A] text-white transition-all',
+          'hover:bg-[#274a3b] active:scale-95 shadow-xs',
           'disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100'
         )}
         aria-label="Send message"

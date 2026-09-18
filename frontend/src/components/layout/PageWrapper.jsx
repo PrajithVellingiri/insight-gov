@@ -9,9 +9,9 @@ export default function PageWrapper({ role }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background text-foreground relative selection:bg-blue-500/30 selection:text-white">
-      {/* Dynamic 3D ambient grid background */}
-      <BackgroundGrid showNodes={true} />
+    <div className="min-h-screen bg-[#F8F7F2] text-[#202522] relative selection:bg-[#315C4A]/20 selection:text-[#202522]">
+      {/* Editorial subtle ivory background */}
+      <BackgroundGrid />
 
       <Navbar
         onMenuClick={() => setSidebarOpen((p) => !p)}

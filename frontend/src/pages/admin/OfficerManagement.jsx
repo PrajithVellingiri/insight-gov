@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOfficers, createOfficer, getDepartments, deleteOfficer } from '@/api/admin.api';
@@ -52,23 +52,26 @@ export default function OfficerManagement() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-8 max-w-6xl mx-auto pb-16">
       <div className="page-header">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-              <Users size={22} />
-            </div>
-            Officers
+          <span className="text-xs font-mono font-semibold uppercase tracking-widest text-[#78917F] block mb-1">
+            01 / ADMINISTRATION
+          </span>
+          <h1 className="text-3xl font-extrabold text-[#202522] tracking-tight flex items-center gap-2.5">
+            <Users size={26} className="text-[#315C4A]" />
+            Department Review Officers
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage departmental administrators, review officers, and workload distribution.</p>
+          <p className="text-sm text-[#68716B] mt-1 max-w-xl leading-relaxed">
+            Manage authorized state officers, review account credentials, and assign ministerial jurisdictions.
+          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1 glass-panel h-fit p-6 rounded-2xl border border-slate-800/80">
-          <h2 className="text-base font-semibold text-foreground flex items-center gap-2 mb-4">
-            <Plus size={18} className="text-cyan-400" /> Add Officer
+        <div className="md:col-span-1 bg-white h-fit p-6 rounded-2xl border border-[#E5E5DE] shadow-card">
+          <h2 className="text-sm font-bold text-[#202522] flex items-center gap-2 mb-4 uppercase tracking-wider">
+            <Plus size={16} className="text-[#315C4A]" /> Enroll Officer
           </h2>
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
@@ -76,7 +79,7 @@ export default function OfficerManagement() {
               <input type="text" className="form-input" placeholder="e.g. Officer Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
             </div>
             <div>
-              <label className="form-label">Email Address</label>
+              <label className="form-label">Official Email</label>
               <input type="email" className="form-input" placeholder="officer@tn.gov.in" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
             </div>
             <div>
@@ -84,63 +87,61 @@ export default function OfficerManagement() {
               <input type="password" className="form-input" placeholder="••••••••" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required />
             </div>
             <div>
-              <label className="form-label">Department</label>
+              <label className="form-label">Department Jurisdiction</label>
               <select className="form-input" value={form.department_id} onChange={e => setForm({...form, department_id: e.target.value})}>
-                <option value="">Select Dept...</option>
-                {depts.map(d => <option key={d.id} value={d.id}>{d.department_code ? `${d.department_code} - ` : ''}{d.name}</option>)}
+                <option value="">Select Ministry...</option>
+                {depts.map(d => <option key={d.id} value={d.id}>{d.department_code ? `${d.department_code} — ` : ''}{d.name}</option>)}
               </select>
             </div>
             {error && (
-              <div className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-xl">
+              <div className="text-xs text-[#B91C1C] bg-[#FDF2F2] border border-[#FBD5D5] p-2.5 rounded-xl">
                 {error}
               </div>
             )}
             <button type="submit" disabled={isPending} className="btn-primary w-full justify-center">
-              {isPending ? <Loader2 size={16} className="animate-spin" /> : 'Create Officer'}
+              {isPending ? <Loader2 size={16} className="animate-spin" /> : 'Create Officer Account'}
             </button>
           </form>
         </div>
 
-        <div className="md:col-span-2 glass-panel p-0 overflow-hidden h-fit rounded-2xl border border-slate-800/80 shadow-card-3d">
+        <div className="md:col-span-2 bg-white rounded-2xl border border-[#E5E5DE] shadow-card overflow-hidden h-fit">
           <table className="w-full text-sm text-left">
-            <thead className="bg-slate-900/80 border-b border-slate-800/80">
+            <thead className="bg-[#F8F7F2] border-b border-[#E5E5DE]">
               <tr>
-                <th className="px-4 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Officer</th>
-                <th className="px-4 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Department</th>
-                <th className="px-4 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Joined</th>
-                <th className="px-4 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Actions</th>
+                <th className="px-5 py-3.5 text-xs font-semibold text-[#68716B] uppercase tracking-wider">Officer</th>
+                <th className="px-5 py-3.5 text-xs font-semibold text-[#68716B] uppercase tracking-wider">Ministry</th>
+                <th className="px-5 py-3.5 text-xs font-semibold text-[#68716B] uppercase tracking-wider">Enrolled</th>
+                <th className="px-5 py-3.5 text-xs font-semibold text-[#68716B] uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-[#E5E5DE]">
               {(offLoading || deptLoading) ? (
-                <tr><td colSpan={4} className="text-center py-10 text-muted-foreground"><Loader2 size={20} className="animate-spin inline mr-2 text-cyan-400" />Loading officers...</td></tr>
+                <tr><td colSpan={4} className="text-center py-10 text-[#68716B]"><Loader2 size={18} className="animate-spin inline mr-2 text-[#315C4A]" />Loading personnel...</td></tr>
               ) : officers.length === 0 ? (
-                <tr><td colSpan={4} className="text-center py-10 text-muted-foreground">No officers enrolled.</td></tr>
+                <tr><td colSpan={4} className="text-center py-10 text-[#68716B]">No officers enrolled.</td></tr>
               ) : (
                 officers.map((o) => (
-                  <tr key={o.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-foreground flex items-center gap-2">
-                        <Users size={14} className="text-slate-400" /> {o.name}
-                      </div>
-                      <div className="text-xs text-slate-400 mt-0.5">{o.email}</div>
+                  <tr key={o.id} className="hover:bg-[#F8F7F2]/60 transition-colors">
+                    <td className="px-5 py-3.5">
+                      <div className="font-medium text-[#202522]">{o.name}</div>
+                      <div className="text-xs text-[#68716B] mt-0.5">{o.email}</div>
                     </td>
-                    <td className="px-4 py-3 text-slate-300 text-xs">
+                    <td className="px-5 py-3.5 text-[#202522] text-xs">
                       {(() => {
                         const dept = depts.find(d => d.id === o.department_id);
-                        if (!dept) return <span className="text-slate-500">Unassigned</span>;
+                        if (!dept) return <span className="text-[#68716B]">Unassigned</span>;
                         return (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-800/80 border border-slate-700/60 text-cyan-300 text-xs">
-                            {dept.department_code ? `${dept.department_code} • ` : ''}{dept.name}
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#EFF4F0] text-[#315C4A] border border-[#D4E2D8]">
+                            {dept.name}
                           </span>
                         );
                       })()}
                     </td>
-                    <td className="px-4 py-3 text-slate-400 text-xs">{formatDateShort(o.created_at)}</td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-5 py-3.5 text-[#68716B] text-xs font-mono">{formatDateShort(o.created_at)}</td>
+                    <td className="px-5 py-3.5 text-right">
                       <button 
                         onClick={() => setDeleteId(o)} 
-                        className="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition-all"
+                        className="text-[#68716B] hover:text-[#B91C1C] p-1 rounded transition-colors"
                         title="Remove Officer"
                       >
                         <Trash2 size={15} />
@@ -155,35 +156,35 @@ export default function OfficerManagement() {
       </div>
 
       {deleteId && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4">
-          <div className="glass-panel-elevated border border-slate-700/60 rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4 animate-fade-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#202522]/30 backdrop-blur-xs p-4">
+          <div className="bg-white border border-[#E5E5DE] rounded-2xl shadow-dropdown w-full max-w-sm p-6 space-y-4 animate-fade-in">
             <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2 text-rose-400">
-                <AlertTriangle size={20} />
-                <h2 className="text-lg font-bold text-foreground">Delete Officer</h2>
+              <div className="flex items-center gap-2 text-[#C58B5B]">
+                <AlertTriangle size={18} />
+                <h2 className="text-base font-bold text-[#202522]">Revoke Officer</h2>
               </div>
-              <button onClick={() => { setDeleteId(null); setDeleteError(''); }} className="text-slate-400 hover:text-white rounded-lg p-1 transition-colors">
-                <X size={18} />
+              <button onClick={() => { setDeleteId(null); setDeleteError(''); }} className="text-[#68716B] hover:text-[#202522] rounded-lg p-1">
+                <X size={16} />
               </button>
             </div>
             
-            <p className="text-sm text-slate-300">
-              Are you sure you want to delete officer <strong className="text-foreground">{deleteId.name}</strong>? This will revoke all their portal access.
+            <p className="text-xs text-[#68716B]">
+              Are you sure you want to remove <strong className="text-[#202522]">{deleteId.name}</strong>? Their portal access will be revoked.
             </p>
             {deleteError && (
-              <div className="text-xs text-rose-400 bg-rose-500/10 p-3 rounded-xl border border-rose-500/20">
+              <div className="text-xs text-[#B91C1C] bg-[#FDF2F2] p-2.5 rounded-xl border border-[#FBD5D5]">
                 {deleteError}
               </div>
             )}
             
             <div className="flex gap-3 pt-2">
-              <button onClick={() => { setDeleteId(null); setDeleteError(''); }} className="btn-secondary flex-1 justify-center">Cancel</button>
+              <button onClick={() => { setDeleteId(null); setDeleteError(''); }} className="btn-secondary flex-1 text-xs">Cancel</button>
               <button 
                 onClick={handleDelete} 
                 disabled={isDeleting}
-                className="flex-1 btn bg-rose-600 hover:bg-rose-500 text-white shadow-glow-rose justify-center disabled:opacity-60 transition-all font-semibold text-sm"
+                className="btn-danger flex-1 text-xs"
               >
-                {isDeleting ? <Loader2 size={14} className="animate-spin" /> : 'Delete'}
+                {isDeleting ? <Loader2 size={14} className="animate-spin" /> : 'Revoke'}
               </button>
             </div>
           </div>

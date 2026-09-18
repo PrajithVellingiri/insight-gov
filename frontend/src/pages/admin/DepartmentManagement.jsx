@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getDepartments, createDepartment, deleteDepartment } from '@/api/admin.api';
@@ -51,23 +51,26 @@ export default function DepartmentManagement() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-8 max-w-6xl mx-auto pb-16">
       <div className="page-header">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
-              <Building2 size={22} />
-            </div>
-            Departments
+          <span className="text-xs font-mono font-semibold uppercase tracking-widest text-[#78917F] block mb-1">
+            01 / ADMINISTRATION
+          </span>
+          <h1 className="text-3xl font-extrabold text-[#202522] tracking-tight flex items-center gap-2.5">
+            <Building2 size={26} className="text-[#315C4A]" />
+            State Ministries & Departments
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage state ministry mappings and autonomous AI routing targets.</p>
+          <p className="text-sm text-[#68716B] mt-1 max-w-xl leading-relaxed">
+            Manage official government ministry targets, departmental identifiers, and routing queues.
+          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1 glass-panel h-fit p-6 rounded-2xl border border-slate-800/80">
-          <h2 className="text-base font-semibold text-foreground flex items-center gap-2 mb-4">
-            <Plus size={18} className="text-blue-400" /> Add Department
+        <div className="md:col-span-1 bg-white h-fit p-6 rounded-2xl border border-[#E5E5DE] shadow-card">
+          <h2 className="text-sm font-bold text-[#202522] flex items-center gap-2 mb-4 uppercase tracking-wider">
+            <Plus size={16} className="text-[#315C4A]" /> Register Department
           </h2>
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
@@ -76,10 +79,10 @@ export default function DepartmentManagement() {
             </div>
             <div>
               <label className="form-label">Department Name</label>
-              <input type="text" className="form-input" placeholder="e.g. Health & Welfare" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
+              <input type="text" className="form-input" placeholder="e.g. Health & Family Welfare" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
             </div>
             {error && (
-              <div className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-xl">
+              <div className="text-xs text-[#B91C1C] bg-[#FDF2F2] border border-[#FBD5D5] p-2.5 rounded-xl">
                 {error}
               </div>
             )}
@@ -89,33 +92,33 @@ export default function DepartmentManagement() {
           </form>
         </div>
 
-        <div className="md:col-span-2 glass-panel p-0 overflow-hidden h-fit rounded-2xl border border-slate-800/80 shadow-card-3d">
+        <div className="md:col-span-2 bg-white rounded-2xl border border-[#E5E5DE] shadow-card overflow-hidden h-fit">
           <table className="w-full text-sm text-left">
-            <thead className="bg-slate-900/80 border-b border-slate-800/80">
+            <thead className="bg-[#F8F7F2] border-b border-[#E5E5DE]">
               <tr>
-                <th className="px-4 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Code</th>
-                <th className="px-4 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Name</th>
-                <th className="px-4 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Created</th>
-                <th className="px-4 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Actions</th>
+                <th className="px-5 py-3.5 text-xs font-mono font-semibold text-[#68716B] uppercase tracking-wider w-24">Code</th>
+                <th className="px-5 py-3.5 text-xs font-semibold text-[#68716B] uppercase tracking-wider">Department</th>
+                <th className="px-5 py-3.5 text-xs font-semibold text-[#68716B] uppercase tracking-wider">Registered</th>
+                <th className="px-5 py-3.5 text-xs font-semibold text-[#68716B] uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-[#E5E5DE]">
               {isLoading ? (
-                <tr><td colSpan={4} className="text-center py-10 text-muted-foreground"><Loader2 size={20} className="animate-spin inline mr-2 text-cyan-400" />Loading ministries...</td></tr>
+                <tr><td colSpan={4} className="text-center py-10 text-[#68716B]"><Loader2 size={18} className="animate-spin inline mr-2 text-[#315C4A]" />Loading ministries...</td></tr>
               ) : depts.length === 0 ? (
-                <tr><td colSpan={4} className="text-center py-10 text-muted-foreground">No departments registered.</td></tr>
+                <tr><td colSpan={4} className="text-center py-10 text-[#68716B]">No departments registered.</td></tr>
               ) : (
                 depts.map((d) => (
-                  <tr key={d.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs text-cyan-400">{d.department_code || '—'}</td>
-                    <td className="px-4 py-3 font-medium text-foreground flex items-center gap-2">
-                      <Building2 size={14} className="text-slate-400" /> {d.name}
+                  <tr key={d.id} className="hover:bg-[#F8F7F2]/60 transition-colors">
+                    <td className="px-5 py-3.5 font-mono text-xs text-[#68716B]">{d.department_code || '—'}</td>
+                    <td className="px-5 py-3.5 font-medium text-[#202522]">
+                      {d.name}
                     </td>
-                    <td className="px-4 py-3 text-slate-400 text-xs">{formatDateShort(d.created_at)}</td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-5 py-3.5 text-[#68716B] text-xs font-mono">{formatDateShort(d.created_at)}</td>
+                    <td className="px-5 py-3.5 text-right">
                       <button 
                         onClick={() => setDeleteId(d)} 
-                        className="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition-all"
+                        className="text-[#68716B] hover:text-[#B91C1C] p-1 rounded transition-colors"
                         title="Delete Department"
                       >
                         <Trash2 size={15} />
@@ -130,33 +133,33 @@ export default function DepartmentManagement() {
       </div>
 
       {deleteId && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4">
-          <div className="glass-panel-elevated border border-slate-700/60 rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4 animate-fade-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#202522]/30 backdrop-blur-xs p-4">
+          <div className="bg-white border border-[#E5E5DE] rounded-2xl shadow-dropdown w-full max-w-sm p-6 space-y-4 animate-fade-in">
             <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2 text-rose-400">
-                <AlertTriangle size={20} />
-                <h2 className="text-lg font-bold text-foreground">Delete Department</h2>
+              <div className="flex items-center gap-2 text-[#C58B5B]">
+                <AlertTriangle size={18} />
+                <h2 className="text-base font-bold text-[#202522]">Delete Department</h2>
               </div>
-              <button onClick={() => { setDeleteId(null); setDeleteError(''); }} className="text-slate-400 hover:text-white rounded-lg p-1 transition-colors">
-                <X size={18} />
+              <button onClick={() => { setDeleteId(null); setDeleteError(''); }} className="text-[#68716B] hover:text-[#202522] rounded-lg p-1">
+                <X size={16} />
               </button>
             </div>
             
-            <p className="text-sm text-slate-300">
-              Are you sure you want to delete <strong className="text-foreground">{deleteId.name}</strong>? This action cannot be undone.
+            <p className="text-xs text-[#68716B]">
+              Are you sure you want to remove <strong className="text-[#202522]">{deleteId.name}</strong> from the routing directory?
             </p>
             {deleteError && (
-              <div className="text-xs text-rose-400 bg-rose-500/10 p-3 rounded-xl border border-rose-500/20">
+              <div className="text-xs text-[#B91C1C] bg-[#FDF2F2] p-2.5 rounded-xl border border-[#FBD5D5]">
                 {deleteError}
               </div>
             )}
             
             <div className="flex gap-3 pt-2">
-              <button onClick={() => { setDeleteId(null); setDeleteError(''); }} className="btn-secondary flex-1 justify-center">Cancel</button>
+              <button onClick={() => { setDeleteId(null); setDeleteError(''); }} className="btn-secondary flex-1 text-xs">Cancel</button>
               <button 
                 onClick={handleDelete} 
                 disabled={isDeleting}
-                className="flex-1 btn bg-rose-600 hover:bg-rose-500 text-white shadow-glow-rose justify-center disabled:opacity-60 transition-all font-semibold text-sm"
+                className="btn-danger flex-1 text-xs"
               >
                 {isDeleting ? <Loader2 size={14} className="animate-spin" /> : 'Delete'}
               </button>

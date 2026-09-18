@@ -1,10 +1,9 @@
 ﻿import { useState } from 'react';
 import { useSemanticSearch } from '@/hooks/usePetitions';
-import { Search, Loader2, Sparkles, Layers, ArrowRight } from 'lucide-react';
+import { Search, Loader2, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import usePageTitle from '@/hooks/usePageTitle';
 import MicButton from '@/components/ui/MicButton';
-import Card3D from '@/components/ui/Card3D';
 import { useTranslation } from 'react-i18next';
 
 export default function SemanticSearch() {
@@ -45,46 +44,41 @@ export default function SemanticSearch() {
     <div className="space-y-8 max-w-4xl mx-auto pb-16">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-2 mb-1.5">
-          <span className="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-            <Sparkles size={13} />
-            High-Dimensional Vector Engine
-          </span>
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-          AI Semantic Search
+        <span className="text-xs font-mono font-semibold uppercase tracking-widest text-[#78917F] block mb-1">
+          01 / KNOWLEDGE DISCOVERY
+        </span>
+        <h1 className="text-3xl font-extrabold text-[#202522] tracking-tight">
+          Semantic Case Search
         </h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Query the historical petition vector embedding database in natural language to identify precedents, repeat patterns, or related community reports.
+        <p className="text-sm text-[#68716B] mt-1 max-w-xl leading-relaxed">
+          Search the historical petition archive using natural language to discover related grievances, precedents, and jurisdictional trends.
         </p>
       </div>
 
-      {/* Futuristic Search Console */}
-      <div className="glass-panel-elevated rounded-3xl p-6 border border-blue-500/30 shadow-2xl relative overflow-hidden">
-        <div className="pointer-events-none absolute -top-16 -right-16 h-36 w-36 rounded-full bg-blue-500/15 blur-2xl" aria-hidden="true" />
-        
+      {/* Search Console */}
+      <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#E5E5DE] shadow-card">
         <form onSubmit={handleSearch} className="space-y-3">
           <div className="flex flex-col sm:flex-row gap-2.5">
             <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#68716B]" size={18} />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="e.g. 'repeated drainage overflow during heavy monsoon' or 'frequent transformer failures'"
-                className="w-full rounded-xl bg-slate-950/80 border border-slate-700/80 pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition-all shadow-inner"
+                placeholder="e.g. 'repeated drainage overflow during monsoon' or 'transformer failures'"
+                className="w-full rounded-xl bg-white border border-[#E5E5DE] pl-10 pr-4 py-2.5 text-sm text-[#202522] placeholder:text-[#9EA5A0] focus:border-[#315C4A] focus:ring-1 focus:ring-[#315C4A] transition-all"
               />
             </div>
             <div className="flex items-center gap-2">
               <MicButton 
                 onTranscript={(text) => setQuery(prev => prev + (prev && !prev.endsWith(' ') ? ' ' : '') + text)} 
                 language={i18n.language}
-                className="bg-slate-800 hover:bg-slate-700 text-blue-400 border border-slate-700/80 rounded-xl px-3 py-3" 
+                className="bg-[#EFF4F0] text-[#315C4A] border border-[#D4E2D8] rounded-xl px-3 py-2.5 hover:bg-[#E2ECE6]" 
               />
               <button
                 type="submit"
                 disabled={searchLoading || !query.trim()}
-                className="btn-primary py-3 px-6 text-sm shadow-[0_0_20px_rgba(37,99,235,0.4)] disabled:opacity-50"
+                className="btn-primary py-2.5 px-6 text-sm disabled:opacity-50"
               >
                 {searchLoading ? (
                   <>
@@ -93,76 +87,83 @@ export default function SemanticSearch() {
                   </>
                 ) : (
                   <>
-                    <span>Query Vectors</span>
-                    <ArrowRight size={16} />
+                    <span>Search Archive</span>
+                    <ArrowRight size={15} />
                   </>
                 )}
               </button>
             </div>
           </div>
+          <p className="text-[11px] text-[#68716B]">
+            Searches vector embeddings across petition descriptions, categories, and resolution notes.
+          </p>
         </form>
       </div>
 
+      {/* Error state */}
       {searchError && (
-        <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-6 text-center animate-fade-in">
-          <p className="text-rose-400 font-bold text-sm mb-1">Vector Search Service Unavailable</p>
-          <p className="text-muted-foreground text-xs">{searchError}</p>
+        <div className="rounded-2xl border border-[#FBD5D5] bg-[#FDF2F2] p-4 text-xs text-[#B91C1C]">
+          {searchError}
         </div>
       )}
 
-      {searchResults !== null && !searchError && (
-        <div className="space-y-4 animate-fade-in">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
-            <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-              <Layers size={17} className="text-blue-400" />
-              Vector Precedent Matches ({searchResults.length})
+      {/* Results */}
+      {searchResults !== null && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-bold text-[#202522]">
+              Matches Found ({searchResults.length})
             </h2>
             <button
               onClick={clearResults}
-              className="text-xs text-blue-400 hover:text-blue-300 font-semibold transition-colors"
+              className="text-xs text-[#315C4A] hover:underline font-medium"
             >
               Clear Results
             </button>
           </div>
-          
+
           {searchResults.length === 0 ? (
-            <div className="card text-center py-14 text-muted-foreground text-sm">
-              No matching petitions identified with sufficient cosine similarity.
+            <div className="bg-white rounded-2xl border border-[#E5E5DE] p-10 text-center text-[#68716B] text-xs">
+              No semantic matches found for this query.
             </div>
           ) : (
-            <div className="grid gap-3.5">
-              {searchResults.map((res) => {
-                const matchPct = Math.round(res.score * 100);
-                return (
-                  <Link
-                    key={res.petition_id}
-                    to={`/officer/petitions/${res.petition_id}`}
-                    className="block no-underline group"
-                  >
-                    <Card3D className="p-5 hover:border-blue-500/40">
-                      <div className="flex justify-between items-start gap-4 mb-2">
-                        <h3 className="font-bold text-foreground text-base group-hover:text-blue-400 transition-colors">
-                          {res.title}
-                        </h3>
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30 flex-shrink-0">
-                          {matchPct}% Cosine Match
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed mb-3">
-                        {res.description}
-                      </p>
-                      {res.status && (
-                        <div className="flex items-center gap-2 pt-2 border-t border-slate-800/50">
-                          <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">Status:</span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border border-slate-700/60 bg-slate-800/60 text-slate-300">
-                            {res.status.replace('_', ' ')}
-                          </span>
-                        </div>
-                      )}
-                    </Card3D>
-                  </Link>
-                );
-              })}
+            <div className="space-y-3">
+              {searchResults.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white rounded-2xl border border-[#E5E5DE] p-5 shadow-card hover:border-[#D4D4CA] transition-all"
+                >
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <span className="font-mono text-xs font-semibold text-[#68716B]">
+                      #{item.petition_id || item.id || idx + 1}
+                    </span>
+                    {item.similarity !== undefined && (
+                      <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded bg-[#EFF4F0] text-[#315C4A] border border-[#D4E2D8]">
+                        {Math.round(item.similarity * 100)}% Match
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="text-sm font-bold text-[#202522] mb-1">
+                    {item.title || item.petition_title || 'Untitled Record'}
+                  </h3>
+
+                  <p className="text-xs text-[#68716B] leading-relaxed line-clamp-2 mb-3">
+                    {item.description || item.petition_description}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-3 border-t border-[#E5E5DE] text-[11px] text-[#68716B]">
+                    <span>{item.department_name || item.department || 'General'}</span>
+                    <Link
+                      to={`/officer/petitions/${item.petition_id || item.id}`}
+                      className="inline-flex items-center gap-1 font-semibold text-[#315C4A] hover:underline"
+                    >
+                      <span>Inspect Case File</span>
+                      <ArrowRight size={12} />
+                    </Link>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

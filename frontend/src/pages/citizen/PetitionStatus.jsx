@@ -6,7 +6,7 @@ import AIAnalysisPanel from '@/components/ai/AIAnalysisPanel';
 import StatusTimeline from '@/components/petition/StatusTimeline';
 import PriorityBadge from '@/components/ai/PriorityBadge';
 import { formatDateShort } from '@/lib/utils';
-import { ArrowLeft, MapPin, Calendar, Loader2, Clock, AlertTriangle, X, Image as ImageIcon, ShieldCheck, ShieldAlert, Shield, Sparkles, FileText } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Loader2, AlertTriangle, X, Shield, FileText } from 'lucide-react';
 import usePageTitle from '@/hooks/usePageTitle';
 import { useTranslation } from 'react-i18next';
 
@@ -30,24 +30,24 @@ function WithdrawModal({ petition, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md animate-fade-in p-4">
-      <div className="glass-panel-elevated rounded-3xl border border-amber-500/30 w-full max-w-md p-6 space-y-4 shadow-2xl relative overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#202522]/40 backdrop-blur-xs animate-fade-in p-4">
+      <div className="bg-white rounded-2xl border border-[#E5E5DE] w-full max-w-md p-6 space-y-4 shadow-dropdown">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-2.5 text-amber-400">
-            <AlertTriangle size={20} />
-            <h2 className="text-lg font-bold text-foreground">{t('citizen.withdraw_petition', 'Withdraw Grievance')}</h2>
+          <div className="flex items-center gap-2 text-[#C58B5B]">
+            <AlertTriangle size={18} />
+            <h2 className="text-base font-bold text-[#202522]">{t('citizen.withdraw_petition', 'Withdraw Petition')}</h2>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground rounded-xl p-1 hover:bg-slate-800/60 transition-colors">
-            <X size={18} />
+          <button onClick={onClose} className="text-[#68716B] hover:text-[#202522] rounded-lg p-1">
+            <X size={16} />
           </button>
         </div>
 
-        <div className="bg-amber-500/10 border border-amber-500/25 rounded-xl px-4 py-3 text-xs text-amber-300 leading-relaxed">
-          <strong>"{petition.title}"</strong> {t('citizen.withdraw_confirm', 'will be permanently marked as withdrawn. This administrative action cannot be undone.')}
+        <div className="bg-[#FDF6F0] border border-[#F2DFD0] rounded-xl px-4 py-3 text-xs text-[#C58B5B] leading-relaxed">
+          <strong>"{petition.title}"</strong> {t('citizen.withdraw_confirm', 'will be marked as withdrawn. This administrative action cannot be undone.')}
         </div>
 
         <div>
-          <label className="form-label">{t('citizen.reason_label', 'Official Reason for Withdrawal *')}</label>
+          <label className="form-label">{t('citizen.reason_label', 'Reason for Withdrawal *')}</label>
           <textarea
             className="form-input resize-none text-xs"
             rows={3}
@@ -55,7 +55,7 @@ function WithdrawModal({ petition, onClose }) {
             value={reason}
             onChange={(e) => { setReason(e.target.value); setError(''); }}
           />
-          {error && <p className="text-xs text-rose-400 mt-1">{error}</p>}
+          {error && <p className="text-xs text-[#b91c1c] mt-1">{error}</p>}
         </div>
 
         <div className="flex gap-3 pt-2">
@@ -63,7 +63,7 @@ function WithdrawModal({ petition, onClose }) {
           <button
             onClick={handleWithdraw}
             disabled={isPending || reason.trim().length < 5}
-            className="flex-1 btn text-xs font-semibold bg-amber-600 hover:bg-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.3)] disabled:opacity-50"
+            className="flex-1 btn-danger text-xs font-medium disabled:opacity-50"
           >
             {isPending ? <Loader2 size={14} className="animate-spin" /> : t('citizen.confirm_withdrawal', 'Confirm Withdrawal')}
           </button>
@@ -84,16 +84,16 @@ export default function PetitionStatus() {
   if (isLoading) {
     return (
       <div className="flex justify-center py-24">
-        <Loader2 size={36} className="animate-spin text-blue-400" />
+        <Loader2 size={32} className="animate-spin text-[#315C4A]" />
       </div>
     );
   }
 
   if (isError || !petition) {
     return (
-      <div className="card text-center py-16 text-muted-foreground">
+      <div className="bg-white rounded-2xl border border-[#E5E5DE] p-16 text-center text-[#68716B]">
         <p>Petition record not found.</p>
-        <Link to="/citizen/dashboard" className="btn-secondary mt-4 inline-flex">Back to Dashboard</Link>
+        <Link to="/citizen/dashboard" className="btn-secondary mt-4 inline-flex">Back to Overview</Link>
       </div>
     );
   }
@@ -107,95 +107,107 @@ export default function PetitionStatus() {
         <WithdrawModal petition={petition} onClose={() => setShowWithdraw(false)} />
       )}
 
-      <div className="max-w-3xl mx-auto space-y-6 pb-16">
-        {/* Header */}
+      <div className="max-w-4xl mx-auto space-y-8 pb-16">
+        {/* Case File Header */}
         <div>
           <Link
             to="/citizen/dashboard"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-400 hover:text-blue-300 mb-3 no-underline transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#315C4A] hover:underline mb-4 no-underline"
           >
-            <ArrowLeft size={14} /> Back to My Petitions
+            <ArrowLeft size={14} /> Back to Overview
           </Link>
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/30">
-                  {petition.petition_number}
-                </span>
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700/60 uppercase tracking-wider">
-                  {petition.status.replace('_', ' ')}
-                </span>
+
+          <div className="bg-white rounded-2xl border border-[#E5E5DE] p-6 sm:p-8 shadow-card">
+            <div className="flex flex-wrap items-start justify-between gap-4 pb-6 border-b border-[#E5E5DE]">
+              <div>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="font-mono text-xs font-semibold text-[#68716B] bg-[#F8F7F2] px-2.5 py-0.5 rounded border border-[#E5E5DE]">
+                    {petition.petition_number}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-medium border bg-[#EFF4F0] text-[#315C4A] border-[#D4E2D8]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#315C4A]" />
+                    {petition.status.replace('_', ' ').toUpperCase()}
+                  </span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-[#202522] tracking-tight">
+                  {petition.title}
+                </h1>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight leading-snug">
-                {petition.title}
-              </h1>
+
+              <div className="flex items-center gap-2">
+                {analysis?.priority && <PriorityBadge priority={analysis.priority} size="md" />}
+                {canWithdraw && (
+                  <button
+                    onClick={() => setShowWithdraw(true)}
+                    className="btn-secondary text-xs text-[#C58B5B] hover:text-[#b91c1c]"
+                  >
+                    Withdraw Petition
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              {analysis?.priority && <PriorityBadge priority={analysis.priority} size="lg" />}
-              {canWithdraw && (
-                <button
-                  onClick={() => setShowWithdraw(true)}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-xl border border-amber-500/30 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 transition-colors"
-                >
-                  Withdraw Grievance
-                </button>
-              )}
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-6 text-xs">
+              <div>
+                <p className="font-mono uppercase tracking-wider text-[#68716B] text-[10px] mb-1">Assigned Ministry</p>
+                <p className="font-semibold text-[#202522]">{petition.department_name || analysis?.department || 'Triage in progress'}</p>
+              </div>
+
+              <div>
+                <p className="font-mono uppercase tracking-wider text-[#68716B] text-[10px] mb-1">Filed Date</p>
+                <p className="font-semibold text-[#202522] font-mono">{formatDateShort(petition.created_at)}</p>
+              </div>
+
+              <div>
+                <p className="font-mono uppercase tracking-wider text-[#68716B] text-[10px] mb-1">Location</p>
+                <p className="font-semibold text-[#202522] flex items-center gap-1">
+                  <MapPin size={12} className="text-[#315C4A]" />
+                  <span className="truncate">{petition.location}</span>
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="flex flex-wrap gap-4 mt-3 text-xs text-muted-foreground font-medium">
-            <span className="flex items-center gap-1.5">
-              <MapPin size={13} className="text-blue-400" /> {petition.location}
-              {petition.location_verification_status === 'VERIFIED' && (
-                <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20 font-semibold inline-flex items-center gap-0.5">
-                  <ShieldCheck size={11} /> GPS Verified
-                </span>
-              )}
-              {petition.location_verification_status === 'MISMATCH' && (
-                <span className="text-[10px] text-amber-400 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20 font-semibold inline-flex items-center gap-0.5">
-                  <ShieldAlert size={11} /> Review Flag
-                </span>
-              )}
-            </span>
-            <span className="flex items-center gap-1.5 font-mono">
-              <Calendar size={12} className="text-muted-foreground" /> {formatDateShort(petition.created_at)}
-            </span>
           </div>
         </div>
 
-        {/* Withdrawn banner */}
+        {/* Withdrawn Notice */}
         {petition.status === 'withdrawn' && (
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs text-amber-300 flex items-start gap-3">
-            <AlertTriangle size={16} className="mt-0.5 flex-shrink-0 text-amber-400" />
+          <div className="rounded-2xl border border-[#F2DFD0] bg-[#FDF6F0] p-4 text-xs text-[#C58B5B] flex items-start gap-3">
+            <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
             <div>
-              <strong className="text-sm font-bold text-amber-400 block mb-0.5">Petition Formally Withdrawn</strong>
+              <strong className="text-xs font-bold block mb-0.5">Petition Formally Withdrawn</strong>
               {petition.withdrawal_reason && (
-                <p className="text-slate-300">Stated Reason: {petition.withdrawal_reason}</p>
+                <p className="text-[#68716B]">Stated Reason: {petition.withdrawal_reason}</p>
               )}
             </div>
           </div>
         )}
 
-        {/* Petition body */}
-        <div className="card space-y-2">
-          <div className="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800/60">
-            <FileText size={16} className="text-blue-400" />
-            <h2 className="section-title !mb-0">Petition Statement</h2>
-          </div>
-          <p className="text-foreground leading-relaxed text-sm whitespace-pre-wrap font-normal">
+        {/* Petition Statement */}
+        <div className="bg-white rounded-2xl border border-[#E5E5DE] p-6 sm:p-8 shadow-card">
+          <span className="text-xs font-mono font-semibold uppercase tracking-widest text-[#78917F] block mb-2">
+            GRIEVANCE STATEMENT
+          </span>
+          <p className="text-[#202522] leading-relaxed text-sm whitespace-pre-wrap">
             {petition.description}
           </p>
         </div>
 
-        {/* Attached images */}
+        {/* Evidence Images */}
         {petition.images?.filter(img => img.image_type === 'petition').length > 0 && (
-          <div className="card">
+          <div className="bg-white rounded-2xl border border-[#E5E5DE] p-6 shadow-card">
+            <span className="text-xs font-mono font-semibold uppercase tracking-widest text-[#78917F] block mb-4">
+              ATTACHED EVIDENCE PHOTOS
+            </span>
             <ImageGallery images={petition.images.filter(img => img.image_type === 'petition')} />
           </div>
         )}
 
         {/* Resolution Proof */}
         {petition.images?.filter(img => img.image_type === 'resolution').length > 0 && (
-          <div className="card border-emerald-500/25 bg-emerald-950/10">
+          <div className="bg-[#EFF4F0] rounded-2xl border border-[#D4E2D8] p-6">
+            <span className="text-xs font-mono font-semibold uppercase tracking-widest text-[#315C4A] block mb-4">
+              OFFICIAL RESOLUTION PROOF
+            </span>
             <ImageGallery 
               images={petition.images.filter(img => img.image_type === 'resolution')} 
               title="Official Resolution Proof"
@@ -203,29 +215,26 @@ export default function PetitionStatus() {
           </div>
         )}
 
-        {/* AI Analysis (read-only for citizens) */}
+        {/* InsightGov Intelligence Section */}
         {petition.status !== 'pending' && petition.status !== 'withdrawn' && (
-          <div>
-            <h2 className="section-title">Autonomous AI Determination</h2>
-            <AIAnalysisPanel analysis={analysis} role="citizen" showOverride={false} petition={petition} />
-          </div>
+          <AIAnalysisPanel analysis={analysis} role="citizen" showOverride={false} petition={petition} />
         )}
 
         {petition.status === 'pending' && (
-          <div className="card flex items-center gap-3.5 text-muted-foreground p-5">
-            <Loader2 size={20} className="animate-spin text-blue-400 flex-shrink-0" />
-            <span className="text-xs leading-relaxed text-slate-300">
-              Autonomous AI triage in progress… Analysing grievance context, checking geospatial vector clustering, and routing to state ministry.
+          <div className="bg-[#EFF4F0] rounded-2xl border border-[#D4E2D8] p-5 flex items-center gap-3 text-xs text-[#315C4A]">
+            <Loader2 size={16} className="animate-spin flex-shrink-0" />
+            <span>
+              Autonomous triage in progress — categorizing grievance, checking cluster duplicates, and routing to the responsible ministry.
             </span>
           </div>
         )}
 
-        {/* Status timeline */}
-        <div>
-          <h2 className="section-title">Grievance Lifecycle Milestones</h2>
-          <div className="card">
-            <StatusTimeline history={petition.history ?? []} />
-          </div>
+        {/* Audit Milestones Timeline */}
+        <div className="bg-white rounded-2xl border border-[#E5E5DE] p-6 sm:p-8 shadow-card">
+          <span className="text-xs font-mono font-semibold uppercase tracking-widest text-[#78917F] block mb-6">
+            CASE FILE AUDIT MILESTONES
+          </span>
+          <StatusTimeline history={petition.history ?? []} />
         </div>
       </div>
     </>

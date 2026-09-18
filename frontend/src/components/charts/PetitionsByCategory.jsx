@@ -90,13 +90,13 @@ export default function PetitionsByCategory({ data = [] }) {
               >
                 {getShortName(item.category)}
               </div>
-              <div className="flex-1 flex items-center h-6">
+              <div className="flex-1 flex items-center h-4 bg-[#EFF4F0] rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-primary transition-all duration-500 ease-out rounded-r-md shadow-[0_0_8px_var(--primary)]"
+                  className="h-full bg-[#315C4A] transition-all duration-500 ease-out rounded-full"
                   style={{ width: `${percentage}%` }}
                 />
               </div>
-              <div className="w-12 text-right shrink-0 font-semibold text-foreground">
+              <div className="w-12 text-right shrink-0 font-mono text-xs font-semibold text-[#202522]">
                 {item.count}
               </div>
             </div>

@@ -8,7 +8,7 @@ function Skeleton({
   return (
     <div
       className={cn(
-        "animate-shimmer rounded-xl border border-white/[0.04] bg-slate-900/60 bg-gradient-to-r from-slate-900/60 via-slate-800/40 to-slate-900/60 bg-[length:200%_100%]",
+        "animate-pulse rounded-xl bg-[#EBEAE5]",
         className
       )}
       {...props}

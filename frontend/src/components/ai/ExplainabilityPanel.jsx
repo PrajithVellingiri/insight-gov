@@ -1,6 +1,5 @@
 ﻿import { useState } from 'react';
-import { ChevronDown, ChevronUp, Tag, AlertTriangle, Building2, Image, Search, Brain, Sparkles } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { ChevronDown, ChevronUp, Tag, AlertTriangle, Building2, Image, Search } from 'lucide-react';
 
 const reasons = [
   { key: 'category_reason',   icon: Tag,           label: 'Category Rationale' },
@@ -16,31 +15,30 @@ export default function ExplainabilityPanel({ explanation }) {
   if (!explanation) return null;
 
   return (
-    <div className="rounded-xl border border-blue-500/25 bg-slate-950/60 overflow-hidden shadow-sm">
+    <div className="rounded-xl border border-[#D4E2D8] bg-white overflow-hidden">
       <button
         onClick={() => setOpen((p) => !p)}
-        className="w-full flex items-center justify-between px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-200 hover:bg-slate-800/40 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 text-xs font-semibold text-[#202522] hover:bg-[#EFF4F0]/50 transition-colors"
       >
-        <span className="flex items-center gap-2 text-cyan-400">
-          <Sparkles size={14} className="text-blue-400" />
-          Explainable AI Decision Breakdown
+        <span className="text-xs font-mono uppercase tracking-wider text-[#315C4A]">
+          Explainability Audit Breakdown
         </span>
-        <div className="flex items-center gap-1.5 text-muted-foreground text-xs normal-case font-normal">
-          <span>{open ? 'Collapse details' : 'View reasoning'}</span>
-          {open ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+        <div className="flex items-center gap-1.5 text-[#68716B] text-xs font-normal">
+          <span>{open ? 'Hide details' : 'Inspect reasoning'}</span>
+          {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </div>
       </button>
 
       {open && (
-        <div className="divide-y divide-slate-800/60 border-t border-slate-800/60 bg-slate-900/40 animate-fade-in">
+        <div className="divide-y divide-[#E5E5DE] border-t border-[#D4E2D8] bg-[#F8F7F2]/50">
           {reasons.map(({ key, icon: Icon, label }) => (
             explanation[key] ? (
-              <div key={key} className="px-4 py-3.5">
-                <div className="flex items-center gap-2 text-[11px] font-bold text-blue-400 uppercase tracking-wider mb-1">
-                  <Icon size={13} className="text-cyan-400" />
+              <div key={key} className="px-4 py-3">
+                <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-[#68716B] uppercase tracking-wider mb-1">
+                  <Icon size={12} className="text-[#315C4A]" />
                   {label}
                 </div>
-                <p className="text-xs text-slate-300 leading-relaxed pl-5 border-l border-blue-500/30 ml-1">
+                <p className="text-xs text-[#202522] leading-relaxed pl-4 border-l-2 border-[#315C4A] ml-1">
                   {explanation[key]}
                 </p>
               </div>

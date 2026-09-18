@@ -1,10 +1,9 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Settings, X, Globe, Mic, Type, Monitor } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/api/axiosInstance';
 import toast from 'react-hot-toast';
-import { Moon } from 'lucide-react';
 
 export default function SettingsModal({ onClose }) {
   const { i18n } = useTranslation();
@@ -44,7 +43,7 @@ export default function SettingsModal({ onClose }) {
         toast.error("Failed to save preferences.");
       }
     } else {
-        toast.success("Preferences applied locally!");
+      toast.success("Preferences applied locally!");
     }
     
     setIsSaving(false);
@@ -52,30 +51,34 @@ export default function SettingsModal({ onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-fade-in">
-      <div className="w-full max-w-md glass-panel-elevated border border-slate-700/60 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="flex items-center justify-between p-4 border-b border-slate-800/80 bg-slate-900/60">
-          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-            <Settings size={20} className="text-cyan-400" /> Settings
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#202522]/40 backdrop-blur-xs p-4 animate-fade-in">
+      <div className="w-full max-w-md bg-white border border-[#E5E5DE] rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E5DE] bg-[#F8F7F2]">
+          <h2 className="text-base font-bold text-[#202522] flex items-center gap-2">
+            <Settings size={18} className="text-[#315C4A]" /> System Preferences
           </h2>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/80 rounded-lg transition-colors">
-            <X size={20} />
+          <button 
+            onClick={onClose} 
+            className="p-1.5 text-[#68716B] hover:text-[#202522] hover:bg-[#E5E5DE]/50 rounded-lg transition-colors"
+          >
+            <X size={18} />
           </button>
         </div>
         
+        {/* Content */}
         <div className="p-6 overflow-y-auto space-y-6">
-          
-          {/* Language */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Globe size={16} className="text-blue-400" /> Language
+          {/* Language Selection */}
+          <div className="space-y-2.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#68716B] flex items-center gap-2">
+              <Globe size={14} className="text-[#315C4A]" /> Interface Language
             </h3>
             <select
               value={preferences.language}
               onChange={(e) => setPreferences({ ...preferences, language: e.target.value })}
-              className="form-input"
+              className="w-full px-3.5 py-2.5 bg-[#F8F7F2] border border-[#E5E5DE] rounded-xl text-sm text-[#202522] focus:outline-none focus:border-[#315C4A] focus:bg-white transition-colors"
             >
-              <option value="en">English</option>
+              <option value="en">English (Official)</option>
               <option value="ta">Tamil (தமிழ்)</option>
               <option value="hi">Hindi (हिंदी)</option>
               <option value="ml">Malayalam (മലയാളം)</option>
@@ -84,58 +87,60 @@ export default function SettingsModal({ onClose }) {
             </select>
           </div>
           
-          <hr className="border-slate-800/80" />
+          <hr className="border-[#E5E5DE]" />
           
-          {/* Accessibility */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Monitor size={16} className="text-cyan-400" /> Accessibility
+          {/* Accessibility Settings */}
+          <div className="space-y-3.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#68716B] flex items-center gap-2">
+              <Monitor size={14} className="text-[#315C4A]" /> Accessibility & Input
             </h3>
             
-            <label className="flex items-center justify-between cursor-pointer group p-2.5 rounded-xl hover:bg-slate-800/40 transition-colors border border-transparent hover:border-slate-800">
-              <div className="flex items-center gap-2 text-sm text-foreground font-medium">
-                <Mic size={16} className="text-slate-400 group-hover:text-cyan-400 transition-colors" /> Voice Input Enabled
+            <label className="flex items-center justify-between cursor-pointer p-3 rounded-xl hover:bg-[#F8F7F2] transition-colors border border-transparent hover:border-[#E5E5DE]">
+              <div className="flex items-center gap-2.5 text-sm text-[#202522] font-medium">
+                <Mic size={16} className="text-[#68716B]" /> Voice Input Enabled
               </div>
               <input
                 type="checkbox"
                 checked={preferences.voice_input}
                 onChange={(e) => setPreferences({ ...preferences, voice_input: e.target.checked })}
-                className="w-4 h-4 rounded text-blue-500 focus:ring-blue-500/30 border-slate-700 bg-slate-900"
+                className="w-4 h-4 rounded text-[#315C4A] focus:ring-[#315C4A]/30 border-[#E5E5DE]"
               />
             </label>
             
-            <label className="flex items-center justify-between cursor-pointer group p-2.5 rounded-xl hover:bg-slate-800/40 transition-colors border border-transparent hover:border-slate-800">
-              <div className="flex items-center gap-2 text-sm text-foreground font-medium">
-                <Monitor size={16} className="text-slate-400 group-hover:text-cyan-400 transition-colors" /> High Contrast Mode
+            <label className="flex items-center justify-between cursor-pointer p-3 rounded-xl hover:bg-[#F8F7F2] transition-colors border border-transparent hover:border-[#E5E5DE]">
+              <div className="flex items-center gap-2.5 text-sm text-[#202522] font-medium">
+                <Monitor size={16} className="text-[#68716B]" /> High Contrast Mode
               </div>
               <input
                 type="checkbox"
                 checked={preferences.high_contrast}
                 onChange={(e) => setPreferences({ ...preferences, high_contrast: e.target.checked })}
-                className="w-4 h-4 rounded text-blue-500 focus:ring-blue-500/30 border-slate-700 bg-slate-900"
+                className="w-4 h-4 rounded text-[#315C4A] focus:ring-[#315C4A]/30 border-[#E5E5DE]"
               />
             </label>
             
-            <div className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-800/40 transition-colors border border-transparent hover:border-slate-800">
-              <div className="flex items-center gap-2 text-sm text-foreground font-medium">
-                <Type size={16} className="text-slate-400" /> Font Size
+            <div className="flex items-center justify-between p-3 rounded-xl hover:bg-[#F8F7F2] transition-colors border border-transparent hover:border-[#E5E5DE]">
+              <div className="flex items-center gap-2.5 text-sm text-[#202522] font-medium">
+                <Type size={16} className="text-[#68716B]" /> Typography Scale
               </div>
               <select
                 value={preferences.font_size}
                 onChange={(e) => setPreferences({ ...preferences, font_size: e.target.value })}
-                className="w-32 rounded-lg border border-slate-700/80 bg-slate-900/90 text-foreground text-sm py-1.5 px-2.5 focus:ring-2 focus:ring-blue-500/30"
+                className="w-32 rounded-lg border border-[#E5E5DE] bg-[#F8F7F2] text-[#202522] text-xs py-1.5 px-2.5 focus:border-[#315C4A] focus:bg-white"
               >
-                <option value="medium">Medium</option>
-                <option value="large">Large</option>
+                <option value="medium">Standard (100%)</option>
+                <option value="large">Large (115%)</option>
               </select>
             </div>
           </div>
-          
         </div>
         
-        <div className="p-4 border-t border-slate-800/80 bg-slate-900/60 flex justify-end gap-3">
-          <button onClick={onClose} className="btn-secondary px-6">Cancel</button>
-          <button onClick={handleSave} disabled={isSaving} className="btn-primary px-6">
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-[#E5E5DE] bg-[#F8F7F2] flex justify-end gap-3">
+          <button onClick={onClose} className="btn-secondary px-5 py-2 text-xs">
+            Cancel
+          </button>
+          <button onClick={handleSave} disabled={isSaving} className="btn-primary px-5 py-2 text-xs">
             {isSaving ? "Saving..." : "Save Preferences"}
           </button>
         </div>

@@ -255,14 +255,16 @@ export default function PetitionForm() {
   // ── Success state ─────────────────────────────────────────────────────────
   if (submitted) {
     return (
-      <div className="card text-center py-10 animate-fade-in">
-        <CheckCircle size={48} className="text-accent-500 mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-foreground mb-2">{t("petition_submitted", "Petition Submitted!")}</h2>
-        <p className="text-muted-foreground mb-1">{t("petition_received_desc", "Your petition has been received and is being analysed by our AI system.")}</p>
-        <p className="text-xs text-muted-foreground mb-6">{t("reference_id", "Reference ID:")} <span className="font-mono font-semibold text-foreground">{submitted.id}</span></p>
+      <div className="card text-center py-12">
+        <div className="w-14 h-14 rounded-full bg-[#EFF4F0] text-[#315C4A] flex items-center justify-center mx-auto mb-4">
+          <CheckCircle size={32} />
+        </div>
+        <h2 className="text-2xl font-bold text-[#202522] mb-2">{t("petition_submitted", "Petition Submitted")}</h2>
+        <p className="text-sm text-[#68716B] mb-2">{t("petition_received_desc", "Your grievance has been recorded and is currently undergoing autonomous triage.")}</p>
+        <p className="text-xs text-[#68716B] mb-8 font-mono">{t("reference_id", "Reference ID:")} <span className="font-bold text-[#202522]">{submitted.id}</span></p>
         <div className="flex justify-center gap-3">
-          <button className="btn-secondary" onClick={() => navigate('/citizen/dashboard')}>{t("go_to_dashboard", "Go to Dashboard")}</button>
-          <button className="btn-primary" onClick={() => navigate(`/citizen/petitions/${submitted.id}`)}>{t("track_status", "Track Status")}</button>
+          <button className="btn-secondary" onClick={() => navigate('/citizen/dashboard')}>{t("go_to_dashboard", "Return to Overview")}</button>
+          <button className="btn-primary" onClick={() => navigate(`/citizen/petitions/${submitted.id}`)}>{t("track_status", "Inspect Case File")}</button>
         </div>
       </div>
     );

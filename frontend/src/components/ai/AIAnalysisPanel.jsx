@@ -1,4 +1,4 @@
-﻿import { Brain, Calendar, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
+﻿import { CheckCircle2, AlertCircle, Shield, FileText, Calendar } from 'lucide-react';
 import PriorityBadge from './PriorityBadge';
 import ConfidenceBar from './ConfidenceBar';
 import ExplainabilityPanel from './ExplainabilityPanel';
@@ -8,10 +8,10 @@ import { formatDate } from '@/lib/utils';
 export default function AIAnalysisPanel({ analysis, role = 'officer', petition = null }) {
   if (!analysis) {
     return (
-      <div className="ai-panel">
-        <div className="flex items-center gap-2.5 text-muted-foreground text-sm">
-          <Brain size={18} className="animate-pulse text-blue-400" />
-          <span>Processing real-time neural analysis…</span>
+      <div className="bg-[#EFF4F0] border border-[#D4E2D8] rounded-2xl p-6 text-sm text-[#315C4A]">
+        <div className="flex items-center gap-2">
+          <Shield size={16} className="text-[#315C4A]" />
+          <span>Autonomous triage determination in progress...</span>
         </div>
       </div>
     );
@@ -24,25 +24,25 @@ export default function AIAnalysisPanel({ analysis, role = 'officer', petition =
   } = analysis;
 
   return (
-    <div className="space-y-4 animate-fade-in">
-      {/* Duplicate alert — prominent, at the top */}
+    <div className="space-y-4">
+      {/* Duplicate alert */}
       <DuplicateAlert
         duplicateIds={duplicate_ids}
         similarityScores={similarity_scores}
         role={role}
       />
 
-      {/* Main AI panel */}
-      <div className="ai-panel space-y-5 border-blue-500/30">
+      {/* Main InsightGov Intelligence panel */}
+      <div className="bg-[#EFF4F0] border border-[#D4E2D8] rounded-2xl p-6 space-y-5">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between border-b border-[#D4E2D8] pb-3">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/20 text-cyan-400 border border-blue-400/30 shadow-[0_0_10px_rgba(6,182,212,0.3)]">
-              <Brain size={16} />
-            </div>
-            <span className="ai-label">Autonomous AI Determination</span>
+            <Shield size={16} className="text-[#315C4A]" />
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#315C4A]">
+              INSIGHTGOV INTELLIGENCE
+            </span>
           </div>
-          <span className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-mono">
+          <span className="text-[11px] text-[#68716B] font-mono flex items-center gap-1.5">
             <Calendar size={11} />
             {formatDate(analyzed_at)}
           </span>
@@ -50,32 +50,40 @@ export default function AIAnalysisPanel({ analysis, role = 'officer', petition =
 
         {/* Priority + Category row */}
         <div className="flex flex-wrap items-center gap-2.5">
-          <PriorityBadge priority={priority} size="lg" />
+          <PriorityBadge priority={priority} size="md" />
           {category && (
-            <span className="category-pill">{category}</span>
+            <span className="text-xs font-medium text-[#315C4A] bg-white px-2.5 py-1 rounded-md border border-[#D4E2D8]">
+              {category}
+            </span>
           )}
         </div>
 
         {/* Department Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-800/80">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl bg-white border border-[#D4E2D8]">
           {petition?.citizen_department_id && (
             <div>
-              <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-1">Citizen Preference</p>
-              <p className="text-sm text-foreground font-medium">{petition.department_name || "Unspecified"}</p>
+              <p className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[#68716B] mb-1">
+                Citizen Preference
+              </p>
+              <p className="text-xs text-[#202522] font-medium">
+                {petition.department_name || "Unspecified"}
+              </p>
             </div>
           )}
           {department && (
             <div>
-              <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-1">Neural AI Recommendation</p>
-              <p className="text-sm font-bold text-foreground flex items-center gap-2">
+              <p className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[#68716B] mb-1">
+                Autonomous Routing Target
+              </p>
+              <p className="text-xs font-bold text-[#202522] flex items-center gap-2">
                 {department}
                 {petition?.department_match === true && (
-                  <span className="text-[10px] uppercase tracking-wider font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span className="text-[10px] font-medium bg-[#EFF4F0] text-[#315C4A] border border-[#D4E2D8] px-2 py-0.5 rounded-full flex items-center gap-1">
                     <CheckCircle2 size={10} /> Match
                   </span>
                 )}
                 {petition?.department_match === false && (
-                  <span className="text-[10px] uppercase tracking-wider font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span className="text-[10px] font-medium bg-[#FDF6F0] text-[#C58B5B] border border-[#F2DFD0] px-2 py-0.5 rounded-full flex items-center gap-1">
                     <AlertCircle size={10} /> Mismatch
                   </span>
                 )}
@@ -86,11 +94,11 @@ export default function AIAnalysisPanel({ analysis, role = 'officer', petition =
 
         {/* Summary */}
         {summary && (
-          <div className="rounded-xl p-4 bg-slate-950/70 border border-blue-500/20 shadow-sm">
-            <p className="text-[11px] uppercase tracking-wider font-bold text-cyan-400 mb-1.5 flex items-center gap-1.5">
-              <Sparkles size={12} /> Executive Analysis Summary
+          <div className="rounded-xl p-4 bg-white border border-[#D4E2D8]">
+            <p className="text-[10px] font-mono uppercase tracking-wider font-bold text-[#315C4A] mb-1">
+              Executive Summary
             </p>
-            <p className="text-sm text-slate-200 leading-relaxed font-normal">{summary}</p>
+            <p className="text-xs text-[#202522] leading-relaxed font-normal">{summary}</p>
           </div>
         )}
 

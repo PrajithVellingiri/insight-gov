@@ -1,4 +1,4 @@
-import { Mic, MicOff } from 'lucide-react';
+﻿import { Mic, MicOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useRef, useEffect } from 'react';
 import useSpeechRecognition from '@/hooks/useSpeechRecognition';
@@ -44,27 +44,27 @@ export default function MicButton({ onTranscript, className, disabled, language 
         disabled={disabled}
         onClick={isListening ? stopListening : startListening}
         className={cn(
-          "p-2 rounded-full transition-all flex items-center justify-center disabled:opacity-50 border",
+          "p-2 rounded-xl transition-all flex items-center justify-center disabled:opacity-50 border",
           isListening 
-            ? "bg-rose-500/20 text-rose-400 border-rose-500/40 shadow-glow-rose animate-pulse" 
-            : "bg-slate-800/80 text-slate-400 hover:text-cyan-400 hover:bg-slate-700/80 border-slate-700/60 shadow-sm",
+            ? "bg-[#C58B5B]/15 text-[#C58B5B] border-[#C58B5B]/40 animate-pulse shadow-xs" 
+            : "bg-[#F8F7F2] text-[#68716B] hover:text-[#315C4A] hover:bg-[#EFF4F0] border-[#E5E5DE] shadow-xs",
           className
         )}
         title={isListening ? "Stop listening" : "Start voice typing"}
       >
-        {isListening ? <Mic size={18} /> : <MicOff size={18} />}
+        {isListening ? <Mic size={17} /> : <MicOff size={17} />}
       </button>
 
       {/* Interim Text Tooltip overlay */}
       {isListening && interimText && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[200px] bg-black/80 text-white text-xs p-2 rounded-lg pointer-events-none z-50">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[200px] bg-[#202522] text-white text-xs p-2 rounded-lg pointer-events-none z-50 shadow-md">
           {interimText}
         </div>
       )}
 
       {/* Error Toast */}
       {showToast && error && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[200px] bg-red-600 text-white text-xs p-2 rounded-lg pointer-events-none z-50">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[200px] bg-[#9E4343] text-white text-xs p-2 rounded-lg pointer-events-none z-50 shadow-md">
           {error}
         </div>
       )}

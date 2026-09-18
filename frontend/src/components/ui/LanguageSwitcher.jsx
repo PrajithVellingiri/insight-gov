@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe, ChevronDown, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
-import api from '@/api/axiosInstance'; // to optionally save preference
+import api from '@/api/axiosInstance';
 
 const LANGUAGES = [
   { code: 'en', label: 'English', native: 'English' },
@@ -52,26 +52,26 @@ export default function LanguageSwitcher() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E5E5DE] bg-white hover:bg-[#F8F7F2] text-[#202522] transition-colors shadow-xs"
         aria-label="Change language"
       >
-        <Globe size={18} />
-        <span className="text-sm font-medium hidden sm:block">{currentLang.native}</span>
-        <ChevronDown size={14} className={cn('transition-transform', isOpen && 'rotate-180')} />
+        <Globe size={15} className="text-[#315C4A]" />
+        <span className="text-xs font-medium hidden sm:block">{currentLang.native}</span>
+        <ChevronDown size={13} className={cn('text-[#68716B] transition-transform', isOpen && 'rotate-180')} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-1 w-40 bg-card rounded-xl shadow-card-hover border border-border py-1 animate-fade-in z-50">
+        <div className="absolute right-0 top-full mt-1.5 w-44 bg-white rounded-xl shadow-lg border border-[#E5E5DE] py-1.5 animate-fade-in z-50">
           {LANGUAGES.map((lang) => (
             <button
               key={lang.code}
               onClick={() => changeLanguage(lang.code)}
-              className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors flex items-center justify-between"
+              className="w-full text-left px-3.5 py-2 text-xs hover:bg-[#EFF4F0] transition-colors flex items-center justify-between"
             >
-              <span className={cn(currentLang.code === lang.code ? 'font-semibold text-primary-700' : 'text-foreground')}>
+              <span className={cn(currentLang.code === lang.code ? 'font-semibold text-[#315C4A]' : 'text-[#202522]')}>
                 {lang.native}
               </span>
-              {currentLang.code === lang.code && <Check size={14} className="text-primary-600" />}
+              {currentLang.code === lang.code && <Check size={14} className="text-[#315C4A]" />}
             </button>
           ))}
         </div>

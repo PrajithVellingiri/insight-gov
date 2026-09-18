@@ -6,10 +6,10 @@
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-slate-950/90 backdrop-blur-xl border border-blue-500/30 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.6)] px-4 py-2.5">
-      <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1">{label}</p>
-      <p className="text-lg font-bold text-blue-400 flex items-baseline gap-1.5" style={{ textShadow: '0 0 12px rgba(59, 130, 246, 0.5)' }}>
-        {payload[0].value} <span className="text-xs text-muted-foreground font-normal">petitions registered</span>
+    <div className="bg-white border border-[#E5E5DE] rounded-xl shadow-card px-4 py-2.5">
+      <p className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[#68716B] mb-0.5">{label}</p>
+      <p className="text-sm font-bold text-[#315C4A]">
+        {payload[0].value} <span className="text-xs text-[#68716B] font-normal">petitions recorded</span>
       </p>
     </div>
   );
@@ -17,41 +17,33 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export default function PetitionsOverTime({ data = [] }) {
   if (!data.length) {
-    return <div className="flex items-center justify-center h-48 text-sm text-muted-foreground">No historical trend data available</div>;
+    return <div className="flex items-center justify-center h-48 text-xs text-[#68716B]">No historical trend data recorded.</div>;
   }
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <AreaChart data={data} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
+    <ResponsiveContainer width="100%" height={280}>
+      <AreaChart data={data} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
         <defs>
-          <linearGradient id="colorCountGov" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.65} />
-            <stop offset="60%" stopColor="#06b6d4" stopOpacity={0.15} />
-            <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+          <linearGradient id="govTrendFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#315C4A" stopOpacity={0.18} />
+            <stop offset="100%" stopColor="#315C4A" stopOpacity={0.0} />
           </linearGradient>
-          <filter id="glowBlue" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#33415525" vertical={false} />
-        <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#64748b', fontWeight: 500 }} stroke="transparent" dy={10} />
-        <YAxis tick={{ fontSize: 11, fill: '#64748b', fontWeight: 500 }} stroke="transparent" allowDecimals={false} dx={-10} />
-        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#3b82f650', strokeWidth: 1.5, strokeDasharray: '4 4' }} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#E5E5DE" vertical={false} />
+        <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#68716B' }} stroke="#E5E5DE" dy={8} />
+        <YAxis tick={{ fontSize: 11, fill: '#68716B' }} stroke="transparent" allowDecimals={false} />
+        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#78917F', strokeWidth: 1, strokeDasharray: '3 3' }} />
         <Area
           type="monotone"
           dataKey="count"
-          stroke="#3b82f6"
-          strokeWidth={3}
-          fillOpacity={1}
-          fill="url(#colorCountGov)"
-          style={{ filter: 'url(#glowBlue)' }}
+          stroke="#315C4A"
+          strokeWidth={2}
+          fill="url(#govTrendFill)"
           activeDot={{
-            r: 6,
-            fill: '#06b6d4',
-            stroke: '#1e3a8a',
-            strokeWidth: 3,
-            style: { filter: 'drop-shadow(0px 0px 8px #06b6d4)' },
+            r: 4,
+            fill: '#315C4A',
+            stroke: '#FFFFFF',
+            strokeWidth: 2,
           }}
         />
       </AreaChart>

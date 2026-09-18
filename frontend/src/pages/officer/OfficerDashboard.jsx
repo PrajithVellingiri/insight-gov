@@ -2,13 +2,13 @@
 import { useActivePetitions } from '@/hooks/usePetitions';
 import PetitionTable from '@/components/petition/PetitionTable';
 import StatCard from '@/components/ui/StatCard';
-import { AlertTriangle, FileText, CheckCircle, Building2, ShieldCheck, Sparkles } from 'lucide-react';
+import { AlertTriangle, FileText, CheckCircle, Building2 } from 'lucide-react';
 import usePageTitle from '@/hooks/usePageTitle';
 import { useTranslation } from 'react-i18next';
 
 export default function OfficerDashboard() {
   const { t } = useTranslation();
-  usePageTitle(t('officer.dashboard', 'Officer Queue Command'));
+  usePageTitle(t('officer.dashboard', 'Officer Queue Overview'));
   const { user } = useAuth();
   const { data: petitions = [], isLoading } = useActivePetitions();
 
@@ -25,73 +25,70 @@ export default function OfficerDashboard() {
     return priorityWeight[pB] - priorityWeight[pA];
   });
 
-  const pending = petitions.filter((p) => p.status === 'analysed' || p.status === 'under_review');
+  const pending = petitions.filter((p) => p.status === 'analysed' || p.status === 'under_review' || p.status === 'pending');
   const critical = petitions.filter((p) => p.status !== 'resolved' && (p.priority === 'critical' || p.ai_analysis?.priority === 'critical'));
   const recentlyFinalized = petitions.filter((p) => ['resolved', 'rejected', 'duplicate'].includes(p.status));
 
   return (
-    <div className="space-y-8 pb-12">
-      {/* Header */}
+    <div className="space-y-10 pb-16 max-w-6xl mx-auto">
+      {/* Editorial Header */}
       <div className="page-header">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
-              <Sparkles size={13} />
-              Operational Triage Command
-            </span>
-            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700/60 flex items-center gap-1">
-              <Building2 size={10} />
-              {user?.department_name || t('common.unassigned', 'Unassigned Ministry')}
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-            {t('officer.welcome', 'Department Grievance Queue')}
+          <span className="text-xs font-mono font-semibold uppercase tracking-widest text-[#78917F] block mb-1">
+            01 / OFFICER WORKSPACE
+          </span>
+          <h1 className="text-3xl font-extrabold text-[#202522] tracking-tight">
+            Department Grievance Queue
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Review AI categorisation, examine vector duplicate matches, and issue formal administrative determinations.
+          <p className="text-sm text-[#68716B] mt-1 max-w-xl leading-relaxed">
+            Review triaged citizen applications, inspect geospatial cluster records, and issue administrative determinations.
           </p>
+        </div>
+
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#E5E5DE] bg-white text-xs text-[#202522] shadow-subtle">
+          <Building2 size={14} className="text-[#315C4A]" />
+          <span className="font-semibold">{user?.department_name || 'Ministry Review Queue'}</span>
         </div>
       </div>
 
-      {/* 3D Telemetry Cards */}
+      {/* Differentiated KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <StatCard
-          label={t('officer.pending_review', 'Pending Review')}
+          label="Pending Review"
           value={pending.length}
           Icon={FileText}
-          color="text-blue-400 bg-blue-500/10 border-blue-500/25"
-          glowColor="rgba(59, 130, 246, 0.25)"
+          variant="pending"
           description="Assigned petitions requiring officer action"
         />
         <StatCard
-          label={t('priority.critical', 'Critical Escalations')}
+          label="Critical Priority"
           value={critical.length}
           Icon={AlertTriangle}
-          color="text-rose-400 bg-rose-500/15 border-rose-500/30"
-          glowColor="rgba(244, 63, 94, 0.3)"
-          trend="Immediate SLA"
-          trendType="negative"
+          variant="pending"
           description="High severity or public safety issues"
         />
         <StatCard
           label="Recently Finalized"
           value={recentlyFinalized.length}
           Icon={CheckCircle}
-          color="text-emerald-400 bg-emerald-500/10 border-emerald-500/25"
-          glowColor="rgba(16, 185, 129, 0.25)"
+          variant="resolved"
           description="Closed within active 48-hour retention"
         />
       </div>
 
-      {/* Queue Table */}
+      {/* Queue Table Section */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-foreground flex items-center gap-2 tracking-tight">
-            <ShieldCheck size={18} className="text-blue-400" />
-            {t('officer.petition_queue', 'Prioritised Ministry Queue')}
-          </h2>
-          <span className="text-xs text-muted-foreground font-mono">
-            {sortedPetitions.length} Active Records
+        <div className="flex items-center justify-between mb-4 pt-4 border-t border-[#E5E5DE]">
+          <div>
+            <h2 className="text-xl font-bold text-[#202522] tracking-tight">
+              Prioritized Review Ledger
+            </h2>
+            <p className="text-xs text-[#68716B] mt-0.5">
+              Sorted by operational priority and review urgency.
+            </p>
+          </div>
+          <span className="text-xs font-mono text-[#68716B] bg-[#F0EFEA] px-2.5 py-1 rounded-md">
+            {sortedPetitions.length} Records
           </span>
         </div>
         <PetitionTable petitions={sortedPetitions} role="officer" />

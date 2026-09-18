@@ -1,8 +1,8 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getDepartments, getOfficers } from '@/api/admin.api';
 import OfficerAnalytics from '@/components/admin/OfficerAnalytics';
-import { Loader2, ChevronRight, Activity } from 'lucide-react';
+import { Loader2, ChevronRight, Activity, Users } from 'lucide-react';
 import usePageTitle from '@/hooks/usePageTitle';
 
 export default function OfficerAnalyticsPage() {
@@ -21,25 +21,38 @@ export default function OfficerAnalyticsPage() {
   });
 
   return (
-    <div className="space-y-8 pb-10 animate-fade-in-up">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold text-foreground tracking-tight flex items-center gap-3">
-            <div className="p-2.5 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 rounded-xl shadow-glow-cyan">
-              <Activity size={24} />
+    <div className="space-y-6 pb-12">
+      {/* Header */}
+      <div className="border-b border-[#E5E5DE] pb-5">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#68716B]">
+            04 / Performance Audit
+          </span>
+        </div>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#EFF4F0] border border-[#D4E2D8] flex items-center justify-center text-[#315C4A]">
+              <Activity size={20} />
             </div>
-            Officer Analytics
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">Monitor individual officer workload, performance metrics, and resolution turnaround.</p>
+            <div>
+              <h1 className="text-2xl font-bold text-[#202522] tracking-tight">Officer Analytics</h1>
+              <p className="text-sm text-[#68716B] mt-0.5">
+                Monitor individual officer workload, performance metrics, and resolution turnaround.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-4 animate-fade-in-up delay-100">
-          <div className="glass-panel p-5 rounded-2xl border border-slate-800/80">
-            <label className="form-label text-slate-300">Filter by Department</label>
+        {/* Left Column: Department Filter & Officer List */}
+        <div className="lg:col-span-1 space-y-4">
+          <div className="card p-4">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[#68716B] mb-2">
+              Filter by Department
+            </label>
             <select 
-              className="form-input" 
+              className="w-full px-3 py-2 text-sm bg-[#F8F7F2] border border-[#E5E5DE] rounded-lg text-[#202522] focus:outline-none focus:border-[#315C4A] focus:bg-white transition-colors" 
               value={selectedDept} 
               onChange={(e) => {
                 setSelectedDept(e.target.value);
@@ -49,56 +62,72 @@ export default function OfficerAnalyticsPage() {
             >
               <option value="">All Departments</option>
               {depts.map(d => (
-                <option key={d.id} value={d.id}>{d.department_code ? `${d.department_code} - ` : ''}{d.name}</option>
+                <option key={d.id} value={d.id}>
+                  {d.department_code ? `${d.department_code} - ` : ''}{d.name}
+                </option>
               ))}
             </select>
           </div>
           
-          <div className="glass-panel p-0 overflow-hidden rounded-2xl border border-slate-800/80 shadow-card-3d">
-            <div className="p-4 border-b border-slate-800/80 bg-slate-900/60 flex items-center justify-between">
-              <h3 className="font-semibold text-sm text-foreground">Officers ({officers.length})</h3>
-              <span className="text-xs text-slate-400">Select to inspect</span>
+          <div className="card p-0 overflow-hidden">
+            <div className="px-4 py-3 border-b border-[#E5E5DE] bg-[#F8F7F2] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users size={15} className="text-[#315C4A]" />
+                <h3 className="font-semibold text-xs text-[#202522] uppercase tracking-wider">
+                  Officers ({officers.length})
+                </h3>
+              </div>
+              <span className="text-[11px] text-[#68716B]">Select to inspect</span>
             </div>
-            <div className="max-h-[500px] overflow-y-auto divide-y divide-slate-800/60">
+
+            <div className="max-h-[520px] overflow-y-auto divide-y divide-[#E5E5DE]">
               {loadingOfficers ? (
-                <div className="p-8 text-center text-muted-foreground flex items-center justify-center gap-2">
-                  <Loader2 size={20} className="animate-spin text-cyan-400" />
-                  <span>Loading personnel...</span>
+                <div className="p-8 text-center text-[#68716B] flex items-center justify-center gap-2">
+                  <Loader2 size={18} className="animate-spin text-[#315C4A]" />
+                  <span className="text-xs">Loading personnel...</span>
                 </div>
               ) : officers.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground text-sm">No officers found for selected filter.</div>
+                <div className="p-8 text-center text-[#68716B] text-xs">
+                  No officers found for selected department.
+                </div>
               ) : (
-                <ul className="divide-y divide-slate-800/60">
-                  {officers.map(officer => (
-                    <li key={officer.id}>
-                      <button
-                        onClick={() => setSelectedOfficer(officer)}
-                        className={`w-full text-left p-4 flex items-center justify-between hover:bg-slate-800/40 transition-all ${
-                          selectedOfficer?.id === officer.id 
-                            ? 'bg-blue-500/10 border-l-4 border-cyan-400 text-white shadow-inner' 
-                            : 'border-l-4 border-transparent text-slate-300'
-                        }`}
-                      >
-                        <div>
-                          <div className="font-medium text-sm text-foreground">{officer.name}</div>
-                          <div className="text-xs text-slate-400 mt-0.5">{officer.email}</div>
-                        </div>
-                        <ChevronRight 
-                          size={16} 
-                          className={`transition-transform ${
-                            selectedOfficer?.id === officer.id ? 'translate-x-1 text-cyan-400' : 'text-slate-500'
-                          }`} 
-                        />
-                      </button>
-                    </li>
-                  ))}
+                <ul className="divide-y divide-[#E5E5DE]">
+                  {officers.map(officer => {
+                    const isSelected = selectedOfficer?.id === officer.id;
+                    return (
+                      <li key={officer.id}>
+                        <button
+                          onClick={() => setSelectedOfficer(officer)}
+                          className={`w-full text-left px-4 py-3 flex items-center justify-between transition-all ${
+                            isSelected 
+                              ? 'bg-[#EFF4F0] border-l-4 border-[#315C4A] text-[#202522]' 
+                              : 'border-l-4 border-transparent text-[#202522] hover:bg-[#F8F7F2]'
+                          }`}
+                        >
+                          <div>
+                            <div className={`text-sm font-medium ${isSelected ? 'text-[#315C4A] font-semibold' : 'text-[#202522]'}`}>
+                              {officer.name}
+                            </div>
+                            <div className="text-xs text-[#68716B] mt-0.5 font-mono">{officer.email}</div>
+                          </div>
+                          <ChevronRight 
+                            size={15} 
+                            className={`transition-transform ${
+                              isSelected ? 'translate-x-1 text-[#315C4A]' : 'text-[#68716B]/50'
+                            }`} 
+                          />
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
           </div>
         </div>
         
-        <div className="lg:col-span-2 animate-fade-in-up delay-200">
+        {/* Right Column: Selected Officer Analytics Detail */}
+        <div className="lg:col-span-2">
           <OfficerAnalytics officer={selectedOfficer} />
         </div>
       </div>

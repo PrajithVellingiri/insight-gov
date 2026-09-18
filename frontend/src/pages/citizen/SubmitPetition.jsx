@@ -6,31 +6,32 @@ import { useTranslation } from 'react-i18next';
 
 export default function SubmitPetition() {
   const { t } = useTranslation();
-  usePageTitle(t('citizen.submit_a_petition', 'Submit Citizen Grievance'));
+  usePageTitle('Submit Application');
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-16">
       <div>
         <Link
           to="/citizen/dashboard"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#315C4A] hover:underline mb-3 no-underline"
+          className="inline-flex items-center gap-1.5 text-xs font-mono font-bold uppercase text-[#181817] hover:text-[#F05A3C] transition-colors mb-3 no-underline"
         >
-          <ArrowLeft size={14} /> {t('citizen.back_to_dashboard', 'Back to Overview')}
+          <ArrowLeft size={13} /> Return to Dashboard
         </Link>
-        <h1 className="text-3xl font-extrabold text-[#202522] tracking-tight">
-          {t('citizen.submit_a_petition', 'Submit a Civic Grievance')}
+        <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#F05A3C] block mb-1">
+          CITIZEN GRIEVANCE INTAKE
+        </span>
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-[#181817] uppercase tracking-tight">
+          Submit Application
         </h1>
-        <p className="text-[#68716B] text-sm mt-1 leading-relaxed">
-          {t('citizen.submit_petition_desc', 'Describe your concern clearly. Our system will automatically categorise, prioritise, and route it to the appropriate state ministry.')}
+        <p className="text-[#6F6F6A] text-xs sm:text-sm mt-1 leading-relaxed">
+          Record your grievance in the state ledger. Our intelligence layer will automatically categorize, check spatial duplicates, and route it to the responsible department.
         </p>
       </div>
 
-      <div className="bg-[#EFF4F0] rounded-2xl border border-[#D4E2D8] p-4 flex items-center gap-3.5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-[#315C4A] border border-[#D4E2D8] flex-shrink-0">
-          <Shield size={16} />
-        </div>
-        <p className="text-xs text-[#202522] leading-snug">
-          <strong className="text-[#315C4A] font-semibold">InsightGov Intelligence:</strong> Your application will be analysed upon submission, establishing geospatial coordinates and routing directly to the corresponding ministry queue.
+      <div className="bg-[#181817] text-[#F7F6F2] rounded-md border border-[#292927] p-4 flex items-center gap-3">
+        <span className="w-2 h-2 rounded-full bg-[#F05A3C] flex-shrink-0" />
+        <p className="text-xs font-mono leading-snug">
+          <strong className="text-[#F05A3C]">INSIGHTGOV INTAKE:</strong> Applications undergo sub-second embedding extraction and geospatial coordinate deduplication.
         </p>
       </div>
 

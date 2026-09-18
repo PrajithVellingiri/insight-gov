@@ -36,14 +36,13 @@ export default function LanguageSwitcher() {
     i18n.changeLanguage(code);
     setIsOpen(false);
     
-    // Save preference to localStorage for guests, and DB for authenticated users
     localStorage.setItem('i18nextLng', code);
     
     if (user) {
       try {
         await api.patch('/auth/preferences', { language: code });
       } catch (_e) {
-        // fail silently for now, as endpoint might not exist yet
+        // fail silently
       }
     }
   };
@@ -52,26 +51,26 @@ export default function LanguageSwitcher() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E5E5DE] bg-white hover:bg-[#F8F7F2] text-[#202522] transition-colors shadow-xs"
+        className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-[#DDDCD7] bg-white hover:bg-[#F7F6F2] text-[#181817] transition-colors"
         aria-label="Change language"
       >
-        <Globe size={15} className="text-[#315C4A]" />
-        <span className="text-xs font-medium hidden sm:block">{currentLang.native}</span>
-        <ChevronDown size={13} className={cn('text-[#68716B] transition-transform', isOpen && 'rotate-180')} />
+        <Globe size={13} className="text-[#181817]" />
+        <span className="text-xs font-mono font-medium hidden sm:block">{currentLang.native}</span>
+        <ChevronDown size={11} className={cn('text-[#6F6F6A] transition-transform', isOpen && 'rotate-180')} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-1.5 w-44 bg-white rounded-xl shadow-lg border border-[#E5E5DE] py-1.5 animate-fade-in z-50">
+        <div className="absolute right-0 top-full mt-1.5 w-40 bg-white rounded-md shadow-elevated border border-[#DDDCD7] py-1 animate-fade-in z-50">
           {LANGUAGES.map((lang) => (
             <button
               key={lang.code}
               onClick={() => changeLanguage(lang.code)}
-              className="w-full text-left px-3.5 py-2 text-xs hover:bg-[#EFF4F0] transition-colors flex items-center justify-between"
+              className="w-full text-left px-3 py-2 text-xs hover:bg-[#FFF0EB]/40 transition-colors flex items-center justify-between"
             >
-              <span className={cn(currentLang.code === lang.code ? 'font-semibold text-[#315C4A]' : 'text-[#202522]')}>
+              <span className={cn(currentLang.code === lang.code ? 'font-bold text-[#F05A3C]' : 'text-[#181817]')}>
                 {lang.native}
               </span>
-              {currentLang.code === lang.code && <Check size={14} className="text-[#315C4A]" />}
+              {currentLang.code === lang.code && <Check size={12} className="text-[#F05A3C]" />}
             </button>
           ))}
         </div>

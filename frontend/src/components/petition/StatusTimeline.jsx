@@ -1,44 +1,40 @@
 ﻿import { formatDate } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
-const dotColors = {
-  pending:      'border-[#C58B5B] bg-[#C58B5B]',
-  analysed:     'border-[#315C4A] bg-[#315C4A]',
-  under_review: 'border-[#C58B5B] bg-[#C58B5B]',
-  resolved:     'border-[#315C4A] bg-[#315C4A]',
-  rejected:     'border-[#B91C1C] bg-[#B91C1C]',
-  duplicate:    'border-[#C8A96B] bg-[#C8A96B]',
-};
-
 export default function StatusTimeline({ history = [] }) {
   if (!history.length) {
-    return <p className="text-xs text-[#68716B] text-center py-4">No audit milestones recorded yet.</p>;
+    return <p className="text-xs font-mono text-[#6F6F6A] text-center py-4">NO AUDIT MILESTONES RECORDED.</p>;
   }
 
   return (
     <ol className="relative space-y-4">
       {history.map((item, i) => {
-        const dotColor = dotColors[item.new_status] || 'border-[#315C4A] bg-[#315C4A]';
+        const isLatest = i === 0;
         const isLast = i === history.length - 1;
         return (
-          <li key={i} className="flex gap-4">
+          <li key={i} className="flex gap-3.5">
             <div className="flex flex-col items-center">
-              <div className={cn('h-2.5 w-2.5 rounded-full mt-1.5 flex-shrink-0 ring-4 ring-[#F8F7F2]', dotColor)} />
-              {!isLast && <div className="w-px flex-1 bg-[#E5E5DE] my-1" />}
+              <div 
+                className={cn(
+                  'h-2.5 w-2.5 rounded-full mt-1 flex-shrink-0',
+                  isLatest ? 'bg-[#F05A3C] ring-4 ring-[#FFF0EB]' : 'bg-[#181817]'
+                )} 
+              />
+              {!isLast && <div className="w-px flex-1 bg-[#DDDCD7] my-1" />}
             </div>
-            <div className="pb-4">
-              <p className="text-xs font-semibold text-[#202522] uppercase tracking-wider">
+            <div className="pb-3 flex-1">
+              <p className={cn("text-xs font-mono font-bold uppercase tracking-wider", isLatest ? 'text-[#F05A3C]' : 'text-[#181817]')}>
                 {item.new_status?.replace('_', ' ')}
               </p>
               {item.note && (
-                <p className="text-xs text-[#202522] mt-1 bg-[#F8F7F2] p-2.5 rounded-lg border border-[#E5E5DE] leading-relaxed">
+                <p className="text-xs text-[#181817] mt-1 bg-[#F7F6F2] p-2.5 rounded border border-[#DDDCD7] leading-relaxed font-sans">
                   {item.note}
                 </p>
               )}
               {item.officer_name && (
-                <p className="text-[11px] text-[#315C4A] mt-1 font-medium">Logged by: {item.officer_name}</p>
+                <p className="text-[11px] font-mono text-[#6F6F6A] mt-1">Logged by: {item.officer_name}</p>
               )}
-              <p className="text-[11px] text-[#68716B] mt-0.5 font-mono">{formatDate(item.created_at)}</p>
+              <p className="text-[10px] text-[#6F6F6A] mt-0.5 font-mono">{formatDate(item.created_at)}</p>
             </div>
           </li>
         );

@@ -59,13 +59,13 @@ export default function ChatInput({ onSend, onSendMessage, isStreaming, disabled
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        placeholder={placeholder || (isBusy ? 'AI is responding...' : 'Ask a question…')}
+        placeholder={placeholder || (isBusy ? 'Processing query...' : 'Inquire about policy or grievance...')}
         disabled={isBusy}
         rows={1}
         className={cn(
-          'flex-1 resize-none rounded-xl border border-[#E5E5DE] bg-[#F8F7F2] px-3.5 py-2 text-sm text-[#202522]',
-          'focus:outline-none focus:border-[#315C4A] focus:bg-white',
-          'placeholder:text-[#68716B]/70 transition-all',
+          'flex-1 resize-none rounded-md border border-[#DDDCD7] bg-[#F7F6F2] px-3 py-2 text-xs text-[#181817]',
+          'focus:outline-none focus:border-[#F05A3C] focus:bg-white',
+          'placeholder:text-[#6F6F6A] transition-colors',
           isBusy && 'opacity-50 cursor-not-allowed'
         )}
       />
@@ -73,14 +73,14 @@ export default function ChatInput({ onSend, onSendMessage, isStreaming, disabled
         onClick={handleSend}
         disabled={!value.trim() || isBusy}
         className={cn(
-          'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl',
-          'bg-[#315C4A] text-white transition-all',
-          'hover:bg-[#274a3b] active:scale-95 shadow-xs',
-          'disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100'
+          'flex h-8 w-8 shrink-0 items-center justify-center rounded-md',
+          'bg-[#181817] text-white transition-all',
+          'hover:bg-[#F05A3C] active:scale-95',
+          'disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100'
         )}
         aria-label="Send message"
       >
-        <Send size={15} />
+        <Send size={14} />
       </button>
     </div>
   );

@@ -1,14 +1,12 @@
-﻿import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { useActivePetitions } from '@/hooks/usePetitions';
 import PetitionTable from '@/components/petition/PetitionTable';
-import StatCard from '@/components/ui/StatCard';
-import { AlertTriangle, FileText, CheckCircle, Building2 } from 'lucide-react';
 import usePageTitle from '@/hooks/usePageTitle';
 import { useTranslation } from 'react-i18next';
 
 export default function OfficerDashboard() {
   const { t } = useTranslation();
-  usePageTitle(t('officer.dashboard', 'Officer Queue Overview'));
+  usePageTitle('Officer Queue Operations');
   const { user } = useAuth();
   const { data: petitions = [], isLoading } = useActivePetitions();
 
@@ -30,64 +28,67 @@ export default function OfficerDashboard() {
   const recentlyFinalized = petitions.filter((p) => ['resolved', 'rejected', 'duplicate'].includes(p.status));
 
   return (
-    <div className="space-y-10 pb-16 max-w-6xl mx-auto">
+    <div className="space-y-10 pb-16">
       {/* Editorial Header */}
-      <div className="page-header">
+      <div className="border-b border-[#DDDCD7] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <span className="text-xs font-mono font-semibold uppercase tracking-widest text-[#78917F] block mb-1">
-            01 / OFFICER WORKSPACE
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#F05A3C] block mb-2">
+            GOVERNMENT OPERATIONS
           </span>
-          <h1 className="text-3xl font-extrabold text-[#202522] tracking-tight">
-            Department Grievance Queue
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-[#181817] uppercase tracking-tight">
+            GRIEVANCE QUEUE
           </h1>
-          <p className="text-sm text-[#68716B] mt-1 max-w-xl leading-relaxed">
-            Review triaged citizen applications, inspect geospatial cluster records, and issue administrative determinations.
+          <p className="text-xs font-mono text-[#6F6F6A] mt-1 uppercase">
+            {user?.department_name || 'Department Jurisdiction'} — Active Triage Queue
           </p>
-        </div>
-
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#E5E5DE] bg-white text-xs text-[#202522] shadow-subtle">
-          <Building2 size={14} className="text-[#315C4A]" />
-          <span className="font-semibold">{user?.department_name || 'Ministry Review Queue'}</span>
         </div>
       </div>
 
-      {/* Differentiated KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <StatCard
-          label="Pending Review"
-          value={pending.length}
-          Icon={FileText}
-          variant="pending"
-          description="Assigned petitions requiring officer action"
-        />
-        <StatCard
-          label="Critical Priority"
-          value={critical.length}
-          Icon={AlertTriangle}
-          variant="pending"
-          description="High severity or public safety issues"
-        />
-        <StatCard
-          label="Recently Finalized"
-          value={recentlyFinalized.length}
-          Icon={CheckCircle}
-          variant="resolved"
-          description="Closed within active 48-hour retention"
-        />
+      {/* Typographic Operational Metrics Banner */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 py-4 border-b border-[#DDDCD7]">
+        <div className="space-y-1">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#F05A3C]">
+            PENDING REVIEW
+          </span>
+          <div className="text-4xl sm:text-5xl font-extrabold text-[#F05A3C] font-mono">
+            {pending.length}
+          </div>
+          <p className="text-[11px] text-[#6F6F6A]">Awaiting official determination</p>
+        </div>
+
+        <div className="space-y-1 border-t sm:border-t-0 sm:border-l border-[#DDDCD7] pt-4 sm:pt-0 sm:pl-6">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#E13B22]">
+            CRITICAL PRIORITY
+          </span>
+          <div className="text-4xl sm:text-5xl font-extrabold text-[#E13B22] font-mono">
+            {critical.length}
+          </div>
+          <p className="text-[11px] text-[#6F6F6A]">Immediate escalation status</p>
+        </div>
+
+        <div className="space-y-1 border-t sm:border-t-0 sm:border-l border-[#DDDCD7] pt-4 sm:pt-0 sm:pl-6">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#181817]">
+            FINALIZED CASES
+          </span>
+          <div className="text-4xl sm:text-5xl font-extrabold text-[#181817] font-mono">
+            {recentlyFinalized.length}
+          </div>
+          <p className="text-[11px] text-[#6F6F6A]">Formally concluded in ledger</p>
+        </div>
       </div>
 
       {/* Queue Table Section */}
-      <div>
-        <div className="flex items-center justify-between mb-4 pt-4 border-t border-[#E5E5DE]">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[#DDDCD7]">
           <div>
-            <h2 className="text-xl font-bold text-[#202522] tracking-tight">
-              Prioritized Review Ledger
+            <h2 className="text-sm font-mono font-bold text-[#181817] uppercase tracking-wider">
+              PRIORITIZED REVIEW LEDGER
             </h2>
-            <p className="text-xs text-[#68716B] mt-0.5">
-              Sorted by operational priority and review urgency.
+            <p className="text-xs text-[#6F6F6A] mt-0.5">
+              Ranked by urgency level and statutory turnaround guidelines.
             </p>
           </div>
-          <span className="text-xs font-mono text-[#68716B] bg-[#F0EFEA] px-2.5 py-1 rounded-md">
+          <span className="text-xs font-mono font-bold text-[#181817] bg-white px-2.5 py-1 rounded border border-[#DDDCD7]">
             {sortedPetitions.length} Records
           </span>
         </div>

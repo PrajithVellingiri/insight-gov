@@ -44,27 +44,25 @@ export default function MicButton({ onTranscript, className, disabled, language 
         disabled={disabled}
         onClick={isListening ? stopListening : startListening}
         className={cn(
-          "p-2 rounded-xl transition-all flex items-center justify-center disabled:opacity-50 border",
+          "p-2 rounded-md transition-all flex items-center justify-center disabled:opacity-50 border",
           isListening 
-            ? "bg-[#C58B5B]/15 text-[#C58B5B] border-[#C58B5B]/40 animate-pulse shadow-xs" 
-            : "bg-[#F8F7F2] text-[#68716B] hover:text-[#315C4A] hover:bg-[#EFF4F0] border-[#E5E5DE] shadow-xs",
+            ? "bg-[#FFF0EB] text-[#F05A3C] border-[#F05A3C] animate-pulse" 
+            : "bg-[#F7F6F2] text-[#6F6F6A] hover:text-[#181817] hover:border-[#181817] border-[#DDDCD7]",
           className
         )}
         title={isListening ? "Stop listening" : "Start voice typing"}
       >
-        {isListening ? <Mic size={17} /> : <MicOff size={17} />}
+        {isListening ? <Mic size={15} /> : <MicOff size={15} />}
       </button>
 
-      {/* Interim Text Tooltip overlay */}
       {isListening && interimText && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[200px] bg-[#202522] text-white text-xs p-2 rounded-lg pointer-events-none z-50 shadow-md">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[200px] bg-[#181817] text-white text-xs p-2 rounded pointer-events-none z-50 shadow-elevated">
           {interimText}
         </div>
       )}
 
-      {/* Error Toast */}
       {showToast && error && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[200px] bg-[#9E4343] text-white text-xs p-2 rounded-lg pointer-events-none z-50 shadow-md">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[200px] bg-[#E13B22] text-white text-xs p-2 rounded pointer-events-none z-50 shadow-elevated">
           {error}
         </div>
       )}

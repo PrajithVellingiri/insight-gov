@@ -8,15 +8,15 @@ import usePageTitle from '@/hooks/usePageTitle';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'All Determinations' },
-  { value: 'resolved', label: 'Resolved' },
+  { value: 'resolved', label: 'Approved' },
   { value: 'rejected', label: 'Rejected' },
   { value: 'duplicate', label: 'Duplicate' },
 ];
 
 const STATUS_ICONS = {
-  resolved: <CheckCircle size={14} className="text-[#315C4A]" />,
-  rejected: <XCircle size={14} className="text-[#B91C1C]" />,
-  duplicate: <Copy size={14} className="text-[#C8A96B]" />,
+  resolved: <CheckCircle size={13} className="text-[#181817]" />,
+  rejected: <XCircle size={13} className="text-[#E13B22]" />,
+  duplicate: <Copy size={13} className="text-[#6F6F6A]" />,
 };
 
 export default function ResolutionHistory() {
@@ -29,29 +29,24 @@ export default function ResolutionHistory() {
   );
 
   return (
-    <div className="space-y-8 pb-16 max-w-6xl mx-auto">
+    <div className="space-y-8 pb-16">
       {/* Header */}
-      <div className="page-header">
+      <div className="border-b border-[#DDDCD7] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <span className="text-xs font-mono font-semibold uppercase tracking-widest text-[#78917F] block mb-1">
-            01 / ARCHIVE
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#F05A3C] block mb-2">
+            PERMANENT ARCHIVE
           </span>
-          <h1 className="text-3xl font-extrabold text-[#202522] tracking-tight flex items-center gap-2.5">
-            <History size={26} className="text-[#315C4A]" />
-            Resolution History
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-[#181817] uppercase tracking-tight">
+            RESOLUTION HISTORY
           </h1>
-          <p className="text-sm text-[#68716B] mt-1 max-w-xl leading-relaxed">
-            Permanent public record of concluded petitions and formal determinations for{' '}
-            <span className="font-semibold text-[#202522]">
-              {user?.department_name || 'your department'}
-            </span>
-            .
+          <p className="text-xs font-mono text-[#6F6F6A] mt-1 uppercase">
+            Concluded dockets for {user?.department_name || 'your department'}
           </p>
         </div>
       </div>
 
       {/* Filter Control Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-3 rounded-2xl bg-white border border-[#E5E5DE] shadow-card">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-3 rounded-md bg-white border border-[#DDDCD7]">
         <div className="flex flex-wrap gap-2">
           {STATUS_OPTIONS.map(({ value, label }) => {
             const count = value ? petitions.filter(p => p.status === value).length : petitions.length;
@@ -60,15 +55,15 @@ export default function ResolutionHistory() {
               <button
                 key={value}
                 onClick={() => setStatusFilter(value)}
-                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-medium border transition-colors ${
+                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded text-xs font-semibold uppercase tracking-wider transition-colors ${
                   isSelected
-                    ? 'bg-[#EFF4F0] text-[#315C4A] border-[#D4E2D8] font-semibold'
-                    : 'bg-white text-[#68716B] border-[#E5E5DE] hover:bg-[#F8F7F2]'
+                    ? 'bg-[#181817] text-white'
+                    : 'bg-[#F7F6F2] text-[#6F6F6A] border border-[#DDDCD7] hover:text-[#181817]'
                 }`}
               >
                 {STATUS_ICONS[value]}
                 <span>{label}</span>
-                <span className="px-1.5 py-0.2 rounded bg-[#F0EFEA] text-[10px] font-mono">
+                <span className={`px-1.5 py-0.2 rounded text-[10px] font-mono ${isSelected ? 'bg-[#292927] text-white' : 'bg-white text-[#181817]'}`}>
                   {count}
                 </span>
               </button>
@@ -79,7 +74,7 @@ export default function ResolutionHistory() {
         {statusFilter && (
           <button
             onClick={() => setStatusFilter('')}
-            className="text-xs text-[#315C4A] hover:underline font-medium px-2"
+            className="text-xs font-mono text-[#181817] hover:text-[#F05A3C] font-bold uppercase transition-colors"
           >
             Reset filter
           </button>
@@ -89,13 +84,13 @@ export default function ResolutionHistory() {
       {/* Content */}
       {isLoading && (
         <div className="flex justify-center items-center py-24">
-          <Loader2 size={32} className="animate-spin text-[#315C4A]" />
+          <Loader2 size={28} className="animate-spin text-[#181817]" />
         </div>
       )}
 
       {isError && !isLoading && (
-        <div className="rounded-2xl border border-[#FBD5D5] bg-[#FDF2F2] p-8 text-center text-[#B91C1C]">
-          Failed to load historical petition archive.
+        <div className="rounded-md border border-[#E13B22]/30 bg-[#FFF0EB] p-6 text-center text-[#E13B22] font-mono text-xs">
+          FAILED TO LOAD HISTORICAL ARCHIVE.
         </div>
       )}
 
@@ -104,8 +99,8 @@ export default function ResolutionHistory() {
           title="No Archive Records"
           description={
             statusFilter
-              ? `No ${statusFilter} petitions found in the archive.`
-              : 'No resolved or finalized petitions have been recorded yet.'
+              ? `No ${statusFilter} records found in historical docket.`
+              : 'No resolved or finalized records recorded yet.'
           }
         />
       )}

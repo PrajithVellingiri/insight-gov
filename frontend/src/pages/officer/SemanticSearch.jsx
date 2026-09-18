@@ -41,68 +41,68 @@ export default function SemanticSearch() {
   };
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto pb-16">
+    <div className="space-y-8 pb-16 max-w-4xl mx-auto">
       {/* Header */}
-      <div>
-        <span className="text-xs font-mono font-semibold uppercase tracking-widest text-[#78917F] block mb-1">
-          01 / KNOWLEDGE DISCOVERY
+      <div className="border-b border-[#DDDCD7] pb-6">
+        <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#F05A3C] block mb-2">
+          KNOWLEDGE RETRIEVAL
         </span>
-        <h1 className="text-3xl font-extrabold text-[#202522] tracking-tight">
-          Semantic Case Search
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-[#181817] uppercase tracking-tight">
+          Semantic Search
         </h1>
-        <p className="text-sm text-[#68716B] mt-1 max-w-xl leading-relaxed">
-          Search the historical petition archive using natural language to discover related grievances, precedents, and jurisdictional trends.
+        <p className="text-xs font-mono text-[#6F6F6A] mt-1 uppercase">
+          Query the historical petition archive using natural language embeddings
         </p>
       </div>
 
       {/* Search Console */}
-      <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#E5E5DE] shadow-card">
+      <div className="bg-white rounded-md p-6 border border-[#DDDCD7] shadow-card">
         <form onSubmit={handleSearch} className="space-y-3">
           <div className="flex flex-col sm:flex-row gap-2.5">
             <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#68716B]" size={18} />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6F6F6A]" size={16} />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="e.g. 'repeated drainage overflow during monsoon' or 'transformer failures'"
-                className="w-full rounded-xl bg-white border border-[#E5E5DE] pl-10 pr-4 py-2.5 text-sm text-[#202522] placeholder:text-[#9EA5A0] focus:border-[#315C4A] focus:ring-1 focus:ring-[#315C4A] transition-all"
+                placeholder="e.g. 'drainage overflow during monsoon' or 'transformer issues'"
+                className="w-full rounded-md bg-white border border-[#DDDCD7] pl-10 pr-4 py-2.5 text-xs text-[#181817] placeholder:text-[#6F6F6A] focus:border-[#F05A3C] focus:ring-1 focus:ring-[#F05A3C] transition-all"
               />
             </div>
             <div className="flex items-center gap-2">
               <MicButton 
                 onTranscript={(text) => setQuery(prev => prev + (prev && !prev.endsWith(' ') ? ' ' : '') + text)} 
                 language={i18n.language}
-                className="bg-[#EFF4F0] text-[#315C4A] border border-[#D4E2D8] rounded-xl px-3 py-2.5 hover:bg-[#E2ECE6]" 
+                className="bg-[#F7F6F2] text-[#181817] border border-[#DDDCD7] rounded-md px-3 py-2.5 hover:border-[#181817]" 
               />
               <button
                 type="submit"
                 disabled={searchLoading || !query.trim()}
-                className="btn-primary py-2.5 px-6 text-sm disabled:opacity-50"
+                className="btn-primary py-2.5 px-6 text-xs font-bold uppercase tracking-wider disabled:opacity-50"
               >
                 {searchLoading ? (
                   <>
-                    <Loader2 size={16} className="animate-spin" />
+                    <Loader2 size={14} className="animate-spin" />
                     <span>Searching...</span>
                   </>
                 ) : (
                   <>
-                    <span>Search Archive</span>
-                    <ArrowRight size={15} />
+                    <span>Query Archive</span>
+                    <ArrowRight size={13} />
                   </>
                 )}
               </button>
             </div>
           </div>
-          <p className="text-[11px] text-[#68716B]">
-            Searches vector embeddings across petition descriptions, categories, and resolution notes.
+          <p className="text-[11px] font-mono text-[#6F6F6A]">
+            Vector cosine similarity across descriptions, department codes, and resolution logs.
           </p>
         </form>
       </div>
 
       {/* Error state */}
       {searchError && (
-        <div className="rounded-2xl border border-[#FBD5D5] bg-[#FDF2F2] p-4 text-xs text-[#B91C1C]">
+        <div className="rounded-md border border-[#E13B22]/30 bg-[#FFF0EB] p-4 text-xs text-[#E13B22] font-mono">
           {searchError}
         </div>
       )}
@@ -110,56 +110,56 @@ export default function SemanticSearch() {
       {/* Results */}
       {searchResults !== null && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-[#202522]">
-              Matches Found ({searchResults.length})
+          <div className="flex items-center justify-between pb-2 border-b border-[#DDDCD7]">
+            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-[#181817]">
+              VECTOR MATCHES FOUND ({searchResults.length})
             </h2>
             <button
               onClick={clearResults}
-              className="text-xs text-[#315C4A] hover:underline font-medium"
+              className="text-xs font-mono uppercase text-[#181817] hover:text-[#F05A3C] font-semibold"
             >
               Clear Results
             </button>
           </div>
 
           {searchResults.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-[#E5E5DE] p-10 text-center text-[#68716B] text-xs">
-              No semantic matches found for this query.
+            <div className="bg-white rounded-md border border-[#DDDCD7] p-10 text-center text-[#6F6F6A] text-xs font-mono">
+              NO SEMANTIC MATCHES IDENTIFIED.
             </div>
           ) : (
             <div className="space-y-3">
               {searchResults.map((item, idx) => (
                 <div
                   key={idx}
-                  className="bg-white rounded-2xl border border-[#E5E5DE] p-5 shadow-card hover:border-[#D4D4CA] transition-all"
+                  className="bg-white rounded-md border border-[#DDDCD7] p-5 shadow-card hover:border-[#181817] transition-colors"
                 >
                   <div className="flex items-start justify-between gap-3 mb-2">
-                    <span className="font-mono text-xs font-semibold text-[#68716B]">
+                    <span className="font-mono text-xs font-bold text-[#181817]">
                       #{item.petition_id || item.id || idx + 1}
                     </span>
                     {item.similarity !== undefined && (
-                      <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded bg-[#EFF4F0] text-[#315C4A] border border-[#D4E2D8]">
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#FFF0EB] text-[#F05A3C] border border-[#F05A3C]/30">
                         {Math.round(item.similarity * 100)}% Match
                       </span>
                     )}
                   </div>
 
-                  <h3 className="text-sm font-bold text-[#202522] mb-1">
+                  <h3 className="text-sm font-bold text-[#181817] mb-1">
                     {item.title || item.petition_title || 'Untitled Record'}
                   </h3>
 
-                  <p className="text-xs text-[#68716B] leading-relaxed line-clamp-2 mb-3">
+                  <p className="text-xs text-[#6F6F6A] leading-relaxed line-clamp-2 mb-3">
                     {item.description || item.petition_description}
                   </p>
 
-                  <div className="flex items-center justify-between pt-3 border-t border-[#E5E5DE] text-[11px] text-[#68716B]">
+                  <div className="flex items-center justify-between pt-3 border-t border-[#DDDCD7] text-[11px] font-mono text-[#6F6F6A]">
                     <span>{item.department_name || item.department || 'General'}</span>
                     <Link
                       to={`/officer/petitions/${item.petition_id || item.id}`}
-                      className="inline-flex items-center gap-1 font-semibold text-[#315C4A] hover:underline"
+                      className="inline-flex items-center gap-1 font-bold uppercase text-[#181817] hover:text-[#F05A3C] transition-colors"
                     >
-                      <span>Inspect Case File</span>
-                      <ArrowRight size={12} />
+                      <span>Review Docket</span>
+                      <ArrowRight size={11} />
                     </Link>
                   </div>
                 </div>

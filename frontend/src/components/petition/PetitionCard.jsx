@@ -3,20 +3,20 @@ import { MapPin, Calendar, ArrowRight } from 'lucide-react';
 import { formatDateShort, truncate } from '@/lib/utils';
 
 const statusDotColors = {
-  pending:      'text-[#C58B5B]',
-  analysed:     'text-[#315C4A]',
-  under_review: 'text-[#C58B5B]',
-  resolved:     'text-[#315C4A]',
-  rejected:     'text-[#B91C1C]',
-  duplicate:    'text-[#C8A96B]',
-  withdrawn:    'text-[#68716B]',
+  pending:      'text-[#F05A3C]',
+  analysed:     'text-[#F05A3C]',
+  under_review: 'text-[#F05A3C]',
+  resolved:     'text-[#181817]',
+  rejected:     'text-[#E13B22]',
+  duplicate:    'text-[#6F6F6A]',
+  withdrawn:    'text-[#6F6F6A]',
 };
 
 const statusLabels = {
-  pending:      'Pending Review',
+  pending:      'Pending',
   analysed:     'Triaged',
-  under_review: 'Under Review',
-  resolved:     'Resolved',
+  under_review: 'Review',
+  resolved:     'Approved',
   rejected:     'Rejected',
   duplicate:    'Duplicate',
   withdrawn:    'Withdrawn',
@@ -25,64 +25,62 @@ const statusLabels = {
 export default function PetitionCard({ petition, role = 'citizen' }) {
   const { id, title, description, location, status, priority, category, created_at, ai_analysis } = petition;
   const pri = (priority || ai_analysis?.priority || 'medium').toLowerCase();
-  const dotColor = statusDotColors[status] || 'text-[#68716B]';
+  const dotColor = statusDotColors[status] || 'text-[#6F6F6A]';
   const label = statusLabels[status] || status;
   const basePath = role === 'officer' ? '/officer' : '/citizen';
 
   return (
     <Link to={`${basePath}/petitions/${id}`} className="block no-underline group">
-      <div className="bg-white rounded-2xl border border-[#E5E5DE] p-6 h-full flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:border-[#D4D4CA] shadow-card hover:shadow-card-hover">
+      <div className="bg-white rounded-md border border-[#DDDCD7] p-5 h-full flex flex-col justify-between transition-colors hover:border-[#181817]">
         <div>
-          <div className="flex items-start justify-between gap-3 mb-2">
-            <span className="text-[11px] font-mono font-semibold text-[#68716B]">
+          <div className="flex items-center justify-between gap-3 mb-2.5">
+            <span className="text-xs font-mono font-bold text-[#181817]">
               {petition.petition_number}
             </span>
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#202522]">
-              <span className={`text-sm leading-none ${dotColor}`}>●</span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#181817]">
+              <span className={`text-base leading-none ${dotColor}`}>●</span>
               <span>{label}</span>
             </span>
           </div>
 
-          <h3 className="text-base font-bold text-[#202522] leading-snug group-hover:text-[#315C4A] transition-colors mb-2">
+          <h3 className="text-sm font-bold text-[#181817] leading-snug group-hover:text-[#F05A3C] transition-colors mb-2">
             {title}
           </h3>
 
-          <p className="text-xs text-[#68716B] leading-relaxed line-clamp-2 mb-4">
+          <p className="text-xs text-[#6F6F6A] leading-relaxed line-clamp-2 mb-4">
             {truncate(description, 120)}
           </p>
         </div>
 
         <div>
-          <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-[#E5E5DE]">
+          <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-[#DDDCD7]">
             <span
-              className={`text-[11px] font-medium px-2 py-0.5 rounded ${
+              className={`text-[10px] font-mono font-semibold uppercase px-2 py-0.5 rounded ${
                 pri === 'critical'
-                  ? 'bg-[#FDF2F2] text-[#B91C1C]'
+                  ? 'bg-[#FFF0EB] text-[#E13B22] border border-[#E13B22]/30'
                   : pri === 'high'
-                  ? 'bg-[#FDF6F0] text-[#C58B5B]'
-                  : pri === 'low'
-                  ? 'bg-[#EFF4F0] text-[#315C4A]'
-                  : 'bg-[#FAF6ED] text-[#9A7B38]'
+                  ? 'bg-[#FFF0EB] text-[#F05A3C] border border-[#F05A3C]/30'
+                  : 'bg-[#EFEFEA] text-[#181817]'
               }`}
             >
-              {pri.charAt(0).toUpperCase() + pri.slice(1)} Priority
+              {pri}
             </span>
 
             {(category || ai_analysis?.category) && (
-              <span className="text-[11px] text-[#315C4A] bg-[#EFF4F0] px-2 py-0.5 rounded border border-[#D4E2D8]">
+              <span className="text-[10px] font-mono uppercase text-[#6F6F6A] bg-[#F7F6F2] px-2 py-0.5 rounded border border-[#DDDCD7]">
                 {category || ai_analysis?.category}
               </span>
             )}
           </div>
 
-          <div className="flex items-center justify-between text-[11px] text-[#68716B] pt-3 mt-3 border-t border-[#E5E5DE]/60">
+          <div className="flex items-center justify-between text-[10px] font-mono text-[#6F6F6A] pt-3 mt-3 border-t border-[#DDDCD7]/60">
             {location ? (
               <span className="flex items-center gap-1 max-w-[150px] truncate" title={location}>
-                <MapPin size={11} className="text-[#68716B] flex-shrink-0" /> {truncate(location, 20)}
+                <MapPin size={10} className="text-[#F05A3C] flex-shrink-0" /> {truncate(location, 20)}
               </span>
             ) : <span />}
-            <span className="flex items-center gap-1 font-mono">
-              <Calendar size={11} className="text-[#68716B] flex-shrink-0" /> {formatDateShort(created_at)}
+            <span className="flex items-center gap-1">
+              <Calendar size={10} className="text-[#6F6F6A] flex-shrink-0" /> {formatDateShort(created_at)}
             </span>
           </div>
         </div>

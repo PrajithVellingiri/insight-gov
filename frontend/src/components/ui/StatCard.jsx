@@ -2,7 +2,7 @@
 import { cn } from '@/lib/utils';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
-function useCounter(endValue, duration = 900) {
+function useCounter(endValue, duration = 800) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
@@ -36,114 +36,67 @@ function useCounter(endValue, duration = 900) {
 }
 
 /**
- * Minimalist GovTech KPI Card.
- * Clean, flat, spacious, with subtle editorial variations.
+ * Bold Typographic Metric Component.
+ * Minimalist, high contrast, clean horizontal divider.
  */
 export default function StatCard({
   label,
   value = 0,
   Icon,
-  color, // optional override
-  variant = 'default', // 'applications' | 'pending' | 'resolved' | 'departments' | 'default'
+  color,
+  variant = 'default',
   trend,
-  trendType = 'positive', // positive | negative | neutral
+  trendType = 'positive',
   description,
   className = '',
 }) {
   const animatedValue = useCounter(value);
 
-  // Determine variant styling based on explicit prop or label text
-  let styleVariant = variant;
-  const lowerLabel = (label || '').toLowerCase();
-  if (styleVariant === 'default') {
-    if (lowerLabel.includes('pending') || lowerLabel.includes('review') || lowerLabel.includes('critical')) {
-      styleVariant = 'pending';
-    } else if (lowerLabel.includes('resolved') || lowerLabel.includes('approved') || lowerLabel.includes('closed')) {
-      styleVariant = 'resolved';
-    } else if (lowerLabel.includes('department') || lowerLabel.includes('ministr') || lowerLabel.includes('rate')) {
-      styleVariant = 'departments';
-    } else {
-      styleVariant = 'applications';
-    }
-  }
-
-  // Styles per variant
-  const variantClasses = {
-    applications: {
-      card: 'bg-white border-[#E5E5DE]',
-      iconBox: 'bg-[#EFF4F0] text-[#315C4A]',
-      accentText: 'text-[#315C4A]',
-      badge: 'bg-[#EFF4F0] text-[#315C4A]',
-    },
-    pending: {
-      card: 'bg-[#FBF9F5] border-[#EFE8DC]',
-      iconBox: 'bg-[#FDF6F0] text-[#C58B5B]',
-      accentText: 'text-[#C58B5B]',
-      badge: 'bg-[#FDF6F0] text-[#C58B5B]',
-    },
-    resolved: {
-      card: 'bg-[#F2F6F3] border-[#DFE9E3]',
-      iconBox: 'bg-[#E2ECE6] text-[#315C4A]',
-      accentText: 'text-[#315C4A]',
-      badge: 'bg-[#E2ECE6] text-[#315C4A]',
-    },
-    departments: {
-      card: 'bg-white border-[#E5E5DE]',
-      iconBox: 'bg-[#FAF6ED] text-[#9A7B38]',
-      accentText: 'text-[#9A7B38]',
-      badge: 'bg-[#FAF6ED] text-[#9A7B38]',
-    },
-  }[styleVariant] || {
-    card: 'bg-white border-[#E5E5DE]',
-    iconBox: 'bg-[#EFF4F0] text-[#315C4A]',
-    accentText: 'text-[#315C4A]',
-    badge: 'bg-[#EFF4F0] text-[#315C4A]',
-  };
-
   return (
     <div
       className={cn(
-        'rounded-2xl border p-6 transition-all duration-200 shadow-card hover:shadow-card-hover hover:-translate-y-0.5',
-        variantClasses.card,
+        'bg-white border border-[#DDDCD7] rounded-lg p-5 transition-colors relative group',
         className
       )}
     >
-      <div className="flex items-center justify-between gap-3 mb-4">
-        <span className="text-xs font-semibold uppercase tracking-wider text-[#68716B]">
+      {/* Upper Label Row */}
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#6F6F6A]">
           {label}
         </span>
         {Icon && (
-          <div className={cn('p-2 rounded-lg transition-colors', variantClasses.iconBox)}>
-            <Icon size={18} strokeWidth={1.8} />
+          <div className="text-[#181817] group-hover:text-[#F05A3C] transition-colors">
+            <Icon size={16} strokeWidth={1.8} />
           </div>
         )}
       </div>
 
-      <div className="flex items-baseline justify-between gap-2">
-        <div className="text-3xl lg:text-4xl font-bold font-sans tracking-tight text-[#202522]">
+      {/* Main Metric Value */}
+      <div className="flex items-baseline justify-between gap-3">
+        <div className="text-3xl sm:text-4xl font-extrabold text-[#181817] tracking-tight font-sans">
           {typeof value === 'number' ? animatedValue.toLocaleString() : value}
         </div>
 
         {trend && (
           <span
             className={cn(
-              'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium',
-              trendType === 'positive' && 'bg-[#EFF4F0] text-[#315C4A]',
-              trendType === 'negative' && 'bg-[#FDF2F2] text-[#B91C1C]',
-              trendType === 'neutral' && 'bg-[#F0EFEA] text-[#68716B]'
+              'inline-flex items-center gap-1 text-xs font-mono font-semibold',
+              trendType === 'positive' && 'text-[#181817]',
+              trendType === 'negative' && 'text-[#E13B22]',
+              trendType === 'neutral' && 'text-[#6F6F6A]'
             )}
           >
-            {trendType === 'positive' && <TrendingUp size={12} />}
+            {trendType === 'positive' && <TrendingUp size={12} className="text-[#F05A3C]" />}
             {trendType === 'negative' && <TrendingDown size={12} />}
-            {trend}
+            <span className="text-[#F05A3C]">{trend}</span>
           </span>
         )}
       </div>
 
       {description && (
-        <p className="mt-2 text-xs text-[#68716B] leading-relaxed">
+        <div className="mt-3 pt-2.5 border-t border-[#DDDCD7]/70 text-[11px] text-[#6F6F6A] leading-relaxed">
           {description}
-        </p>
+        </div>
       )}
     </div>
   );

@@ -2,12 +2,12 @@
 import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOfficers, createOfficer, getDepartments, deleteOfficer } from '@/api/admin.api';
-import { Users, Plus, Loader2, Trash2, AlertTriangle, X } from 'lucide-react';
+import { Plus, Loader2, Trash2, AlertTriangle, X } from 'lucide-react';
 import { formatDateShort } from '@/lib/utils';
 import usePageTitle from '@/hooks/usePageTitle';
 
 export default function OfficerManagement() {
-  usePageTitle('Officers');
+  usePageTitle('Officers Directory');
   const queryClient = useQueryClient();
   const { data: officers = [], isLoading: offLoading } = useQuery({ queryKey: ['admin', 'officers'], queryFn: () => getOfficers() });
   const { data: depts = [], isLoading: deptLoading } = useQuery({ queryKey: ['admin', 'departments'], queryFn: () => getDepartments() });
@@ -52,127 +52,138 @@ export default function OfficerManagement() {
   };
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto pb-16">
-      <div className="page-header">
+    <div className="space-y-8 pb-16">
+      {/* Header */}
+      <div className="border-b border-[#DDDCD7] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <span className="text-xs font-mono font-semibold uppercase tracking-widest text-[#78917F] block mb-1">
-            01 / ADMINISTRATION
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#F05A3C] block mb-2">
+            ADMINISTRATION DIRECTORY
           </span>
-          <h1 className="text-3xl font-extrabold text-[#202522] tracking-tight flex items-center gap-2.5">
-            <Users size={26} className="text-[#315C4A]" />
-            Department Review Officers
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-[#181817] uppercase tracking-tight">
+            OFFICERS
           </h1>
-          <p className="text-sm text-[#68716B] mt-1 max-w-xl leading-relaxed">
-            Manage authorized state officers, review account credentials, and assign ministerial jurisdictions.
+          <p className="text-xs font-mono text-[#6F6F6A] mt-1 uppercase">
+            {officers.length} personnel enrolled across state departments
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1 bg-white h-fit p-6 rounded-2xl border border-[#E5E5DE] shadow-card">
-          <h2 className="text-sm font-bold text-[#202522] flex items-center gap-2 mb-4 uppercase tracking-wider">
-            <Plus size={16} className="text-[#315C4A]" /> Enroll Officer
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Enroll Officer Form (4 cols) */}
+        <div className="lg:col-span-4 bg-white p-6 rounded-md border border-[#DDDCD7] shadow-card">
+          <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-[#181817] flex items-center gap-2 mb-4 border-b border-[#DDDCD7] pb-2">
+            <Plus size={14} className="text-[#F05A3C]" /> Enroll Officer
           </h2>
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
-              <label className="form-label">Full Name</label>
-              <input type="text" className="form-input" placeholder="e.g. Officer Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
+              <label className="form-label">Full Name *</label>
+              <input type="text" className="form-input" placeholder="e.g. A. Kumar" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
             </div>
             <div>
-              <label className="form-label">Official Email</label>
+              <label className="form-label">Official Email *</label>
               <input type="email" className="form-input" placeholder="officer@tn.gov.in" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
             </div>
             <div>
-              <label className="form-label">Temporary Password</label>
+              <label className="form-label">Temporary Password *</label>
               <input type="password" className="form-input" placeholder="••••••••" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required />
             </div>
             <div>
-              <label className="form-label">Department Jurisdiction</label>
-              <select className="form-input" value={form.department_id} onChange={e => setForm({...form, department_id: e.target.value})}>
+              <label className="form-label">Department Jurisdiction *</label>
+              <select className="form-input" value={form.department_id} onChange={e => setForm({...form, department_id: e.target.value})} required>
                 <option value="">Select Ministry...</option>
                 {depts.map(d => <option key={d.id} value={d.id}>{d.department_code ? `${d.department_code} — ` : ''}{d.name}</option>)}
               </select>
             </div>
             {error && (
-              <div className="text-xs text-[#B91C1C] bg-[#FDF2F2] border border-[#FBD5D5] p-2.5 rounded-xl">
+              <div className="text-xs text-[#E13B22] bg-[#FFF0EB] border border-[#F05A3C]/30 p-2.5 rounded font-mono">
                 {error}
               </div>
             )}
-            <button type="submit" disabled={isPending} className="btn-primary w-full justify-center">
-              {isPending ? <Loader2 size={16} className="animate-spin" /> : 'Create Officer Account'}
+            <button type="submit" disabled={isPending} className="btn-primary w-full py-2.5 text-xs font-bold uppercase">
+              {isPending ? <Loader2 size={14} className="animate-spin" /> : 'Create Officer Account'}
             </button>
           </form>
         </div>
 
-        <div className="md:col-span-2 bg-white rounded-2xl border border-[#E5E5DE] shadow-card overflow-hidden h-fit">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-[#F8F7F2] border-b border-[#E5E5DE]">
+        {/* Minimalist Officer Directory (8 cols) */}
+        <div className="lg:col-span-8 bg-white rounded-md border border-[#DDDCD7] overflow-hidden">
+          <table className="w-full text-xs text-left">
+            <thead className="bg-[#F7F6F2] border-b border-[#DDDCD7]">
               <tr>
-                <th className="px-5 py-3.5 text-xs font-semibold text-[#68716B] uppercase tracking-wider">Officer</th>
-                <th className="px-5 py-3.5 text-xs font-semibold text-[#68716B] uppercase tracking-wider">Ministry</th>
-                <th className="px-5 py-3.5 text-xs font-semibold text-[#68716B] uppercase tracking-wider">Enrolled</th>
-                <th className="px-5 py-3.5 text-xs font-semibold text-[#68716B] uppercase tracking-wider text-right">Actions</th>
+                <th className="px-5 py-3 font-mono font-bold text-[#6F6F6A] uppercase tracking-wider">NAME</th>
+                <th className="px-5 py-3 font-bold text-[#6F6F6A] uppercase tracking-wider">DEPARTMENT</th>
+                <th className="px-5 py-3 font-bold text-[#6F6F6A] uppercase tracking-wider">STATUS</th>
+                <th className="px-5 py-3 font-bold text-[#6F6F6A] uppercase tracking-wider text-right">ACTION</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5E5DE]">
+            <tbody className="divide-y divide-[#DDDCD7]">
               {(offLoading || deptLoading) ? (
-                <tr><td colSpan={4} className="text-center py-10 text-[#68716B]"><Loader2 size={18} className="animate-spin inline mr-2 text-[#315C4A]" />Loading personnel...</td></tr>
+                <tr><td colSpan={4} className="text-center py-10 text-[#6F6F6A] font-mono"><Loader2 size={16} className="animate-spin inline mr-2 text-[#181817]" />LOADING PERSONNEL...</td></tr>
               ) : officers.length === 0 ? (
-                <tr><td colSpan={4} className="text-center py-10 text-[#68716B]">No officers enrolled.</td></tr>
+                <tr><td colSpan={4} className="text-center py-10 text-[#6F6F6A] font-mono">NO OFFICERS ENROLLED.</td></tr>
               ) : (
-                officers.map((o) => (
-                  <tr key={o.id} className="hover:bg-[#F8F7F2]/60 transition-colors">
-                    <td className="px-5 py-3.5">
-                      <div className="font-medium text-[#202522]">{o.name}</div>
-                      <div className="text-xs text-[#68716B] mt-0.5">{o.email}</div>
-                    </td>
-                    <td className="px-5 py-3.5 text-[#202522] text-xs">
-                      {(() => {
-                        const dept = depts.find(d => d.id === o.department_id);
-                        if (!dept) return <span className="text-[#68716B]">Unassigned</span>;
-                        return (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#EFF4F0] text-[#315C4A] border border-[#D4E2D8]">
-                            {dept.name}
-                          </span>
-                        );
-                      })()}
-                    </td>
-                    <td className="px-5 py-3.5 text-[#68716B] text-xs font-mono">{formatDateShort(o.created_at)}</td>
-                    <td className="px-5 py-3.5 text-right">
-                      <button 
-                        onClick={() => setDeleteId(o)} 
-                        className="text-[#68716B] hover:text-[#B91C1C] p-1 rounded transition-colors"
-                        title="Remove Officer"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                officers.map((o) => {
+                  const dept = depts.find(d => d.id === o.department_id);
+                  const initials = o.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'OF';
+                  return (
+                    <tr key={o.id} className="hover:bg-[#FFF0EB]/20 transition-colors">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-7 h-7 rounded-full bg-[#181817] text-white flex items-center justify-center font-mono font-bold text-[10px]">
+                            {initials}
+                          </div>
+                          <div>
+                            <div className="font-bold text-[#181817]">{o.name}</div>
+                            <div className="text-[10px] font-mono text-[#6F6F6A] mt-0.5">{o.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3.5 text-[#181817] font-medium">
+                        {dept ? dept.name : <span className="text-[#6F6F6A]">Unassigned</span>}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <span className="inline-flex items-center gap-1.5 font-semibold text-[#181817]">
+                          <span className="text-base text-[#F05A3C] leading-none">●</span>
+                          <span>Active</span>
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 text-right">
+                        <button 
+                          onClick={() => setDeleteId(o)} 
+                          className="text-[#6F6F6A] hover:text-[#E13B22] p-1 rounded transition-colors"
+                          title="Revoke Officer"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
 
+      {/* Revoke Modal */}
       {deleteId && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#202522]/30 backdrop-blur-xs p-4">
-          <div className="bg-white border border-[#E5E5DE] rounded-2xl shadow-dropdown w-full max-w-sm p-6 space-y-4 animate-fade-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#181817]/60 backdrop-blur-xs p-4">
+          <div className="bg-white border border-[#DDDCD7] rounded-md shadow-elevated w-full max-w-sm p-6 space-y-4 animate-fade-in">
             <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2 text-[#C58B5B]">
-                <AlertTriangle size={18} />
-                <h2 className="text-base font-bold text-[#202522]">Revoke Officer</h2>
+              <div className="flex items-center gap-2 text-[#E13B22]">
+                <AlertTriangle size={16} />
+                <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-[#181817]">Revoke Access</h2>
               </div>
-              <button onClick={() => { setDeleteId(null); setDeleteError(''); }} className="text-[#68716B] hover:text-[#202522] rounded-lg p-1">
-                <X size={16} />
+              <button onClick={() => { setDeleteId(null); setDeleteError(''); }} className="text-[#6F6F6A] hover:text-[#181817]">
+                <X size={15} />
               </button>
             </div>
             
-            <p className="text-xs text-[#68716B]">
-              Are you sure you want to remove <strong className="text-[#202522]">{deleteId.name}</strong>? Their portal access will be revoked.
+            <p className="text-xs text-[#6F6F6A]">
+              Revoke portal access for <strong className="text-[#181817]">{deleteId.name}</strong>?
             </p>
             {deleteError && (
-              <div className="text-xs text-[#B91C1C] bg-[#FDF2F2] p-2.5 rounded-xl border border-[#FBD5D5]">
+              <div className="text-xs text-[#E13B22] bg-[#FFF0EB] p-2 rounded border border-[#F05A3C]/30 font-mono">
                 {deleteError}
               </div>
             )}
@@ -182,9 +193,9 @@ export default function OfficerManagement() {
               <button 
                 onClick={handleDelete} 
                 disabled={isDeleting}
-                className="btn-danger flex-1 text-xs"
+                className="btn-primary bg-[#E13B22] hover:bg-[#b91c1c] flex-1 text-xs"
               >
-                {isDeleting ? <Loader2 size={14} className="animate-spin" /> : 'Revoke'}
+                {isDeleting ? <Loader2 size={13} className="animate-spin" /> : 'Revoke'}
               </button>
             </div>
           </div>

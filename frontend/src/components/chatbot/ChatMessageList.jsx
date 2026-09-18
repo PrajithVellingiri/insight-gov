@@ -2,10 +2,10 @@
 import ChatBubble from './ChatBubble';
 
 const SUGGESTED_PROMPTS = [
-  'How do I submit a petition?',
+  'How do I submit an application?',
   'What does "Under Review" mean?',
-  'Which department handles road issues?',
-  'How does duplicate detection work?',
+  'Which department handles road infrastructure?',
+  'How does duplicate cluster detection work?',
 ];
 
 export default function ChatMessageList({ messages, onSend, onFeedback, isStreaming }) {
@@ -32,7 +32,7 @@ export default function ChatMessageList({ messages, onSend, onFeedback, isStream
 
       {showSuggestions && (
         <div className="pt-3 pb-1">
-          <p className="text-[11px] font-mono uppercase tracking-wider text-[#68716B] text-center mb-2.5">
+          <p className="text-[10px] font-mono uppercase tracking-wider text-[#6F6F6A] text-center mb-2.5">
             Suggested Inquiries
           </p>
           <div className="flex flex-wrap gap-2 justify-center">
@@ -40,7 +40,7 @@ export default function ChatMessageList({ messages, onSend, onFeedback, isStream
               <button
                 key={prompt}
                 onClick={() => onSend && onSend(prompt)}
-                className="text-xs bg-white text-[#202522] border border-[#E5E5DE] rounded-full px-3 py-1.5 hover:border-[#315C4A] hover:bg-[#EFF4F0] hover:text-[#315C4A] transition-all text-left shadow-xs"
+                className="text-xs font-mono bg-white text-[#181817] border border-[#DDDCD7] rounded px-3 py-1 hover:border-[#F05A3C] hover:text-[#F05A3C] transition-all text-left"
               >
                 {prompt}
               </button>

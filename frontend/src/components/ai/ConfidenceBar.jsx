@@ -8,26 +8,26 @@ export default function ConfidenceBar({ confidence }) {
   return (
     <div className="space-y-1.5 pt-1">
       <div className="flex items-center justify-between text-xs">
-        <span className="font-mono text-[10px] uppercase tracking-wider font-bold text-[#68716B] flex items-center gap-1.5">
-          <Shield size={12} className="text-[#315C4A]" />
+        <span className="font-mono text-[10px] uppercase tracking-wider font-bold text-[#A3A39E] flex items-center gap-1.5">
+          <Shield size={11} className="text-[#F05A3C]" />
           Confidence Assessment
         </span>
-        <span className={cn('font-mono font-bold text-xs', isLow ? 'text-[#C58B5B]' : 'text-[#315C4A]')}>
+        <span className={cn('font-mono font-bold text-xs', isLow ? 'text-[#E13B22]' : 'text-[#F05A3C]')}>
           {pct}%
         </span>
       </div>
-      <div className="h-1.5 w-full rounded-full bg-white overflow-hidden border border-[#D4E2D8]">
+      <div className="h-1.5 w-full rounded-full bg-[#292927] overflow-hidden">
         <div
           className={cn(
             'h-full rounded-full transition-all duration-500',
-            isLow ? 'bg-[#C58B5B]' : 'bg-[#315C4A]'
+            isLow ? 'bg-[#E13B22]' : 'bg-[#F05A3C]'
           )}
           style={{ width: `${pct}%` }}
         />
       </div>
       {isLow && (
-        <p className="text-[11px] text-[#C58B5B] font-medium mt-1">
-          Low confidence score — manual officer assessment recommended
+        <p className="text-[10px] font-mono text-[#E13B22] mt-1">
+          Low confidence score — manual review recommended
         </p>
       )}
     </div>

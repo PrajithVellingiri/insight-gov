@@ -2,9 +2,8 @@
 import { cn } from '@/lib/utils';
 
 /**
- * Editorial minimalist Card component.
- * Replaced heavy 3D tilt/glare with a calm, flat, elegant surface
- * with subtle hover elevation and crisp border.
+ * Minimalist operational panel component.
+ * Flat, high-contrast, clean 1px border.
  */
 export default function Card3D({
   children,
@@ -16,7 +15,7 @@ export default function Card3D({
     <div
       onClick={onClick}
       className={cn(
-        'bg-white rounded-2xl border border-[#E5E5DE] p-6 transition-all duration-200 shadow-card hover:shadow-card-hover hover:border-[#D4D4CA] text-[#202522]',
+        'bg-white rounded-lg border border-[#DDDCD7] p-6 text-[#181817] shadow-card transition-colors',
         className
       )}
       {...props}

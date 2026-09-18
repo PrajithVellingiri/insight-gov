@@ -3,33 +3,31 @@ import { getAnalytics } from '@/api/analytics.api';
 import PetitionsByCategory from '@/components/charts/PetitionsByCategory';
 import PetitionsByStatus from '@/components/charts/PetitionsByStatus';
 import PetitionsOverTime from '@/components/charts/PetitionsOverTime';
-import StatCard from '@/components/ui/StatCard';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { FileText, Users, Building2, CheckCircle } from 'lucide-react';
 import usePageTitle from '@/hooks/usePageTitle';
 import { useTranslation } from 'react-i18next';
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
-  usePageTitle(t('admin.welcome', 'Executive Command Overview'));
+  usePageTitle('Executive Operations Overview');
 
   const { data, isLoading } = useQuery({ queryKey: ['analytics'], queryFn: getAnalytics });
 
   if (isLoading) {
     return (
-      <div className="space-y-8 pb-16 max-w-6xl mx-auto">
+      <div className="space-y-8 pb-16">
         <div className="space-y-2">
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-4 w-96" />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 py-4 border-b border-[#DDDCD7]">
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-28 rounded-2xl" />
+            <Skeleton key={i} className="h-20 rounded" />
           ))}
         </div>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <Skeleton className="h-80 xl:col-span-2 rounded-2xl" />
-          <Skeleton className="h-80 rounded-2xl" />
+          <Skeleton className="h-80 xl:col-span-2 rounded" />
+          <Skeleton className="h-80 rounded" />
         </div>
       </div>
     );
@@ -39,92 +37,106 @@ export default function AdminDashboard() {
   const charts = data?.charts || {};
 
   return (
-    <div className="space-y-10 pb-16 max-w-6xl mx-auto">
-      {/* Executive Command Header */}
-      <div className="page-header">
-        <div>
-          <span className="text-xs font-mono font-semibold uppercase tracking-widest text-[#78917F] block mb-1">
-            01 / EXECUTIVE REPORT
+    <div className="space-y-10 pb-16">
+      {/* Header */}
+      <div className="border-b border-[#DDDCD7] pb-6">
+        <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#F05A3C] block mb-2">
+          EXECUTIVE COMMAND
+        </span>
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-[#181817] uppercase tracking-tight">
+          Governance Operations
+        </h1>
+        <p className="text-xs sm:text-sm text-[#6F6F6A] mt-1 max-w-xl leading-relaxed">
+          Statewide petition intake velocity, departmental resolution performance, and active administrative workloads.
+        </p>
+      </div>
+
+      {/* Typographic Metrics Banner (Thin Horizontal Rules) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 py-4 border-b border-[#DDDCD7]">
+        <div className="space-y-1">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6F6F6A]">
+            TOTAL APPLICATIONS
           </span>
-          <h1 className="text-3xl font-extrabold text-[#202522] tracking-tight">
-            Governance Overview
-          </h1>
-          <p className="text-sm text-[#68716B] mt-1.5 max-w-xl leading-relaxed">
-            Statewide petition intake velocity, departmental resolution performance, and active administrative workloads.
-          </p>
+          <div className="text-4xl sm:text-5xl font-extrabold text-[#181817] font-mono">
+            {(stats.total_petitions || 0).toLocaleString()}
+          </div>
+          <p className="text-[11px] text-[#6F6F6A]">Total citizen grievance records</p>
+        </div>
+
+        <div className="space-y-1 border-l border-[#DDDCD7] pl-6">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#F05A3C]">
+            RESOLVED CASES
+          </span>
+          <div className="text-4xl sm:text-5xl font-extrabold text-[#F05A3C] font-mono">
+            {(stats.resolved_petitions || 0).toLocaleString()}
+          </div>
+          <p className="text-[11px] text-[#6F6F6A]">Concluded by departments</p>
+        </div>
+
+        <div className="space-y-1 border-l border-[#DDDCD7] pl-6">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6F6F6A]">
+            ASSIGNED OFFICERS
+          </span>
+          <div className="text-4xl sm:text-5xl font-extrabold text-[#181817] font-mono">
+            {(stats.active_officers || 0).toLocaleString()}
+          </div>
+          <p className="text-[11px] text-[#6F6F6A]">Ministerial triage personnel</p>
+        </div>
+
+        <div className="space-y-1 border-l border-[#DDDCD7] pl-6">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6F6F6A]">
+            CONNECTED MINISTRIES
+          </span>
+          <div className="text-4xl sm:text-5xl font-extrabold text-[#181817] font-mono">
+            {(stats.total_departments || 0).toLocaleString()}
+          </div>
+          <p className="text-[11px] text-[#6F6F6A]">Administrative queues active</p>
         </div>
       </div>
 
-      {/* Differentiated KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <StatCard
-          label={t('admin.total_petitions', 'Total Applications')}
-          value={stats.total_petitions || 0}
-          Icon={FileText}
-          variant="applications"
-          description="Total citizen grievance records"
-        />
-        <StatCard
-          label={t('status.resolved', 'Resolved Cases')}
-          value={stats.resolved_petitions || 0}
-          Icon={CheckCircle}
-          variant="resolved"
-          description="Formally concluded by departments"
-        />
-        <StatCard
-          label={t('admin.active_officers', 'Assigned Officers')}
-          value={stats.active_officers || 0}
-          Icon={Users}
-          variant="departments"
-          description="Active ministerial triage officers"
-        />
-        <StatCard
-          label={t('admin.departments', 'Connected Ministries')}
-          value={stats.total_departments || 0}
-          Icon={Building2}
-          variant="pending"
-          description="State departments in network"
-        />
-      </div>
-
-      {/* Analytical Charts Section */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E5E5DE] shadow-card xl:col-span-2">
-          <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#E5E5DE]">
+      {/* Analytical Charts Section (Technology Research Report layout) */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        {/* Main Intake Velocity Chart (2 cols) */}
+        <div className="bg-white rounded-md p-6 border border-[#DDDCD7] shadow-card xl:col-span-2">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#DDDCD7]">
             <div>
-              <span className="text-xs font-mono font-semibold uppercase tracking-wider text-[#68716B] block">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6F6F6A] block">
                 INTAKE VELOCITY
               </span>
-              <h2 className="text-sm font-bold text-[#202522]">Application Registration Trend</h2>
+              <h2 className="text-sm font-bold text-[#181817] uppercase tracking-wider font-mono">
+                Daily Application Registration
+              </h2>
             </div>
-            <span className="text-xs text-[#68716B] font-mono">Daily Volume</span>
+            <span className="text-xs text-[#F05A3C] font-mono font-semibold">● Live Telemetry</span>
           </div>
-          <PetitionsOverTime data={charts?.trend || []} />
+          <PetitionsOverTime data={charts.over_time || []} />
         </div>
-        
-        <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E5E5DE] shadow-card flex flex-col">
-          <div className="mb-4 pb-3 border-b border-[#E5E5DE]">
-            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-[#68716B] block">
-              BREAKDOWN
+
+        {/* Status Distribution (1 col) */}
+        <div className="bg-white rounded-md p-6 border border-[#DDDCD7] shadow-card">
+          <div className="mb-4 pb-3 border-b border-[#DDDCD7]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6F6F6A] block">
+              CASE STATUS
             </span>
-            <h2 className="text-sm font-bold text-[#202522]">Resolution Status Distribution</h2>
+            <h2 className="text-sm font-bold text-[#181817] uppercase tracking-wider font-mono">
+              Caseload Breakdown
+            </h2>
           </div>
-          <div className="flex-1 flex items-center justify-center">
-            <PetitionsByStatus data={charts?.by_status || []} />
-          </div>
+          <PetitionsByStatus data={charts.by_status || []} />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-        <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E5E5DE] shadow-card">
-          <div className="mb-6 pb-3 border-b border-[#E5E5DE]">
-            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-[#68716B] block">
-              JURISDICTION VOLUME
-            </span>
-            <h2 className="text-sm font-bold text-[#202522]">Applications by Civic Department</h2>
-          </div>
-          <PetitionsByCategory data={charts?.by_category || []} />
+      {/* Category Distribution Full Width */}
+      <div className="bg-white rounded-md p-6 border border-[#DDDCD7] shadow-card">
+        <div className="mb-4 pb-3 border-b border-[#DDDCD7]">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#F05A3C] block">
+            JURISDICTION VOLUME
+          </span>
+          <h2 className="text-sm font-bold text-[#181817] uppercase tracking-wider font-mono">
+            Department Allocation Analysis
+          </h2>
         </div>
+        <PetitionsByCategory data={charts.by_category || []} />
       </div>
     </div>
   );

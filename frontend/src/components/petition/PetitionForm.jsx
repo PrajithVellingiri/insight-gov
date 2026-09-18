@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+﻿import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubmitPetition } from '@/hooks/usePetitions';
 import { getDepartments } from '@/api/petitions.api';
@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Fix for default Leaflet marker icons in React
 import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -24,8 +23,6 @@ L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
   shadowUrl: markerShadow,
 });
-
-// ── Leaflet sub-components ──────────────────────────────────────────────────
 
 function LocationPicker({ position, setPosition, setLocationSource, setLocationAccuracy }) {
   useMapEvents({
@@ -39,7 +36,6 @@ function LocationPicker({ position, setPosition, setLocationSource, setLocationA
   return position ? <Marker position={position} /> : null;
 }
 
-/** Flies the map to a new position whenever `flyTo` changes. */
 function MapController({ flyTo }) {
   const map = useMap();
   useEffect(() => {
@@ -50,12 +46,9 @@ function MapController({ flyTo }) {
   return null;
 }
 
-// ── Allowed image types and limits ─────────────────────────────────────────
 const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const MAX_FILES = 5;
-
-// ── Main component ──────────────────────────────────────────────────────────
 
 export default function PetitionForm() {
   const { t, i18n } = useTranslation();
@@ -64,33 +57,28 @@ export default function PetitionForm() {
 
   const [form, setForm] = useState({ title: '', description: '', location: '', citizen_department_id: '' });
   const [departments, setDepartments] = useState([]);
-  const [position, setPosition] = useState(null);   // { lat, lng }
+  const [position, setPosition] = useState(null);
   const [locationSource, setLocationSource] = useState('manual');
   const [locationAccuracy, setLocationAccuracy] = useState(null);
-  const [flyTo, setFlyTo] = useState(null);          // triggers MapController
+  const [flyTo, setFlyTo] = useState(null);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(null);
 
-  // GPS state
   const [gpsLoading, setGpsLoading] = useState(false);
   const [gpsError, setGpsError] = useState(null);
 
-  // Image upload state
-  const [images, setImages] = useState([]);          // File[]
-  const [previews, setPreviews] = useState([]);      // object URL strings
+  const [images, setImages] = useState([]);
+  const [previews, setPreviews] = useState([]);
   const fileInputRef = useRef(null);
 
-  // Clean up object URLs on unmount / image change
   useEffect(() => {
     return () => previews.forEach(URL.revokeObjectURL);
   }, [previews]);
 
-  // Load departments
   useEffect(() => {
     getDepartments().then(setDepartments).catch(console.error);
   }, []);
 
-  // ── Validation ────────────────────────────────────────────────────────────
   const validate = () => {
     const errs = {};
     if (!form.title.trim()) errs.title = 'Title is required';
@@ -103,7 +91,6 @@ export default function PetitionForm() {
     return errs;
   };
 
-  // ── GPS auto-detection ────────────────────────────────────────────────────
   const handleUseCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setGpsError('Geolocation is not supported by your browser.');
@@ -120,7 +107,6 @@ export default function PetitionForm() {
         setLocationAccuracy(accuracy);
         setFlyTo({ lat, lng });
 
-        // Reverse geocode via Nominatim (no API key required)
         try {
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`,
@@ -131,7 +117,7 @@ export default function PetitionForm() {
             setForm((prev) => ({ ...prev, location: data.display_name }));
           }
         } catch {
-          // Reverse geocode failure is non-fatal — location pin already set
+          // ignore reverse geocode fail
         }
 
         setGpsLoading(false);
@@ -139,33 +125,29 @@ export default function PetitionForm() {
       (err) => {
         setGpsLoading(false);
         if (err.code === err.PERMISSION_DENIED) {
-          setGpsError('Location permission denied. Click the map to pin your location manually.');
+          setGpsError('Location permission denied. Click the map to pin manually.');
         } else {
-          setGpsError('Unable to detect location. Click the map to pin your location manually.');
+          setGpsError('Unable to detect location. Click the map to pin manually.');
         }
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
     );
   }, []);
 
-  // ── Image handling ────────────────────────────────────────────────────────
   const handleImageChange = (e) => {
     const selected = Array.from(e.target.files || []);
     if (!selected.length) return;
 
-    // Validate types
     const badType = selected.find((f) => !ALLOWED_MIME.includes(f.type));
     if (badType) {
       setErrors((prev) => ({ ...prev, images: 'Only JPG, PNG, and WebP images are allowed.' }));
       return;
     }
-    // Validate sizes
     const tooBig = selected.find((f) => f.size > MAX_FILE_SIZE);
     if (tooBig) {
       setErrors((prev) => ({ ...prev, images: 'Each image must be under 5 MB.' }));
       return;
     }
-    // Validate count
     if (images.length + selected.length > MAX_FILES) {
       setErrors((prev) => ({ ...prev, images: `Maximum ${MAX_FILES} images allowed.` }));
       return;
@@ -176,7 +158,6 @@ export default function PetitionForm() {
     setImages(newFiles);
     setPreviews(newPreviews);
     setErrors((prev) => ({ ...prev, images: null }));
-    // Reset input so the same file can be re-added if removed
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -186,7 +167,6 @@ export default function PetitionForm() {
     setPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // ── Device Location (Transparent request on submit) ───────────────────────
   const requestDeviceLocation = () => {
     return new Promise((resolve) => {
       if (!navigator.geolocation) {
@@ -195,13 +175,12 @@ export default function PetitionForm() {
       }
       navigator.geolocation.getCurrentPosition(
         (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy }),
-        () => resolve(null), // Timeout, denied, or unavailable gracefully ignored
+        () => resolve(null),
         { enableHighAccuracy: true, timeout: 5000, maximumAge: 60000 }
       );
     });
   };
 
-  // ── Submit ────────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = validate();
@@ -248,36 +227,40 @@ export default function PetitionForm() {
   };
 
   const set = (key) => (e) => setForm((p) => ({ ...p, [key]: e.target.value }));
-
-  // Default map center: Tamil Nadu
   const defaultCenter = [11.1271, 78.6569];
 
-  // ── Success state ─────────────────────────────────────────────────────────
   if (submitted) {
     return (
-      <div className="card text-center py-12">
-        <div className="w-14 h-14 rounded-full bg-[#EFF4F0] text-[#315C4A] flex items-center justify-center mx-auto mb-4">
-          <CheckCircle size={32} />
+      <div className="bg-white rounded-md border border-[#DDDCD7] text-center p-8 sm:p-12 shadow-card space-y-4">
+        <div className="w-12 h-12 rounded-full bg-[#181817] text-white flex items-center justify-center mx-auto mb-2">
+          <CheckCircle size={24} />
         </div>
-        <h2 className="text-2xl font-bold text-[#202522] mb-2">{t("petition_submitted", "Petition Submitted")}</h2>
-        <p className="text-sm text-[#68716B] mb-2">{t("petition_received_desc", "Your grievance has been recorded and is currently undergoing autonomous triage.")}</p>
-        <p className="text-xs text-[#68716B] mb-8 font-mono">{t("reference_id", "Reference ID:")} <span className="font-bold text-[#202522]">{submitted.id}</span></p>
-        <div className="flex justify-center gap-3">
-          <button className="btn-secondary" onClick={() => navigate('/citizen/dashboard')}>{t("go_to_dashboard", "Return to Overview")}</button>
-          <button className="btn-primary" onClick={() => navigate(`/citizen/petitions/${submitted.id}`)}>{t("track_status", "Inspect Case File")}</button>
+        <h2 className="text-xl font-bold uppercase tracking-tight text-[#181817]">Application Recorded</h2>
+        <p className="text-xs text-[#6F6F6A] max-w-md mx-auto">
+          Your grievance has been recorded in the state ledger and is currently undergoing autonomous triage and classification.
+        </p>
+        <p className="text-xs font-mono text-[#6F6F6A]">
+          Reference ID: <span className="font-bold text-[#181817]">#{submitted.id}</span>
+        </p>
+        <div className="flex justify-center gap-3 pt-4">
+          <button className="btn-secondary text-xs px-4" onClick={() => navigate('/citizen/dashboard')}>
+            Return to Overview
+          </button>
+          <button className="btn-primary text-xs px-4" onClick={() => navigate(`/citizen/petitions/${submitted.id}`)}>
+            Inspect Case File
+          </button>
         </div>
       </div>
     );
   }
 
-  // ── Form ──────────────────────────────────────────────────────────────────
   return (
-    <form onSubmit={handleSubmit} className="card space-y-5">
+    <form onSubmit={handleSubmit} className="bg-white rounded-md border border-[#DDDCD7] p-6 sm:p-8 space-y-5 shadow-card">
       {/* Title */}
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <label htmlFor="pet-title" className="form-label mb-0 block">
-            <Type size={13} className="inline mr-1" /> {t("petition_title", "Petition Title")} *
+        <div className="flex items-center justify-between mb-1.5">
+          <label htmlFor="pet-title" className="form-label mb-0">
+            <Type size={13} className="inline mr-1" /> Application Title *
           </label>
           <MicButton 
             onTranscript={(text) => setForm(p => ({ ...p, title: p.title + (p.title && !p.title.endsWith(' ') ? ' ' : '') + text }))} 
@@ -289,17 +272,17 @@ export default function PetitionForm() {
           type="text"
           value={form.title}
           onChange={set('title')}
-          placeholder={t("title_placeholder", "Brief title describing your concern")}
-          className={cn('form-input', errors.title && 'border-destructive focus:ring-destructive/20')}
+          placeholder="Concise summary describing the public issue"
+          className={cn('form-input', errors.title && 'border-[#E13B22]')}
         />
-        {errors.title && <p className="form-error"><span>{errors.title}</span></p>}
+        {errors.title && <p className="text-[11px] font-mono text-[#E13B22] mt-1">{errors.title}</p>}
       </div>
 
       {/* Description */}
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <label htmlFor="pet-desc" className="form-label mb-0 block">
-            <FileText size={13} className="inline mr-1" /> {t("description", "Description")} *
+        <div className="flex items-center justify-between mb-1.5">
+          <label htmlFor="pet-desc" className="form-label mb-0">
+            <FileText size={13} className="inline mr-1" /> Factual Statement *
           </label>
           <MicButton 
             onTranscript={(text) => setForm(p => ({ ...p, description: p.description + (p.description && !p.description.endsWith(' ') ? ' ' : '') + text }))} 
@@ -311,41 +294,41 @@ export default function PetitionForm() {
           rows={5}
           value={form.description}
           onChange={set('description')}
-          placeholder={t("desc_placeholder", "Describe your issue in detail — what happened, who is affected, how long it has been going on...")}
-          className={cn('form-input resize-none', errors.description && 'border-destructive')}
+          placeholder="Describe your issue in detail — context, location landmarks, severity, and impacted population..."
+          className={cn('form-input resize-none', errors.description && 'border-[#E13B22]')}
         />
-        <div className="flex justify-between mt-1">
-          {errors.description ? <p className="form-error">{errors.description}</p> : <span />}
-          <span className="text-xs text-muted-foreground">{form.description.length} chars</span>
+        <div className="flex justify-between mt-1 text-[11px] font-mono text-[#6F6F6A]">
+          {errors.description ? <span className="text-[#E13B22]">{errors.description}</span> : <span />}
+          <span>{form.description.length} chars</span>
         </div>
       </div>
 
-      {/* Citizen Department Suggestion */}
+      {/* Department Choice */}
       <div>
-        <label htmlFor="pet-dept" className="form-label block mb-2">
-          {t("suggested_department", "Suggested Department (Optional)")}
+        <label htmlFor="pet-dept" className="form-label mb-1.5">
+          Department Jurisdiction (Optional)
         </label>
         <select
           id="pet-dept"
           value={form.citizen_department_id}
           onChange={set('citizen_department_id')}
-          className="form-input"
+          className="form-input text-xs"
         >
-          <option value="">{t("let_ai_decide", "Let AI decide")}</option>
+          <option value="">Let Autonomous Triage decide</option>
           {departments.map((d) => (
             <option key={d.id} value={d.id}>{d.name}</option>
           ))}
         </select>
-        <p className="text-xs text-muted-foreground mt-1">
-          {t("dept_suggestion_desc", "You can suggest a department, but our AI will review and route it appropriately.")}
+        <p className="text-[11px] text-[#6F6F6A] mt-1 font-mono">
+          AI will verify and cross-reference jurisdiction with official department responsibilities.
         </p>
       </div>
 
       {/* Location Text */}
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <label htmlFor="pet-loc" className="form-label mb-0 block">
-            <MapPin size={13} className="inline mr-1" /> {t("location_desc", "Location Description")} *
+        <div className="flex items-center justify-between mb-1.5">
+          <label htmlFor="pet-loc" className="form-label mb-0">
+            <MapPin size={13} className="inline mr-1" /> Street Address / Landmark *
           </label>
           <MicButton 
             onTranscript={(text) => setForm(p => ({ ...p, location: p.location + (p.location && !p.location.endsWith(' ') ? ' ' : '') + text }))} 
@@ -357,44 +340,39 @@ export default function PetitionForm() {
           type="text"
           value={form.location}
           onChange={set('location')}
-          placeholder={t("loc_placeholder", "e.g. MG Road, Gandhi Nagar, Chennai")}
-          className={cn('form-input', errors.location && 'border-destructive')}
+          placeholder="e.g. Gandhi Road, Near Post Office, Chennai"
+          className={cn('form-input', errors.location && 'border-[#E13B22]')}
         />
-        {errors.location && <p className="form-error">{errors.location}</p>}
+        {errors.location && <p className="text-[11px] font-mono text-[#E13B22] mt-1">{errors.location}</p>}
       </div>
 
-      {/* Location Map */}
+      {/* Map Pin Location */}
       <div>
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-1.5">
           <label className="form-label mb-0">
-            <Navigation size={13} className="inline mr-1" /> {t("pin_location", "Pin Exact Location on Map")} *
+            <Navigation size={13} className="inline mr-1" /> Spatial Coordinates (200m Cluster Radar) *
           </label>
-          {/* GPS Button */}
           <button
             type="button"
             onClick={handleUseCurrentLocation}
             disabled={gpsLoading}
-            className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 transition-colors disabled:opacity-60"
+            className="flex items-center gap-1.5 text-xs font-mono font-semibold uppercase px-2.5 py-1 rounded bg-[#F7F6F2] text-[#181817] hover:border-[#181817] border border-[#DDDCD7] transition-colors disabled:opacity-60"
           >
-            {gpsLoading
-              ? <Loader2 size={12} className="animate-spin" />
-              : <LocateFixed size={12} />
-            }
-            {gpsLoading ? t("detecting", "Detecting...") : t("use_current_location", "Use Current Location")}
+            {gpsLoading ? <Loader2 size={11} className="animate-spin" /> : <LocateFixed size={11} />}
+            {gpsLoading ? "Detecting GPS..." : "GPS Pin"}
           </button>
         </div>
 
         {gpsError && (
-          <div className="flex items-start gap-2 text-xs text-amber-600 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 mb-2">
-            <AlertCircle size={13} className="mt-0.5 flex-shrink-0" />
-            <span>{gpsError}</span>
+          <div className="text-xs text-[#E13B22] bg-[#FFF0EB] border border-[#F05A3C]/30 rounded p-2.5 mb-2 font-mono">
+            {gpsError}
           </div>
         )}
 
-        <div className={cn('h-64 w-full rounded-xl overflow-hidden border', errors.position ? 'border-destructive' : 'border-border')}>
+        <div className={cn('h-64 w-full rounded-md overflow-hidden border', errors.position ? 'border-[#E13B22]' : 'border-[#DDDCD7]')}>
           <MapContainer center={defaultCenter} zoom={6} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              attribution='&copy; OpenStreetMap contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             <LocationPicker 
@@ -407,32 +385,31 @@ export default function PetitionForm() {
           </MapContainer>
         </div>
 
-        <p className="text-xs text-muted-foreground mt-1.5">
+        <p className="text-[11px] font-mono text-[#6F6F6A] mt-1">
           {position
             ? `📍 Pinned: ${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}`
-            : 'Click the map or use "Use Current Location" to pin your location.'}
+            : 'Click the map or click "GPS Pin" to calibrate coordinates.'}
         </p>
-        {errors.position && <p className="form-error mt-1">{errors.position}</p>}
+        {errors.position && <p className="text-[11px] font-mono text-[#E13B22] mt-1">{errors.position}</p>}
       </div>
 
       {/* Image Upload */}
       <div>
         <label className="form-label mb-2 block">
-          <ImageIcon size={13} className="inline mr-1" /> {t("attach_photos", "Attach Photos")} * (max {MAX_FILES})
+          <ImageIcon size={13} className="inline mr-1" /> Evidence Photos * (Max {MAX_FILES})
         </label>
 
-        {/* Preview grid */}
         {previews.length > 0 && (
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-3">
             {previews.map((src, i) => (
-              <div key={src} className="relative group aspect-square rounded-lg overflow-hidden border border-border bg-muted">
-                <img src={src} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
+              <div key={src} className="relative group aspect-square rounded overflow-hidden border border-[#DDDCD7] bg-[#F7F6F2]">
+                <img src={src} alt={`Evidence ${i + 1}`} className="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={() => removeImage(i)}
-                  className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 bg-black/70 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  <X size={10} />
+                  <X size={11} />
                 </button>
               </div>
             ))}
@@ -441,11 +418,11 @@ export default function PetitionForm() {
 
         {images.length < MAX_FILES && (
           <label
-            className="flex flex-col items-center justify-center gap-2 h-24 rounded-xl border-2 border-dashed border-border hover:border-primary hover:bg-primary/5 cursor-pointer transition-colors text-muted-foreground hover:text-primary"
+            className="flex flex-col items-center justify-center gap-1.5 h-20 rounded border-2 border-dashed border-[#DDDCD7] hover:border-[#181817] hover:bg-[#F7F6F2] cursor-pointer transition-colors text-[#6F6F6A]"
           >
-            <ImageIcon size={20} />
-            <span className="text-xs font-medium">
-              Click to add photos ({images.length}/{MAX_FILES}) — JPG, PNG, WebP up to 5 MB each
+            <ImageIcon size={18} />
+            <span className="text-xs font-mono">
+              Upload photo evidence ({images.length}/{MAX_FILES}) — JPG, PNG, WebP up to 5 MB
             </span>
             <input
               ref={fileInputRef}
@@ -459,22 +436,22 @@ export default function PetitionForm() {
         )}
 
         {errors.images && (
-          <p className="text-xs text-destructive mt-1 flex items-center gap-1">
-            <AlertCircle size={12} /> {errors.images}
+          <p className="text-[11px] font-mono text-[#E13B22] mt-1">
+            {errors.images}
           </p>
         )}
       </div>
 
       {errors.submit && (
-        <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
+        <div className="rounded p-3 text-xs font-mono text-[#E13B22] bg-[#FFF0EB] border border-[#F05A3C]/30">
           {errors.submit}
         </div>
       )}
 
-      <div className="flex items-center justify-between pt-1">
-        <p className="text-xs text-muted-foreground">* {t("required_fields", "Required fields")}</p>
-        <button type="submit" disabled={isPending} className="btn-primary">
-          {isPending ? <><Loader2 size={14} className="animate-spin" /> {t("submitting", "Submitting...")}</> : t("submit_petition", "Submit Petition")}
+      <div className="flex items-center justify-between pt-2 border-t border-[#DDDCD7]">
+        <p className="text-[11px] font-mono text-[#6F6F6A]">* Required fields</p>
+        <button type="submit" disabled={isPending} className="btn-cta text-xs px-6 py-3">
+          {isPending ? <><Loader2 size={13} className="animate-spin" /> Lodging Application...</> : "Submit Application"}
         </button>
       </div>
     </form>

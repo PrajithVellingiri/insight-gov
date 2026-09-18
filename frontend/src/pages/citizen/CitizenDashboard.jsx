@@ -3,20 +3,19 @@ import { useAuth } from '@/context/AuthContext';
 import { usePetitions } from '@/hooks/usePetitions';
 import PetitionCard from '@/components/petition/PetitionCard';
 import PetitionTable from '@/components/petition/PetitionTable';
-import StatCard from '@/components/ui/StatCard';
 import EmptyState from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { FilePlus, FileText, CheckCircle, Clock, Building2, LayoutGrid, List } from 'lucide-react';
+import { FilePlus, LayoutGrid, List } from 'lucide-react';
 import usePageTitle from '@/hooks/usePageTitle';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 
 export default function CitizenDashboard() {
   const { t } = useTranslation();
-  usePageTitle(t('dashboard', 'Citizen Overview'));
+  usePageTitle(t('dashboard', 'Citizen Operations'));
   const { user } = useAuth();
   const { data: petitions = [], isLoading } = usePetitions({ citizen_id: user?.id });
-  const [viewMode, setViewMode] = useState('cards'); // 'cards' | 'table'
+  const [viewMode, setViewMode] = useState('table'); // default to operational table
 
   const statusWeight = { pending: 2, analysed: 2, under_review: 2, resolved: 0, rejected: 0, duplicate: 0 };
   const priorityWeight = { critical: 4, high: 3, medium: 2, low: 1, undefined: 0 };
@@ -34,125 +33,136 @@ export default function CitizenDashboard() {
   const total    = petitions.length;
   const pending  = petitions.filter((p) => ['pending', 'analysed', 'under_review'].includes(p.status)).length;
   const resolved = petitions.filter((p) => p.status === 'resolved').length;
-  
-  // Count unique departments engaged
   const uniqueDepts = new Set(petitions.map(p => p.department_name || p.ai_analysis?.department).filter(Boolean)).size;
 
   return (
-    <div className="space-y-10 pb-16 max-w-6xl mx-auto">
-      {/* Editorial Header */}
-      <div className="page-header">
-        <div>
-          <span className="text-xs font-mono font-semibold uppercase tracking-widest text-[#78917F] block mb-1">
-            01 / CITIZEN OVERVIEW
+    <div className="space-y-10 pb-16">
+      {/* Editorial Dashboard Hero */}
+      <div className="border-b border-[#DDDCD7] pb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#F05A3C] block mb-2">
+              GOOD MORNING.
+            </span>
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-[#181817] uppercase tracking-tight leading-tight">
+              Government Operations<br />
+              at a glance.
+            </h1>
+            <p className="text-xs sm:text-sm text-[#6F6F6A] mt-2 max-w-lg leading-relaxed">
+              Monitor your submitted applications, departmental jurisdiction reviews, and administrative progress.
+            </p>
+          </div>
+
+          <Link to="/citizen/petitions/new" className="btn-cta text-xs px-5 py-3 self-start md:self-auto">
+            <FilePlus size={15} /> Submit Application
+          </Link>
+        </div>
+      </div>
+
+      {/* Typographic Operational Metrics (No traditional card grid) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 py-4 border-b border-[#DDDCD7]">
+        <div className="space-y-1">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6F6F6A]">
+            TOTAL APPLICATIONS
           </span>
-          <h1 className="text-3xl font-extrabold text-[#202522] tracking-tight">
-            Good morning, {user?.name?.split(' ')[0] || 'Citizen'}
-          </h1>
-          <p className="text-sm text-[#68716B] mt-1.5 max-w-xl leading-relaxed">
-            Monitor submitted applications, review milestones, and departmental resolution from one place.
-          </p>
+          <div className="text-4xl sm:text-5xl font-extrabold text-[#181817] font-mono">
+            {total}
+          </div>
+          <p className="text-[11px] text-[#6F6F6A]">Recorded in state ledger</p>
         </div>
 
-        <Link to="/citizen/petitions/new" className="btn-primary btn-lg">
-          <FilePlus size={16} /> Submit New Petition
-        </Link>
+        <div className="space-y-1 border-l border-[#DDDCD7] pl-6">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#F05A3C]">
+            PENDING REVIEW
+          </span>
+          <div className="text-4xl sm:text-5xl font-extrabold text-[#F05A3C] font-mono">
+            {pending}
+          </div>
+          <p className="text-[11px] text-[#6F6F6A]">Awaiting department action</p>
+        </div>
+
+        <div className="space-y-1 border-l border-[#DDDCD7] pl-6">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6F6F6A]">
+            RESOLVED / PROCESSED
+          </span>
+          <div className="text-4xl sm:text-5xl font-extrabold text-[#181817] font-mono">
+            {resolved}
+          </div>
+          <p className="text-[11px] text-[#6F6F6A]">Successfully completed</p>
+        </div>
+
+        <div className="space-y-1 border-l border-[#DDDCD7] pl-6">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6F6F6A]">
+            MINISTRIES ENGAGED
+          </span>
+          <div className="text-4xl sm:text-5xl font-extrabold text-[#181817] font-mono">
+            {uniqueDepts}
+          </div>
+          <p className="text-[11px] text-[#6F6F6A]">Active administrative lines</p>
+        </div>
       </div>
 
-      {/* Differentiated KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <StatCard
-          label="Applications"
-          value={total}
-          Icon={FileText}
-          variant="applications"
-          description="Total petitions recorded in state ledger"
-        />
-        <StatCard
-          label="Pending Review"
-          value={pending}
-          Icon={Clock}
-          variant="pending"
-          description="Awaiting department review or triage"
-        />
-        <StatCard
-          label="Approved / Resolved"
-          value={resolved}
-          Icon={CheckCircle}
-          variant="resolved"
-          description="Grievances successfully addressed"
-        />
-        <StatCard
-          label="Ministries Engaged"
-          value={uniqueDepts}
-          Icon={Building2}
-          variant="departments"
-          description="Active departmental jurisdictions"
-        />
-      </div>
-
-      {/* Petitions Section */}
-      <div>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pt-4 border-t border-[#E5E5DE]">
+      {/* Applications Ledger Section */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[#DDDCD7]">
           <div>
-            <h2 className="text-xl font-bold text-[#202522] tracking-tight">
-              Application Case Files
+            <h2 className="text-lg font-bold text-[#181817] uppercase tracking-wider font-mono">
+              APPLICATIONS LEDGER
             </h2>
-            <p className="text-xs text-[#68716B] mt-0.5">
-              Verified record of your grievances and their current triage status.
+            <p className="text-xs text-[#6F6F6A] mt-0.5">
+              Verified record of active civic dockets and triage timestamps.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="inline-flex rounded-lg border border-[#E5E5DE] bg-white p-0.5 shadow-subtle">
-              <button
-                onClick={() => setViewMode('cards')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                  viewMode === 'cards'
-                    ? 'bg-[#EFF4F0] text-[#315C4A]'
-                    : 'text-[#68716B] hover:text-[#202522]'
-                }`}
-              >
-                <LayoutGrid size={14} /> Cards
-              </button>
+            <div className="inline-flex rounded-md border border-[#DDDCD7] bg-white p-0.5">
               <button
                 onClick={() => setViewMode('table')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold uppercase tracking-wider transition-colors ${
                   viewMode === 'table'
-                    ? 'bg-[#EFF4F0] text-[#315C4A]'
-                    : 'text-[#68716B] hover:text-[#202522]'
+                    ? 'bg-[#181817] text-white'
+                    : 'text-[#6F6F6A] hover:text-[#181817]'
                 }`}
               >
-                <List size={14} /> Ledger Table
+                <List size={13} /> Ledger
+              </button>
+              <button
+                onClick={() => setViewMode('cards')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold uppercase tracking-wider transition-colors ${
+                  viewMode === 'cards'
+                    ? 'bg-[#181817] text-white'
+                    : 'text-[#6F6F6A] hover:text-[#181817]'
+                }`}
+              >
+                <LayoutGrid size={13} /> Dockets
               </button>
             </div>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-2xl border border-[#E5E5DE] p-6 space-y-4">
-                <Skeleton className="h-5 w-1/3" />
-                <Skeleton className="h-7 w-3/4" />
-                <Skeleton className="h-12 w-full" />
+              <div key={i} className="bg-white border border-[#DDDCD7] p-4 rounded-md space-y-2">
+                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-5 w-3/4" />
               </div>
             ))}
           </div>
         ) : sortedPetitions.length === 0 ? (
           <EmptyState
-            title="No Petitions on File"
-            description="You have not submitted any civic petitions yet. File a petition to initiate autonomous department triage."
+            title="No Applications Recorded"
+            description="No petitions currently exist in your citizen ledger. Submit a new application to initiate autonomous triage."
             action={
-              <Link to="/citizen/petitions/new" className="btn-primary">
-                <FilePlus size={16} /> File Your First Petition
+              <Link to="/citizen/petitions/new" className="btn-primary text-xs">
+                <FilePlus size={14} /> Submit First Application
               </Link>
             }
           />
         ) : viewMode === 'table' ? (
           <PetitionTable petitions={sortedPetitions} role="citizen" />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {sortedPetitions.map((p) => (
               <PetitionCard key={p.id} petition={p} role="citizen" />
             ))}

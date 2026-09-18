@@ -11,13 +11,13 @@ export default function OfficerAnalytics({ officer }) {
 
   if (!officer) {
     return (
-      <div className="card h-full flex flex-col items-center justify-center p-12 text-center min-h-[420px]">
-        <div className="w-14 h-14 rounded-2xl bg-[#EFF4F0] border border-[#D4E2D8] flex items-center justify-center mb-4 text-[#315C4A]">
-          <Briefcase size={26} />
+      <div className="bg-white rounded-md border border-[#DDDCD7] p-12 text-center min-h-[400px] flex flex-col items-center justify-center">
+        <div className="w-12 h-12 rounded-full bg-[#F7F6F2] border border-[#DDDCD7] flex items-center justify-center mb-3 text-[#181817]">
+          <Briefcase size={20} />
         </div>
-        <h3 className="text-base font-bold text-[#202522]">Select an Officer</h3>
-        <p className="text-xs text-[#68716B] max-w-sm mt-1.5 leading-relaxed">
-          Select an officer from the personnel ledger on the left to inspect workload distribution, resolution throughput, and triage performance.
+        <h3 className="text-sm font-bold uppercase tracking-wider text-[#181817]">Select Officer</h3>
+        <p className="text-xs text-[#6F6F6A] max-w-sm mt-1.5 leading-relaxed font-mono">
+          Select an officer from the personnel ledger on the left to inspect workload distribution and resolution metrics.
         </p>
       </div>
     );
@@ -25,41 +25,37 @@ export default function OfficerAnalytics({ officer }) {
 
   if (isLoading) {
     return (
-      <div className="card h-full flex flex-col items-center justify-center min-h-[420px]">
-        <Loader2 size={28} className="animate-spin text-[#315C4A] mb-3" />
-        <p className="text-xs text-[#68716B]">Aggregating officer metrics and case histories...</p>
+      <div className="bg-white rounded-md border border-[#DDDCD7] p-12 text-center min-h-[400px] flex flex-col items-center justify-center font-mono text-xs text-[#6F6F6A]">
+        <Loader2 size={24} className="animate-spin text-[#181817] mb-3" />
+        <p>AGGREGATING PERSONNEL METRICS...</p>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="card h-full flex flex-col items-center justify-center p-8 text-center bg-[#FDF2F2] border-[#F5C2C2] min-h-[420px]">
-        <XCircle size={28} className="mb-2 text-[#9E4343]" />
-        <h3 className="font-bold text-sm text-[#9E4343]">Failed to load analytics</h3>
-        <p className="text-xs text-[#68716B] mt-1">{error?.response?.data?.detail || 'An unexpected error occurred.'}</p>
+      <div className="rounded-md border border-[#E13B22]/30 bg-[#FFF0EB] p-8 text-center text-[#E13B22] min-h-[400px] flex flex-col items-center justify-center">
+        <XCircle size={24} className="mb-2" />
+        <h3 className="font-bold text-xs font-mono uppercase">Failed to load analytics</h3>
+        <p className="text-xs mt-1">{error?.response?.data?.detail || 'An error occurred.'}</p>
       </div>
     );
   }
 
-  if (!data) {
-    return null;
-  }
+  if (!data) return null;
 
   if (data.total_assigned === 0) {
     return (
-      <div className="space-y-6 h-full">
-        <div className="card p-6">
-          <h2 className="text-lg font-bold text-[#202522]">{data.officer_name}</h2>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#315C4A] mt-1">
+      <div className="space-y-6">
+        <div className="bg-white rounded-md border border-[#DDDCD7] p-6">
+          <h2 className="text-lg font-bold text-[#181817]">{data.officer_name}</h2>
+          <p className="text-xs font-mono font-bold uppercase tracking-wider text-[#F05A3C] mt-1">
             {data.department_name || 'Unassigned Department'}
           </p>
         </div>
         
-        <div className="card flex flex-col items-center justify-center p-12 text-center min-h-[300px]">
-          <Briefcase size={28} className="mb-3 text-[#68716B]/40" />
-          <h3 className="text-base font-semibold text-[#202522]">No petition activity recorded</h3>
-          <p className="text-xs text-[#68716B] mt-1">This officer currently has no assigned petitions in the active ledger.</p>
+        <div className="bg-white rounded-md border border-[#DDDCD7] p-12 text-center min-h-[260px] flex flex-col items-center justify-center">
+          <p className="text-xs font-mono uppercase text-[#6F6F6A]">NO ACTIVE ASSIGNED PETITIONS RECORDED.</p>
         </div>
       </div>
     );
@@ -67,162 +63,124 @@ export default function OfficerAnalytics({ officer }) {
 
   return (
     <div className="space-y-6">
-      {/* Officer Header Card */}
-      <div className="card p-6 relative overflow-hidden bg-white border border-[#E5E5DE]">
+      {/* Header Docket */}
+      <div className="bg-white rounded-md border border-[#DDDCD7] p-6">
         <div className="flex items-start justify-between">
           <div>
-            <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[#68716B]">
-              Officer Dossier
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6F6F6A]">
+              OFFICER DOSSIER
             </span>
-            <h2 className="text-xl font-bold text-[#202522] tracking-tight mt-0.5">{data.officer_name}</h2>
-            <p className="text-xs font-semibold text-[#315C4A] mt-1 tracking-wide">
+            <h2 className="text-2xl font-extrabold text-[#181817] tracking-tight uppercase mt-0.5">{data.officer_name}</h2>
+            <p className="text-xs font-mono font-semibold text-[#F05A3C] mt-1">
               {data.department_name || 'Unassigned Department'}
             </p>
           </div>
 
           {data.is_demo && (
-            <div className="bg-[#EFF4F0] text-[#315C4A] border border-[#D4E2D8] px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
-              <Activity size={12} /> Demo Data
+            <div className="bg-[#FFF0EB] text-[#F05A3C] border border-[#F05A3C]/30 px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase">
+              Demo Data
             </div>
           )}
         </div>
       </div>
 
-      {/* KPI 4-Card Grid */}
+      {/* KPI Metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="card p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="p-1.5 rounded-lg bg-[#EFF4F0] text-[#315C4A]">
-              <Briefcase size={15} />
-            </div>
-            <h3 className="text-[10px] font-semibold text-[#68716B] uppercase tracking-wider">Total Assigned</h3>
-          </div>
-          <p className="text-2xl font-bold text-[#202522] font-mono">{data.total_assigned}</p>
+        <div className="bg-white rounded-md border border-[#DDDCD7] p-4">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6F6F6A] block mb-1">
+            TOTAL ASSIGNED
+          </span>
+          <p className="text-3xl font-extrabold text-[#181817] font-mono">{data.total_assigned}</p>
         </div>
 
-        <div className="card p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="p-1.5 rounded-lg bg-[#FBF4EC] text-[#C58B5B]">
-              <Activity size={15} />
-            </div>
-            <h3 className="text-[10px] font-semibold text-[#68716B] uppercase tracking-wider">Active Workload</h3>
-          </div>
-          <p className="text-2xl font-bold text-[#C58B5B] font-mono">{data.active_workload}</p>
+        <div className="bg-white rounded-md border border-[#DDDCD7] p-4">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#F05A3C] block mb-1">
+            ACTIVE WORKLOAD
+          </span>
+          <p className="text-3xl font-extrabold text-[#F05A3C] font-mono">{data.active_workload}</p>
         </div>
 
-        <div className="card p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="p-1.5 rounded-lg bg-[#EFF4F0] text-[#315C4A]">
-              <CheckCircle2 size={15} />
-            </div>
-            <h3 className="text-[10px] font-semibold text-[#68716B] uppercase tracking-wider">Resolved</h3>
-          </div>
-          <p className="text-2xl font-bold text-[#315C4A] font-mono">{data.resolved}</p>
+        <div className="bg-white rounded-md border border-[#DDDCD7] p-4">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#181817] block mb-1">
+            RESOLVED
+          </span>
+          <p className="text-3xl font-extrabold text-[#181817] font-mono">{data.resolved}</p>
         </div>
 
-        <div className="card p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="p-1.5 rounded-lg bg-[#F8F7F2] text-[#68716B]">
-              <Clock size={15} />
-            </div>
-            <h3 className="text-[10px] font-semibold text-[#68716B] uppercase tracking-wider">Resolution Rate</h3>
-          </div>
-          <p className="text-2xl font-bold text-[#202522] font-mono">{data.resolution_rate}%</p>
+        <div className="bg-white rounded-md border border-[#DDDCD7] p-4">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6F6F6A] block mb-1">
+            RESOLUTION RATE
+          </span>
+          <p className="text-3xl font-extrabold text-[#181817] font-mono">{data.resolution_rate}%</p>
         </div>
       </div>
 
       {/* Breakdown Panels */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Status Distribution */}
-        <div className="card p-5">
-          <h3 className="text-xs font-bold text-[#202522] mb-4 uppercase tracking-wider flex items-center justify-between">
-            <span>Status Distribution</span>
-            <span className="text-[11px] font-mono font-normal text-[#68716B]">Caseload Breakdown</span>
+        <div className="bg-white rounded-md border border-[#DDDCD7] p-5">
+          <h3 className="text-xs font-mono font-bold text-[#181817] mb-3 uppercase tracking-wider border-b border-[#DDDCD7] pb-2">
+            Status Breakdown
           </h3>
           <div className="space-y-2">
-            <div className="flex justify-between items-center text-xs p-2.5 rounded-lg bg-[#F8F7F2] border border-[#E5E5DE]/60">
-              <span className="text-[#202522] flex items-center gap-2 font-medium">
-                <span className="w-2 h-2 rounded-full bg-[#C58B5B]" /> Pending Review
+            <div className="flex justify-between items-center text-xs p-2 rounded bg-[#F7F6F2] font-mono">
+              <span className="text-[#181817] font-semibold flex items-center gap-2">
+                <span className="text-[#F05A3C]">●</span> Pending Review
               </span>
-              <span className="font-mono font-semibold text-[#202522] bg-white border border-[#E5E5DE] px-2 py-0.5 rounded">
-                {data.pending}
-              </span>
+              <span className="font-bold text-[#181817]">{data.pending}</span>
             </div>
-            <div className="flex justify-between items-center text-xs p-2.5 rounded-lg bg-[#F8F7F2] border border-[#E5E5DE]/60">
-              <span className="text-[#202522] flex items-center gap-2 font-medium">
-                <span className="w-2 h-2 rounded-full bg-[#315C4A]" /> In Progress
+            <div className="flex justify-between items-center text-xs p-2 rounded bg-[#F7F6F2] font-mono">
+              <span className="text-[#181817] font-semibold flex items-center gap-2">
+                <span className="text-[#FF7A59]">●</span> In Progress
               </span>
-              <span className="font-mono font-semibold text-[#202522] bg-white border border-[#E5E5DE] px-2 py-0.5 rounded">
-                {data.in_progress}
-              </span>
+              <span className="font-bold text-[#181817]">{data.in_progress}</span>
             </div>
-            <div className="flex justify-between items-center text-xs p-2.5 rounded-lg bg-[#F8F7F2] border border-[#E5E5DE]/60">
-              <span className="text-[#202522] flex items-center gap-2 font-medium">
-                <span className="w-2 h-2 rounded-full bg-[#9E4343]" /> Rejected
+            <div className="flex justify-between items-center text-xs p-2 rounded bg-[#F7F6F2] font-mono">
+              <span className="text-[#181817] font-semibold flex items-center gap-2">
+                <span className="text-[#E13B22]">●</span> Rejected
               </span>
-              <span className="font-mono font-semibold text-[#202522] bg-white border border-[#E5E5DE] px-2 py-0.5 rounded">
-                {data.rejected}
-              </span>
+              <span className="font-bold text-[#181817]">{data.rejected}</span>
             </div>
-            <div className="flex justify-between items-center text-xs p-2.5 rounded-lg bg-[#F8F7F2] border border-[#E5E5DE]/60">
-              <span className="text-[#202522] flex items-center gap-2 font-medium">
-                <span className="w-2 h-2 rounded-full bg-[#78917F]" /> Duplicate Linked
+            <div className="flex justify-between items-center text-xs p-2 rounded bg-[#F7F6F2] font-mono">
+              <span className="text-[#181817] font-semibold flex items-center gap-2">
+                <span className="text-[#6F6F6A]">●</span> Duplicate Linked
               </span>
-              <span className="font-mono font-semibold text-[#202522] bg-white border border-[#E5E5DE] px-2 py-0.5 rounded">
-                {data.duplicate || 0}
-              </span>
-            </div>
-            <div className="flex justify-between items-center text-xs p-2.5 rounded-lg bg-[#F8F7F2] border border-[#E5E5DE]/60">
-              <span className="text-[#202522] flex items-center gap-2 font-medium">
-                <span className="w-2 h-2 rounded-full bg-[#68716B]" /> Withdrawn
-              </span>
-              <span className="font-mono font-semibold text-[#202522] bg-white border border-[#E5E5DE] px-2 py-0.5 rounded">
-                {data.withdrawn}
-              </span>
+              <span className="font-bold text-[#181817]">{data.duplicate || 0}</span>
             </div>
           </div>
         </div>
         
         {/* Priority & Turnaround */}
-        <div className="card p-5 flex flex-col justify-between">
+        <div className="bg-white rounded-md border border-[#DDDCD7] p-5 flex flex-col justify-between">
           <div>
-            <h3 className="text-xs font-bold text-[#202522] mb-4 uppercase tracking-wider flex items-center justify-between">
-              <span>Priority Breakdown</span>
-              <span className="text-[11px] font-mono font-normal text-[#68716B]">By Urgency</span>
+            <h3 className="text-xs font-mono font-bold text-[#181817] mb-3 uppercase tracking-wider border-b border-[#DDDCD7] pb-2">
+              Priority Urgency
             </h3>
-            <div className="space-y-2.5">
-              <div className="flex justify-between items-center text-xs p-2 rounded-lg hover:bg-[#F8F7F2] transition-colors">
-                <span className="text-[#202522] flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#9E4343]" /> Critical
-                </span>
-                <span className="font-mono font-semibold text-[#9E4343]">{data.priority_breakdown?.critical || 0}</span>
+            <div className="space-y-2 font-mono text-xs">
+              <div className="flex justify-between items-center p-1">
+                <span className="text-[#E13B22] font-bold">● Critical</span>
+                <span className="font-bold text-[#E13B22]">{data.priority_breakdown?.critical || 0}</span>
               </div>
-              <div className="flex justify-between items-center text-xs p-2 rounded-lg hover:bg-[#F8F7F2] transition-colors">
-                <span className="text-[#202522] flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#C58B5B]" /> High
-                </span>
-                <span className="font-mono font-semibold text-[#C58B5B]">{data.priority_breakdown?.high || 0}</span>
+              <div className="flex justify-between items-center p-1">
+                <span className="text-[#F05A3C] font-bold">● High</span>
+                <span className="font-bold text-[#F05A3C]">{data.priority_breakdown?.high || 0}</span>
               </div>
-              <div className="flex justify-between items-center text-xs p-2 rounded-lg hover:bg-[#F8F7F2] transition-colors">
-                <span className="text-[#202522] flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#C8A96B]" /> Medium
-                </span>
-                <span className="font-mono font-semibold text-[#202522]">{data.priority_breakdown?.medium || 0}</span>
+              <div className="flex justify-between items-center p-1">
+                <span className="text-[#181817] font-bold">● Medium</span>
+                <span className="font-bold text-[#181817]">{data.priority_breakdown?.medium || 0}</span>
               </div>
-              <div className="flex justify-between items-center text-xs p-2 rounded-lg hover:bg-[#F8F7F2] transition-colors">
-                <span className="text-[#202522] flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#78917F]" /> Low
-                </span>
-                <span className="font-mono font-semibold text-[#68716B]">{data.priority_breakdown?.low || 0}</span>
+              <div className="flex justify-between items-center p-1">
+                <span className="text-[#6F6F6A] font-bold">● Low</span>
+                <span className="font-bold text-[#6F6F6A]">{data.priority_breakdown?.low || 0}</span>
               </div>
             </div>
           </div>
           
-          <div className="mt-5 pt-4 border-t border-[#E5E5DE]">
-            <h4 className="text-[10px] font-semibold text-[#68716B] uppercase tracking-wider mb-1">
-              Avg Resolution Turnaround
+          <div className="mt-4 pt-3 border-t border-[#DDDCD7]">
+            <h4 className="text-[10px] font-mono font-bold text-[#6F6F6A] uppercase tracking-wider mb-0.5">
+              Avg Turnaround
             </h4>
-            <p className="text-2xl font-bold text-[#202522] font-mono">
+            <p className="text-2xl font-extrabold text-[#181817] font-mono">
               {data.average_resolution_days !== null && data.average_resolution_days !== undefined
                 ? `${data.average_resolution_days} days` 
                 : 'N/A'}

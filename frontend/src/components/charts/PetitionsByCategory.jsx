@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react';
+﻿import { useMemo, useState } from 'react';
 import { Copy, Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 function getShortName(name) {
   if (name === 'Others') return 'Others';
@@ -65,38 +64,38 @@ export default function PetitionsByCategory({ data = [] }) {
   };
 
   if (!processedData.length) {
-    return <div className="flex items-center justify-center h-48 text-sm text-muted-foreground">No data available</div>;
+    return <div className="flex items-center justify-center h-48 text-xs font-mono text-[#6F6F6A]">NO DATA AVAILABLE</div>;
   }
 
   return (
     <div className="relative">
       <button 
         onClick={handleCopy}
-        className="absolute -top-10 right-0 p-2 text-muted-foreground hover:text-primary-600 transition-colors bg-card hover:bg-muted rounded-lg border border-border shadow-sm"
+        className="absolute -top-10 right-0 p-1.5 text-[#6F6F6A] hover:text-[#181817] transition-colors bg-white rounded border border-[#DDDCD7]"
         aria-label="Copy data"
+        title="Copy data to clipboard"
       >
-        {copied ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
+        {copied ? <Check size={14} className="text-[#F05A3C]" /> : <Copy size={14} />}
       </button>
       
       <div className="space-y-3 mt-4">
         {processedData.map((item, i) => {
-          // Add a tiny baseline percentage so even 1 has a visible bar
           const percentage = Math.max((item.count / maxCount) * 100, 2);
           return (
-            <div key={i} className="flex items-center gap-4 text-sm">
+            <div key={i} className="flex items-center gap-4 text-xs font-mono">
               <div 
-                className="w-32 sm:w-40 shrink-0 truncate font-medium text-foreground"
-                title={item.category} // Tooltip with full name on hover
+                className="w-32 sm:w-40 shrink-0 truncate font-semibold text-[#181817]"
+                title={item.category}
               >
                 {getShortName(item.category)}
               </div>
-              <div className="flex-1 flex items-center h-4 bg-[#EFF4F0] rounded-full overflow-hidden">
+              <div className="flex-1 flex items-center h-2.5 bg-[#EFEFEA] rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-[#315C4A] transition-all duration-500 ease-out rounded-full"
+                  className="h-full bg-[#181817] hover:bg-[#F05A3C] transition-all duration-300 rounded-full"
                   style={{ width: `${percentage}%` }}
                 />
               </div>
-              <div className="w-12 text-right shrink-0 font-mono text-xs font-semibold text-[#202522]">
+              <div className="w-10 text-right shrink-0 font-bold text-[#181817]">
                 {item.count}
               </div>
             </div>

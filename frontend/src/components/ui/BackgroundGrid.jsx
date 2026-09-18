@@ -1,24 +1,23 @@
 ﻿import React from 'react';
 
 /**
- * Editorial minimalist background layer.
- * Warm off-white / ivory canvas with very subtle civic architectural accents.
+ * Minimalist background canvas.
+ * Warm off-white (#F7F6F2) with faint architectural grid lines (#181817 at 3%).
  */
 export default function BackgroundGrid() {
   return (
     <div 
-      className="fixed inset-0 pointer-events-none -z-10 bg-[#F8F7F2]"
+      className="fixed inset-0 pointer-events-none -z-10 bg-[#F7F6F2]"
       aria-hidden="true"
     >
-      {/* Very faint fine line grid for architectural structure */}
       <div 
-        className="absolute inset-0 opacity-[0.035]"
+        className="absolute inset-0 opacity-[0.03]"
         style={{
           backgroundImage: `
-            linear-gradient(to right, #202522 1px, transparent 1px),
-            linear-gradient(to bottom, #202522 1px, transparent 1px)
+            linear-gradient(to right, #181817 1px, transparent 1px),
+            linear-gradient(to bottom, #181817 1px, transparent 1px)
           `,
-          backgroundSize: '48px 48px',
+          backgroundSize: '40px 40px',
         }}
       />
     </div>

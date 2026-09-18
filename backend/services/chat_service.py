@@ -384,13 +384,14 @@ class ChatService:
         if tool_name:
             tool_context = self._execute_tool(tool_name, tool_arg, user_id)
 
-        rag_context = await self._rag.build_context_block(user_message)
+        rag_context, rag_sources = await self._rag.build_context_block(user_message)
 
         # Build enriched system prompt
         allowed_languages = {"en", "es", "fr", "hi", "ta", "te"}
         safe_lang = language if language in allowed_languages else "en"
         lang_instruction = f"\n\n[CRITICAL] You must reply entirely in the following language code: {safe_lang}. Do not use English unless the code is 'en'."
-        enriched_prompt = _SYSTEM_PROMPT + lang_instruction + rag_context + tool_context
+        system_base = _load_system_prompt()
+        enriched_prompt = system_base + lang_instruction + rag_context + tool_context
 
         # Call provider
         start = time.monotonic()
@@ -421,6 +422,7 @@ class ChatService:
             reply=response.content,
             model=response.model,
             token_count=total_tokens,
+            sources=[ChatSource(**s) for s in rag_sources],
         )
 
     # -------------------------------------------------------------------
@@ -456,11 +458,12 @@ class ChatService:
         tool_name, tool_arg = _detect_tool_intent(user_message)
         tool_context = self._execute_tool(tool_name, tool_arg, user_id) if tool_name else ""
         print("[4] Tool calling completed", flush=True)
-        rag_context = await self._rag.build_context_block(user_message)
+        rag_context, rag_sources = await self._rag.build_context_block(user_message)
         allowed_languages = {"en", "es", "fr", "hi", "ta", "te"}
         safe_lang = language if language in allowed_languages else "en"
         lang_instruction = f"\n\n[CRITICAL] You must reply entirely in the following language code: {safe_lang}. Do not use English unless the code is 'en'."
-        enriched_prompt = _SYSTEM_PROMPT + lang_instruction + rag_context + tool_context
+        system_base = _load_system_prompt()
+        enriched_prompt = system_base + lang_instruction + rag_context + tool_context
 
         full_response = []
         start = time.monotonic()
@@ -493,7 +496,11 @@ class ChatService:
         )
 
         self._touch_session(session)
-        yield json.dumps({"done": True, "message_id": str(assistant_msg.id)})
+        yield json.dumps({
+            "done": True,
+            "message_id": str(assistant_msg.id),
+            "sources": rag_sources,
+        })
 
     # -------------------------------------------------------------------
     # History

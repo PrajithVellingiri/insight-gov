@@ -21,48 +21,62 @@ export default function AdminDashboard() {
   const charts = data?.charts || {};
 
   return (
-    <div className="space-y-8">
-      <div>
-        <div className="page-header mb-6">
+    <div className="space-y-8 pb-10">
+      <div className="animate-fade-in-up">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{t('admin.platform_analytics', 'Platform Analytics')}</h1>
-            <p className="text-muted-foreground text-sm mt-1">Platform-wide overview and AI performance.</p>
+            <h1 className="text-3xl font-extrabold text-foreground tracking-tight">Platform Overview</h1>
+            <p className="text-muted-foreground text-sm mt-1">Real-time analytics and AI performance metrics.</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {/* Metric Cards - Staggered */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           {[
-            { label: t('admin.total_petitions', 'Total Petitions'), value: stats.total_petitions || 0, Icon: FileText, color: 'text-primary bg-primary/10' },
-            { label: t('status.resolved', 'Resolved'), value: stats.resolved_petitions || 0, Icon: FileText, color: 'text-accent bg-accent/10' },
-            { label: t('admin.active_officers', 'Active Officers'), value: stats.active_officers || 0, Icon: Users, color: 'text-purple-600 bg-purple-500/10' },
-            { label: t('admin.departments', 'Departments'), value: stats.total_departments || 0, Icon: Building2, color: 'text-muted-foreground bg-secondary' },
-          ].map(({ label, value, Icon, color }) => (
-            <div key={label} className="stat-card">
-              <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${color}`}>
-                <Icon size={20} />
+            { label: t('admin.total_petitions', 'Total Petitions'), value: stats.total_petitions || 0, Icon: FileText, delay: 'delay-100' },
+            { label: t('status.resolved', 'Resolved Petitions'), value: stats.resolved_petitions || 0, Icon: FileText, delay: 'delay-200' },
+            { label: t('admin.active_officers', 'Active Officers'), value: stats.active_officers || 0, Icon: Users, delay: 'delay-300' },
+            { label: t('admin.departments', 'Gov Departments'), value: stats.total_departments || 0, Icon: Building2, delay: 'delay-400' },
+          ].map(({ label, value, Icon, delay }) => (
+            <div key={label} className={`card hover:-translate-y-1.5 transition-transform duration-300 animate-fade-in-up ${delay}`}>
+              <div className="flex items-center justify-between mb-4 text-muted-foreground">
+                <p className="text-sm font-medium uppercase tracking-wider">{label}</p>
+                <div className="p-2 bg-secondary/50 rounded-lg">
+                  <Icon size={18} className="text-primary" />
+                </div>
               </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">{value}</p>
-                <p className="text-sm text-muted-foreground">{label}</p>
-              </div>
+              <p className="text-4xl font-extrabold text-foreground tracking-tight" style={{ textShadow: '0 0 20px rgba(255,255,255,0.1)' }}>{value}</p>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="card lg:col-span-2">
-            <h2 className="section-title">Submission Trend (30 Days)</h2>
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+          <div className="card xl:col-span-2 animate-fade-in-up delay-300 chart-wrapper">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-2 h-6 bg-primary rounded-full animate-pulse"></div>
+              <h2 className="text-lg font-bold uppercase tracking-wider text-foreground">Submission Trend</h2>
+            </div>
             <PetitionsOverTime data={charts?.trend || []} />
           </div>
-          <div className="card">
-            <h2 className="section-title">Status Distribution</h2>
-            <PetitionsByStatus data={charts?.by_status || []} />
+          
+          <div className="card animate-fade-in-up delay-400 chart-wrapper flex flex-col">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-2 h-6 bg-accent rounded-full"></div>
+              <h2 className="text-lg font-bold uppercase tracking-wider text-foreground">Status Distribution</h2>
+            </div>
+            <div className="flex-1 flex items-center justify-center">
+              <PetitionsByStatus data={charts?.by_status || []} />
+            </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="card lg:col-span-2">
-            <h2 className="section-title">Petitions by Category</h2>
+          <div className="card lg:col-span-2 animate-fade-in-up delay-500 chart-wrapper">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-2 h-6 bg-primary rounded-full"></div>
+              <h2 className="text-lg font-bold uppercase tracking-wider text-foreground">Petitions by Category</h2>
+            </div>
             <PetitionsByCategory data={charts?.by_category || []} />
           </div>
         </div>

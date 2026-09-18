@@ -28,14 +28,8 @@ export function AuthProvider({ children }) {
             if (validUser.preferences.language) i18n.changeLanguage(validUser.preferences.language);
             if (validUser.preferences.high_contrast) document.documentElement.classList.add('high-contrast');
             else document.documentElement.classList.remove('high-contrast');
-            if (validUser.preferences.font_size === 'large') document.documentElement.classList.add('font-large');
-            else document.documentElement.classList.remove('font-large');
-            
-            if (validUser.preferences.theme === 'dark' || (validUser.preferences.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-              document.documentElement.classList.add('dark');
-            } else {
-              document.documentElement.classList.remove('dark');
-            }
+      if (validUser.preferences.font_size === 'large') document.documentElement.classList.add('font-large');
+      else document.documentElement.classList.remove('font-large');
           }
         } catch (_err) {
           console.warn("Session expired or invalid token.");
@@ -61,12 +55,6 @@ export function AuthProvider({ children }) {
       else document.documentElement.classList.remove('high-contrast');
       if (user.preferences.font_size === 'large') document.documentElement.classList.add('font-large');
       else document.documentElement.classList.remove('font-large');
-      
-      if (user.preferences.theme === 'dark' || (user.preferences.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
     }
   };
 

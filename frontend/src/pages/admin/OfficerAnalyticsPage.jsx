@@ -21,11 +21,13 @@ export default function OfficerAnalyticsPage() {
   });
 
   return (
-    <div className="space-y-8">
-      <div className="page-header mb-6">
+    <div className="space-y-8 pb-10 animate-fade-in-up">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Activity size={24} />
+          <h1 className="text-3xl font-extrabold text-foreground tracking-tight flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Activity size={24} className="text-primary" />
+            </div>
             Officer Analytics
           </h1>
           <p className="text-muted-foreground text-sm mt-1">Monitor individual officer workload and performance.</p>
@@ -33,7 +35,7 @@ export default function OfficerAnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-4">
+        <div className="lg:col-span-1 space-y-4 animate-fade-in-up delay-100">
           <div className="card">
             <label className="form-label">Filter by Department</label>
             <select 
@@ -67,13 +69,13 @@ export default function OfficerAnalyticsPage() {
                     <li key={officer.id}>
                       <button
                         onClick={() => setSelectedOfficer(officer)}
-                        className={`w-full text-left p-4 flex items-center justify-between hover:bg-slate-50 transition-colors ${selectedOfficer?.id === officer.id ? 'bg-primary-50 border-l-4 border-primary-600' : 'border-l-4 border-transparent'}`}
+                        className={`w-full text-left p-4 flex items-center justify-between hover:bg-muted transition-colors ${selectedOfficer?.id === officer.id ? 'bg-primary/10 border-l-4 border-primary' : 'border-l-4 border-transparent'}`}
                       >
                         <div>
                           <div className="font-medium text-sm text-foreground">{officer.name}</div>
                           <div className="text-xs text-muted-foreground mt-0.5">{officer.email}</div>
                         </div>
-                        <ChevronRight size={16} className={`text-muted-foreground transition-transform ${selectedOfficer?.id === officer.id ? 'translate-x-1 text-primary-600' : ''}`} />
+                        <ChevronRight size={16} className={`text-muted-foreground transition-transform ${selectedOfficer?.id === officer.id ? 'translate-x-1 text-primary' : ''}`} />
                       </button>
                     </li>
                   ))}
@@ -83,7 +85,7 @@ export default function OfficerAnalyticsPage() {
           </div>
         </div>
         
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 animate-fade-in-up delay-200">
           <OfficerAnalytics officer={selectedOfficer} />
         </div>
       </div>

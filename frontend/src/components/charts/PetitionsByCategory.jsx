@@ -92,7 +92,7 @@ export default function PetitionsByCategory({ data = [] }) {
               </div>
               <div className="flex-1 flex items-center h-6">
                 <div 
-                  className="h-full bg-primary-500 transition-all duration-500 ease-out rounded-r-md"
+                  className="h-full bg-primary transition-all duration-500 ease-out rounded-r-md shadow-[0_0_8px_var(--primary)]"
                   style={{ width: `${percentage}%` }}
                 />
               </div>

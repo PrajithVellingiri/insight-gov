@@ -60,8 +60,40 @@ app.include_router(chat_router.router, tags=["Chatbot"])
 
 @app.get("/health", tags=["Health"])
 async def health():
-    """Liveness probe — confirms the backend process is running."""
-    return {"status": "ok"}
+    """Operational health check: verifies backend, database, AI provider, and RAG vector store."""
+    from database import SessionLocal
+    from sqlalchemy import text
+
+    db_status = "error"
+    try:
+        db = SessionLocal()
+        db.execute(text("SELECT 1"))
+        db.close()
+        db_status = "connected"
+    except Exception:
+        db_status = "unreachable"
+
+    # AI provider configuration check
+    ai_ready = bool(settings.llm_api_key or settings.gemini_api_key or settings.llm_provider == "ollama")
+
+    # ChromaDB FAQ RAG check
+    rag_status = "unavailable"
+    try:
+        from services.rag_service import get_rag_service
+        rag = get_rag_service()
+        rag._init_chroma()
+        if rag._faq_collection:
+            rag_status = f"ok (documents={rag._faq_collection.count()})"
+    except Exception:
+        pass
+
+    return {
+        "status": "ok",
+        "database": db_status,
+        "llm_provider": settings.llm_provider,
+        "ai_configured": "ready" if ai_ready else "missing_key",
+        "rag_vector_store": rag_status,
+    }
 
 
 if __name__ == '__main__':

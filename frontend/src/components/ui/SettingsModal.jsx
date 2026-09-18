@@ -16,7 +16,6 @@ export default function SettingsModal({ onClose }) {
       voice_input: true,
       high_contrast: document.documentElement.classList.contains('high-contrast'),
       font_size: document.documentElement.classList.contains('font-large') ? 'large' : 'medium',
-      theme: user?.preferences?.theme || 'system',
     }
   );
   
@@ -33,12 +32,6 @@ export default function SettingsModal({ onClose }) {
     
     if (preferences.font_size === 'large') document.documentElement.classList.add('font-large');
     else document.documentElement.classList.remove('font-large');
-    
-    if (preferences.theme === 'dark' || (preferences.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
     
     // Save to user if authenticated
     if (user) {
@@ -91,24 +84,6 @@ export default function SettingsModal({ onClose }) {
             </select>
           </div>
           
-          <hr className="border-border" />
-          
-          {/* Theme */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Moon size={16} /> Appearance
-            </h3>
-            <select
-              value={preferences.theme}
-              onChange={(e) => setPreferences({ ...preferences, theme: e.target.value })}
-              className="form-input"
-            >
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-              <option value="system">System</option>
-            </select>
-          </div>
-
           <hr className="border-border" />
           
           {/* Accessibility */}

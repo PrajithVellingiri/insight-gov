@@ -188,11 +188,11 @@ export function useChat() {
           );
         },
         // onDone
-        (messageId) => {
+        (messageId, sources = []) => {
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantTempId
-                ? { ...m, id: messageId ?? assistantTempId, streaming: false }
+                ? { ...m, id: messageId ?? assistantTempId, streaming: false, sources: sources || [] }
                 : m
             )
           );

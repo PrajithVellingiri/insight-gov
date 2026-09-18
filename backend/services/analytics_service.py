@@ -22,6 +22,8 @@ from schemas.analytics import (
     StatusCount,
 )
 from models.petition import Petition
+from config import settings
+import random
 
 
 class AnalyticsService:
@@ -135,6 +137,81 @@ class AnalyticsService:
             raise ValueError("Officer not found")
 
         department_name = user.department.name if user.department else None
+
+        if settings.demo_mode:
+            # Deterministic seeded random based on the officer UUID
+            # This ensures consistent metrics for each officer without DB changes
+            rng = random.Random(str(user.id))
+            
+            # Base logic for realistic variation
+            profile_type = rng.choice(["high_performer", "heavy_workload", "new_officer", "balanced"])
+            
+            if profile_type == "high_performer":
+                resolved = rng.randint(400, 600)
+                pending = rng.randint(10, 30)
+                in_progress = rng.randint(5, 15)
+                rejected = rng.randint(20, 50)
+                duplicate = rng.randint(30, 80)
+                withdrawn = rng.randint(0, 5)
+                avg_res_days = round(rng.uniform(1.0, 3.5), 1)
+            elif profile_type == "heavy_workload":
+                resolved = rng.randint(200, 350)
+                pending = rng.randint(150, 250)
+                in_progress = rng.randint(50, 100)
+                rejected = rng.randint(30, 60)
+                duplicate = rng.randint(40, 90)
+                withdrawn = rng.randint(5, 15)
+                avg_res_days = round(rng.uniform(4.5, 12.0), 1)
+            elif profile_type == "new_officer":
+                resolved = rng.randint(10, 50)
+                pending = rng.randint(20, 40)
+                in_progress = rng.randint(10, 25)
+                rejected = rng.randint(0, 5)
+                duplicate = rng.randint(0, 10)
+                withdrawn = 0
+                avg_res_days = round(rng.uniform(2.5, 6.0), 1)
+            else: # balanced
+                resolved = rng.randint(100, 250)
+                pending = rng.randint(40, 80)
+                in_progress = rng.randint(20, 40)
+                rejected = rng.randint(15, 35)
+                duplicate = rng.randint(20, 50)
+                withdrawn = rng.randint(2, 8)
+                avg_res_days = round(rng.uniform(3.0, 7.5), 1)
+
+            total_assigned = pending + in_progress + resolved + rejected + duplicate + withdrawn
+            active_workload = pending + in_progress
+            
+            resolution_rate = 0.0
+            eligible = total_assigned - withdrawn
+            if eligible > 0:
+                resolution_rate = ((resolved + duplicate) / eligible) * 100
+                
+            priority_breakdown = {
+                "critical": rng.randint(0, int(total_assigned * 0.1)),
+                "high": rng.randint(int(total_assigned * 0.1), int(total_assigned * 0.3)),
+                "medium": rng.randint(int(total_assigned * 0.3), int(total_assigned * 0.6)),
+                "low": rng.randint(int(total_assigned * 0.1), int(total_assigned * 0.3)),
+                "unassigned": 0
+            }
+            
+            return OfficerAnalyticsResponse(
+                officer_id=user.id,
+                officer_name=user.name,
+                department_name=department_name,
+                total_assigned=total_assigned,
+                pending=pending,
+                in_progress=in_progress,
+                resolved=resolved,
+                rejected=rejected,
+                duplicate=duplicate,
+                withdrawn=withdrawn,
+                active_workload=active_workload,
+                resolution_rate=round(resolution_rate, 1),
+                average_resolution_days=avg_res_days,
+                priority_breakdown=priority_breakdown,
+                is_demo=True
+            )
 
         # Efficiently group and count petitions assigned to this officer by status
         status_counts = (

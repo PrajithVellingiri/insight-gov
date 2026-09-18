@@ -42,7 +42,7 @@ export default function Navbar({ onMenuClick, sidebarOpen }) {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-card border-b border-border flex items-center px-4 gap-4 transition-colors duration-200">
+    <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-background/80 backdrop-blur-xl border-b border-border/40 flex items-center px-4 gap-4 transition-colors duration-200">
       {/* Mobile menu toggle */}
       <button
         onClick={onMenuClick}

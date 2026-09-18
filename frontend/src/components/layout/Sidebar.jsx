@@ -38,7 +38,7 @@ export default function Sidebar({ role, open, onClose }) {
 
       <aside
         className={cn(
-          'fixed top-16 left-0 z-30 h-[calc(100vh-4rem)] w-60 bg-card border-r border-border flex flex-col transition-transform duration-300 ease-out',
+          'fixed top-16 left-0 z-30 h-[calc(100vh-4rem)] w-60 bg-background border-r border-border/30 flex flex-col transition-transform duration-300 ease-out',
           open ? 'translate-x-0' : '-translate-x-full',
           'lg:translate-x-0'
         )}

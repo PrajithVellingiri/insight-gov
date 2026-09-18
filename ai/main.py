@@ -38,11 +38,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="InsightGov AI Service",
     description=(
-        "Local AI micro-service for InsightGov. "
+        "Cloud-ready AI micro-service for InsightGov. "
         "Provides petition analysis, duplicate detection, and semantic search "
-        "using Ollama (Qwen3 + nomic-embed-text) and ChromaDB."
+        "using hosted LLM/Embedding providers (Gemini / OpenAI / Ollama fallback) and ChromaDB."
     ),
-    version="1.0.0",
+    version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,
@@ -72,39 +72,17 @@ app.include_router(search.router, tags=["Search"])
 @app.get(
     "/health",
     summary="Health check",
-    description="Verifies that the service is running and that Ollama and ChromaDB are reachable.",
+    description="Verifies that the service is running and that AI providers and ChromaDB are operational.",
     tags=["Health"],
 )
 async def health_check() -> dict:
-    """Return the operational status of the AI service and its dependencies."""
+    """Return the operational status of the AI service and its dependencies without leaking secrets."""
+    import config
+    llm_provider = config.LLM_PROVIDER
+    embed_provider = config.EMBEDDING_PROVIDER
 
-    text_model_status = "missing"
-    embedding_model_status = "missing"
-    ollama_status = "unreachable"
-
-    try:
-        from config import OLLAMA_LLM_MODEL, OLLAMA_EMBED_MODEL
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            resp = await client.get(f"{OLLAMA_BASE_URL}/api/tags")
-            if resp.status_code == 200:
-                ollama_status = "reachable"
-                models = resp.json().get("models", [])
-                model_names = [m.get("name") for m in models]
-                
-                # Check for exact matches or matches without the tag if default is 'latest'
-                def has_model(target: str) -> bool:
-                    if target in model_names:
-                        return True
-                    if ":" not in target and f"{target}:latest" in model_names:
-                        return True
-                    return False
-
-                if has_model(OLLAMA_LLM_MODEL):
-                    text_model_status = "ready"
-                if has_model(OLLAMA_EMBED_MODEL):
-                    embedding_model_status = "ready"
-    except Exception:
-        pass
+    llm_configured = bool(config.LLM_API_KEY) or llm_provider == "ollama"
+    embed_configured = bool(config.EMBEDDING_API_KEY) or embed_provider == "ollama"
 
     # Check ChromaDB
     chroma_status = "error"
@@ -112,16 +90,19 @@ async def health_check() -> dict:
         collection = get_collection()
         count = collection.count()
         chroma_status = f"ok (documents={count})"
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.error(f"Chroma health check failed: {exc}")
+
+    semantic_ready = embed_configured and chroma_status.startswith("ok")
 
     return {
         "status": "ok",
-        "ollama": ollama_status,
-        "text_model": text_model_status,
-        "embedding_model": embedding_model_status,
+        "llm_provider": llm_provider,
+        "llm_ready": "ready" if llm_configured else "missing_key",
+        "embedding_provider": embed_provider,
+        "embedding_ready": "ready" if embed_configured else "missing_key",
         "chromadb": chroma_status,
-        "semantic_search": "ready" if embedding_model_status == "ready" and chroma_status.startswith("ok") else "unavailable"
+        "semantic_search": "ready" if semantic_ready else "unavailable",
     }
 
 

@@ -61,15 +61,20 @@ export default function OfficerAnalytics({ officer }) {
 
   return (
     <div className="space-y-6">
-      <div className="card p-6 bg-primary-50/30 border border-primary-100/50">
+      <div className="card p-6 bg-primary/10 border border-primary/20 relative overflow-hidden">
+        {data.is_demo && (
+          <div className="absolute top-4 right-4 bg-primary/20 text-primary border border-primary/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider animate-pulse flex items-center gap-2">
+            <Activity size={12} /> Demo Data
+          </div>
+        )}
         <h2 className="text-xl font-bold text-foreground">{data.officer_name}</h2>
-        <p className="text-sm text-primary-700/80 mt-1">{data.department_name || 'Unassigned Department'}</p>
+        <p className="text-sm text-primary/80 mt-1">{data.department_name || 'Unassigned Department'}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="stat-card">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-blue-100 text-blue-700">
+            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
               <Briefcase size={18} />
             </div>
             <h3 className="text-sm font-medium text-muted-foreground">Total Assigned</h3>
@@ -79,7 +84,7 @@ export default function OfficerAnalytics({ officer }) {
 
         <div className="stat-card">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-orange-100 text-orange-700">
+            <div className="p-2 rounded-lg bg-orange-500/10 text-orange-500">
               <Activity size={18} />
             </div>
             <h3 className="text-sm font-medium text-muted-foreground">Active Workload</h3>
@@ -89,7 +94,7 @@ export default function OfficerAnalytics({ officer }) {
 
         <div className="stat-card">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-emerald-100 text-emerald-700">
+            <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
               <CheckCircle2 size={18} />
             </div>
             <h3 className="text-sm font-medium text-muted-foreground">Resolved</h3>
@@ -99,7 +104,7 @@ export default function OfficerAnalytics({ officer }) {
 
         <div className="stat-card">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-indigo-100 text-indigo-700">
+            <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-500">
               <Clock size={18} />
             </div>
             <h3 className="text-sm font-medium text-muted-foreground">Resolution Rate</h3>
@@ -112,25 +117,25 @@ export default function OfficerAnalytics({ officer }) {
         <div className="card">
           <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">Detailed Breakdown</h3>
           <div className="space-y-3">
-            <div className="flex justify-between items-center text-sm p-2 rounded hover:bg-slate-50 transition-colors">
+            <div className="flex justify-between items-center text-sm p-2 rounded hover:bg-muted transition-colors">
               <span className="text-muted-foreground flex items-center gap-2"><Clock size={14} /> Pending Review</span>
-              <span className="font-medium text-foreground bg-slate-100 px-2 py-0.5 rounded">{data.pending}</span>
+              <span className="font-medium text-foreground bg-secondary px-2 py-0.5 rounded">{data.pending}</span>
             </div>
-            <div className="flex justify-between items-center text-sm p-2 rounded hover:bg-slate-50 transition-colors">
+            <div className="flex justify-between items-center text-sm p-2 rounded hover:bg-muted transition-colors">
               <span className="text-muted-foreground flex items-center gap-2"><Activity size={14} /> In Progress</span>
-              <span className="font-medium text-foreground bg-slate-100 px-2 py-0.5 rounded">{data.in_progress}</span>
+              <span className="font-medium text-foreground bg-secondary px-2 py-0.5 rounded">{data.in_progress}</span>
             </div>
-            <div className="flex justify-between items-center text-sm p-2 rounded hover:bg-slate-50 transition-colors">
+            <div className="flex justify-between items-center text-sm p-2 rounded hover:bg-muted transition-colors">
               <span className="text-muted-foreground flex items-center gap-2"><XCircle size={14} /> Rejected</span>
-              <span className="font-medium text-foreground bg-slate-100 px-2 py-0.5 rounded">{data.rejected}</span>
+              <span className="font-medium text-foreground bg-secondary px-2 py-0.5 rounded">{data.rejected}</span>
             </div>
-            <div className="flex justify-between items-center text-sm p-2 rounded hover:bg-slate-50 transition-colors">
+            <div className="flex justify-between items-center text-sm p-2 rounded hover:bg-muted transition-colors">
               <span className="text-muted-foreground flex items-center gap-2"><CheckCircle2 size={14} /> Duplicate</span>
-              <span className="font-medium text-foreground bg-slate-100 px-2 py-0.5 rounded">{data.duplicate || 0}</span>
+              <span className="font-medium text-foreground bg-secondary px-2 py-0.5 rounded">{data.duplicate || 0}</span>
             </div>
-            <div className="flex justify-between items-center text-sm p-2 rounded hover:bg-slate-50 transition-colors">
+            <div className="flex justify-between items-center text-sm p-2 rounded hover:bg-muted transition-colors">
               <span className="text-muted-foreground flex items-center gap-2"><ArchiveX size={14} /> Withdrawn</span>
-              <span className="font-medium text-foreground bg-slate-100 px-2 py-0.5 rounded">{data.withdrawn}</span>
+              <span className="font-medium text-foreground bg-secondary px-2 py-0.5 rounded">{data.withdrawn}</span>
             </div>
           </div>
         </div>

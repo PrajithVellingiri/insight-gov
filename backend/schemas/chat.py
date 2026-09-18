@@ -48,12 +48,20 @@ class ChatMessageIn(BaseModel):
     )
 
 
+class ChatSource(BaseModel):
+    title: str
+    source: str
+    section: str | None = None
+    relevance: float | None = None
+
+
 class ChatMessageOut(BaseModel):
     message_id: UUID
     session_id: UUID
     reply: str
     model: str
     token_count: int | None = None
+    sources: list[ChatSource] = Field(default_factory=list)
 
     model_config = {"from_attributes": True}
 

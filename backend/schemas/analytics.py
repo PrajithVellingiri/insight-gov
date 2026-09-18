@@ -54,6 +54,7 @@ class OfficerAnalyticsResponse(BaseModel):
     resolution_rate: float
     average_resolution_days: float | None = None
     priority_breakdown: dict[str, int] = {}
+    is_demo: bool = False
 
 class AdminCharts(BaseModel):
     trend: list[ChartPoint]

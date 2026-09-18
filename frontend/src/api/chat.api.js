@@ -94,7 +94,7 @@ export async function streamChatMessage(sessionId, message, language, onToken, o
           return;
         }
         if (parsed.done) {
-          onDone(parsed.message_id ?? null);
+          onDone(parsed.message_id ?? null, parsed.sources ?? []);
           return;
         }
         if (parsed.token) {

@@ -7,7 +7,7 @@ const STATUS_COLORS = {
   pending:      '#f59e0b',
   analysed:     '#3b82f6',
   under_review: '#6366f1',
-  resolved:     '#16a34a',
+  resolved:     '#00e599',
   rejected:     '#ef4444',
   duplicate:    '#f97316',
 };

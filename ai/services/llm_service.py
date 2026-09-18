@@ -1,32 +1,27 @@
 """
-services/llm_service.py – Ollama LLM interaction for the InsightGov AI service.
+services/llm_service.py – Hosted LLM interaction for the InsightGov AI service.
 
 Responsibilities:
-- Send system + user prompts to Ollama /api/generate.
-- Enforce JSON output mode (format="json").
-- Extract and validate the JSON response.
-- Retry up to 3 times on transient failures.
+- Delegates to the configured LLM provider (Gemini, OpenAI, or Ollama fallback).
+- Enforces JSON output mode and schema compliance.
+- Extracts and validates the JSON response.
+- Retry with exponential backoff on transient failures.
 """
-
 from __future__ import annotations
 
 import json
 import re
+from typing import Any
 
-import httpx
-
-from config import OLLAMA_BASE_URL, OLLAMA_LLM_MODEL
+from services.llm import get_llm_provider
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-_MAX_RETRIES = 3
-_TIMEOUT_SECONDS = 120.0
 
-
-async def generate_json(system_prompt: str, user_prompt: str) -> dict:
+async def generate_json(system_prompt: str, user_prompt: str) -> dict[str, Any]:
     """
-    Call the Ollama LLM and return a parsed JSON dict.
+    Call the configured LLM provider and return a parsed JSON dict.
 
     Args:
         system_prompt: Instructions / persona for the model.
@@ -38,59 +33,42 @@ async def generate_json(system_prompt: str, user_prompt: str) -> dict:
     Raises:
         RuntimeError: If all retries are exhausted or the response cannot be parsed.
     """
-    url = f"{OLLAMA_BASE_URL}/api/generate"
-    payload = {
-        "model": OLLAMA_LLM_MODEL,
-        "system": system_prompt,
-        "prompt": user_prompt,
-        "stream": False,
-        "format": "json",  # Instructs Ollama to guarantee valid JSON output
-    }
+    provider = get_llm_provider()
+    logger.info(f"Generating JSON via LLM provider: {type(provider).__name__}")
 
-    last_error: Exception | None = None
-
-    for attempt in range(1, _MAX_RETRIES + 1):
-        try:
-            logger.info(f"LLM request attempt {attempt}/{_MAX_RETRIES} (model={OLLAMA_LLM_MODEL})")
-            async with httpx.AsyncClient(timeout=_TIMEOUT_SECONDS) as client:
-                response = await client.post(url, json=payload)
-                response.raise_for_status()
-
-            data = response.json()
-            raw_text: str = data.get("response", "")
-            parsed = _extract_json(raw_text)
-            logger.info("LLM response parsed successfully.")
-            return parsed
-
-        except Exception as exc:
-            logger.warning(f"LLM attempt {attempt} failed: {exc}")
-            last_error = exc
-
-    raise RuntimeError(
-        f"LLM generation failed after {_MAX_RETRIES} attempts. Last error: {last_error}"
-    )
+    try:
+        return await provider.generate_json(
+            prompt=user_prompt,
+            system_prompt=system_prompt,
+            temperature=0.2,
+        )
+    except Exception as exc:
+        logger.error(f"LLM generate_json failed: {exc}")
+        raise RuntimeError(f"LLM generation failed: {exc}") from exc
 
 
-def _extract_json(text: str) -> dict:
+def _extract_json(text: str) -> dict[str, Any]:
     """
     Extract a JSON object from raw LLM output.
-
-    Tries direct parsing first; falls back to regex extraction of the first
-    JSON object in the string if the model included surrounding text despite
-    the format=json directive.
-
-    Raises:
-        ValueError: If no valid JSON object can be found.
+    Kept for backward-compatibility with tests or direct utility usage.
     """
     text = text.strip()
 
-    # Attempt 1 – direct parse
+    # Direct parse
     try:
         return json.loads(text)
     except json.JSONDecodeError:
         pass
 
-    # Attempt 2 – extract first JSON object via regex
+    # Strip markdown code blocks
+    cleaned = re.sub(r"^```(?:json)?\s*", "", text, flags=re.MULTILINE)
+    cleaned = re.sub(r"\s*```$", "", cleaned, flags=re.MULTILINE).strip()
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        pass
+
+    # Regex extraction
     match = re.search(r"\{.*\}", text, re.DOTALL)
     if match:
         try:
@@ -98,7 +76,4 @@ def _extract_json(text: str) -> dict:
         except json.JSONDecodeError:
             pass
 
-    raise ValueError(
-        f"Could not parse JSON from LLM response. "
-        f"First 300 chars: {text[:300]!r}"
-    )
+    raise ValueError("No valid JSON object could be extracted from text.")

@@ -1,18 +1,19 @@
+from pathlib import Path
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     # Database
-    database_url: str
+    database_url: str = "postgresql://postgres:postgres@localhost:5432/insightgov"
 
     # JWT
-    secret_key: str
+    secret_key: str = "dev_secret_key_insightgov_change_in_production"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 1440
 
-    # AI Service (Ollama pipeline — DO NOT use for chatbot)
-    ai_service_url: str
-    ollama_base_url: str
+    # AI Service (Microservice URL)
+    ai_service_url: str = "http://localhost:8001"
+    ollama_base_url: str = "http://localhost:11434"
 
     # Server binding
     backend_host: str = "0.0.0.0"
@@ -22,10 +23,29 @@ class Settings(BaseSettings):
     upload_dir: str = "uploads"
 
     # CORS
-    allowed_origins: str
+    allowed_origins: str = "http://localhost:5173,http://localhost:3000"
 
     # ---------------------------------------------------------------
-    # Chatbot & Vision (Gemini API) — completely independent from Ollama pipeline
+    # Hosted LLM & Embeddings Configuration
+    # ---------------------------------------------------------------
+    llm_provider: str = "gemini"                         # gemini | openai | grok | ollama
+    llm_api_key: str = ""
+    llm_model: str = "gemini-3.1-flash-lite"
+    llm_base_url: str = ""
+
+    embedding_provider: str = "gemini"                   # gemini | openai | ollama
+    embedding_api_key: str = ""
+    embedding_model: str = "gemini-embedding-001"
+    embedding_base_url: str = ""
+
+    # RAG Configuration
+    rag_top_k: int = 3
+    rag_similarity_threshold: float = 0.55
+    rag_max_context_chars: int = 3500
+    chroma_faq_path: str = "./chroma_faq_db"
+
+    # ---------------------------------------------------------------
+    # Chatbot & Vision (Gemini API)
     # ---------------------------------------------------------------
     gemini_api_key: str = ""                             # GEMINI_API_KEY
     chat_provider: str = "gemini"                        # gemini | grok (legacy) | openai | claude
@@ -44,7 +64,6 @@ class Settings(BaseSettings):
     chat_session_ttl_hours: int = 24
     chat_stream_timeout: int = 60
     chat_compression_threshold: int = 20               # turns before compression kicks in
-    chroma_faq_path: str = "./chroma_faq_db"
 
     # Priority Escalation Configuration
     priority_threshold_medium: int = 2
@@ -54,10 +73,17 @@ class Settings(BaseSettings):
     # Location Verification
     location_verification_threshold_meters: float = 500.0
 
+    # Analytics Demo Mode
+    demo_mode: bool = False
+
     @property
     def allowed_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.allowed_origins.split(",")]
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {
+        "env_file": [".env", str(Path(__file__).resolve().parent / ".env")],
+        "env_file_encoding": "utf-8",
+        "extra": "ignore",
+    }
 
 settings = Settings()

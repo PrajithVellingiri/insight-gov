@@ -11,7 +11,7 @@ from alembic import context
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from config import settings
-from database import Base
+from database import Base, engine
 
 # Import all models so Alembic autogenerate can detect them
 import models  # noqa: F401
@@ -20,7 +20,8 @@ import models  # noqa: F401
 # Alembic config object
 # ---------------------------------------------------------------------------
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# Escape % to %% so configparser doesn't fail on URL-encoded passwords (e.g. %40 for @)
+config.set_main_option("sqlalchemy.url", settings.database_url.replace("%", "%%"))
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
@@ -41,11 +42,7 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    connectable = engine
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
         with context.begin_transaction():

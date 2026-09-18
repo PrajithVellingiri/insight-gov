@@ -1,11 +1,8 @@
 from datetime import datetime, timedelta, timezone
-
+import bcrypt
 from jose import jwt
-from passlib.context import CryptContext
 
 from config import settings
-
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class AuthService:
@@ -17,11 +14,16 @@ class AuthService:
 
     @staticmethod
     def hash_password(plain: str) -> str:
-        return _pwd_context.hash(plain)
+        pwd_bytes = plain.encode("utf-8")
+        salt = bcrypt.gensalt()
+        return bcrypt.hashpw(pwd_bytes, salt).decode("utf-8")
 
     @staticmethod
     def verify_password(plain: str, hashed: str) -> bool:
-        return _pwd_context.verify(plain, hashed)
+        try:
+            return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+        except Exception:
+            return False
 
     # ------------------------------------------------------------------
     # JWT helpers

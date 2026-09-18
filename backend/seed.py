@@ -184,7 +184,9 @@ def main() -> None:
         print()
     except Exception as exc:
         db.rollback()
+        import traceback
         print(f"\n[FAIL] Seed failed: {exc}\n", file=sys.stderr)
+        traceback.print_exc()
         sys.exit(1)
     finally:
         db.close()

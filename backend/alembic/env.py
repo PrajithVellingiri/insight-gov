@@ -21,7 +21,7 @@ import models  # noqa: F401
 # ---------------------------------------------------------------------------
 config = context.config
 # Escape % to %% so configparser doesn't fail on URL-encoded passwords (e.g. %40 for @)
-config.set_main_option("sqlalchemy.url", settings.database_url.replace("%", "%%"))
+config.set_main_option("sqlalchemy.url", settings.clean_database_url.replace("%", "%%"))
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

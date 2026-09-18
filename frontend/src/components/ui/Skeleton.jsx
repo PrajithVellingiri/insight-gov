@@ -1,4 +1,5 @@
-import { cn } from "@/lib/utils"
+﻿import React from "react";
+import { cn } from "@/lib/utils";
 
 function Skeleton({
   className,
@@ -6,10 +7,13 @@ function Skeleton({
 }) {
   return (
     <div
-      className={cn("animate-shimmer bg-muted/40 bg-gradient-to-r from-transparent via-muted/60 to-transparent bg-[length:400%_100%] rounded-md", className)}
+      className={cn(
+        "animate-shimmer rounded-xl border border-white/[0.04] bg-slate-900/60 bg-gradient-to-r from-slate-900/60 via-slate-800/40 to-slate-900/60 bg-[length:200%_100%]",
+        className
+      )}
       {...props}
     />
-  )
+  );
 }
 
-export { Skeleton }
+export { Skeleton };

@@ -44,8 +44,10 @@ export default function MicButton({ onTranscript, className, disabled, language 
         disabled={disabled}
         onClick={isListening ? stopListening : startListening}
         className={cn(
-          "p-2 rounded-full transition-colors flex items-center justify-center disabled:opacity-50",
-          isListening ? "bg-red-100 text-red-600 hover:bg-red-200 animate-pulse" : "bg-secondary text-muted-foreground hover:bg-slate-200",
+          "p-2 rounded-full transition-all flex items-center justify-center disabled:opacity-50 border",
+          isListening 
+            ? "bg-rose-500/20 text-rose-400 border-rose-500/40 shadow-glow-rose animate-pulse" 
+            : "bg-slate-800/80 text-slate-400 hover:text-cyan-400 hover:bg-slate-700/80 border-slate-700/60 shadow-sm",
           className
         )}
         title={isListening ? "Stop listening" : "Start voice typing"}

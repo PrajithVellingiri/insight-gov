@@ -1,10 +1,4 @@
-/**
- * components/chatbot/ChatPanel.jsx
- *
- * Slide-in panel containing the chat interface.
- * Connects the UI components to the useChat hook.
- */
-import { X, Trash2, ShieldCheck } from 'lucide-react';
+﻿import { X, Trash2, ShieldCheck, Sparkles } from 'lucide-react';
 import ChatMessageList from './ChatMessageList';
 import ChatInput from './ChatInput';
 import { useChat } from '@/hooks/useChat';
@@ -24,32 +18,34 @@ export default function ChatPanel({ isOpen, onClose }) {
   return (
     <div
       className={cn(
-        'fixed bottom-20 right-4 sm:right-6 w-[360px] h-[540px] max-h-[80vh] max-w-[calc(100vw-32px)]',
-        'bg-card rounded-2xl shadow-card-hover border border-border flex flex-col overflow-hidden',
-        'transition-all duration-300 ease-out z-50 origin-bottom-right',
+        'fixed bottom-24 right-4 sm:right-7 w-[380px] h-[560px] max-h-[82vh] max-w-[calc(100vw-32px)]',
+        'glass-panel-elevated rounded-3xl border border-blue-500/30 shadow-2xl flex flex-col overflow-hidden',
+        'transition-all duration-300 cubic-bezier(0.16, 1, 0.3, 1) z-50 origin-bottom-right',
         isOpen
-          ? 'opacity-100 scale-100 translate-y-0'
+          ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto'
           : 'opacity-0 scale-95 translate-y-8 pointer-events-none'
       )}
       role="dialog"
       aria-label="InsightGov AI Assistant"
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary text-primary-foreground shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-foreground/20">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800/80 bg-slate-950/90 text-foreground shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-[0_0_12px_rgba(37,99,235,0.4)] border border-blue-400/30">
             <ShieldCheck size={16} />
           </div>
           <div>
-            <h3 className="font-semibold text-sm leading-tight">InsightGov Assistant</h3>
-            <p className="text-[10px] text-primary-foreground/70 uppercase tracking-wider font-medium">AI Powered</p>
+            <h3 className="font-bold text-sm leading-tight text-foreground flex items-center gap-1.5">
+              InsightGov Copilot
+            </h3>
+            <p className="text-[10px] text-cyan-400 font-mono font-semibold uppercase tracking-wider">Public Policy & FAQ RAG</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={clearMessages}
             disabled={isStreaming}
-            className="p-1.5 hover:bg-primary-foreground/10 rounded-lg transition-colors disabled:opacity-50 text-primary-foreground/80 hover:text-primary-foreground"
+            className="p-1.5 hover:bg-slate-800/60 rounded-xl transition-colors disabled:opacity-50 text-muted-foreground hover:text-foreground"
             title="Clear Chat History"
             aria-label="Clear Chat History"
           >
@@ -57,38 +53,39 @@ export default function ChatPanel({ isOpen, onClose }) {
           </button>
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-primary-foreground/10 rounded-lg transition-colors text-primary-foreground/80 hover:text-primary-foreground"
+            className="p-1.5 hover:bg-slate-800/60 rounded-xl transition-colors text-muted-foreground hover:text-foreground"
             aria-label="Close chat"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
       </div>
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-destructive/10 text-destructive text-xs px-4 py-2 border-b border-destructive/20">
+        <div className="bg-rose-500/10 text-rose-400 text-xs px-4 py-2 border-b border-rose-500/20 font-medium">
           {error}
         </div>
       )}
 
-      {/* Messages Area */}
-      {isLoadingSession ? (
-        <div className="flex-1 flex flex-col items-center justify-center gap-3 bg-muted/30">
-          <div className="h-6 w-6 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-          <p className="text-xs text-muted-foreground font-medium">Connecting to AI...</p>
-        </div>
-      ) : (
+      {/* Message List */}
+      <div className="flex-1 overflow-hidden bg-slate-950/40">
         <ChatMessageList
           messages={messages}
-          onSend={sendMessage}
-          onFeedback={submitFeedback}
           isStreaming={isStreaming}
+          isLoadingSession={isLoadingSession}
+          onSubmitFeedback={submitFeedback}
         />
-      )}
+      </div>
 
-      {/* Input Area */}
-      <ChatInput onSend={sendMessage} isStreaming={isStreaming} />
+      {/* Chat Input */}
+      <div className="p-3 border-t border-slate-800/80 bg-slate-950/80 shrink-0">
+        <ChatInput
+          onSendMessage={sendMessage}
+          disabled={isStreaming || isLoadingSession}
+          placeholder="Ask about public schemes, grievance status, or policies..."
+        />
+      </div>
     </div>
   );
 }

@@ -54,15 +54,20 @@ export default function DepartmentManagement() {
     <div className="space-y-6 max-w-5xl mx-auto">
       <div className="page-header">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Departments</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage government departments mapping for AI routing.</p>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+              <Building2 size={22} />
+            </div>
+            Departments
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage state ministry mappings and autonomous AI routing targets.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1 card h-fit">
-          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
-            <Plus size={18} className="text-primary-600" /> Add Department
+        <div className="md:col-span-1 glass-panel h-fit p-6 rounded-2xl border border-slate-800/80">
+          <h2 className="text-base font-semibold text-foreground flex items-center gap-2 mb-4">
+            <Plus size={18} className="text-blue-400" /> Add Department
           </h2>
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
@@ -73,37 +78,47 @@ export default function DepartmentManagement() {
               <label className="form-label">Department Name</label>
               <input type="text" className="form-input" placeholder="e.g. Health & Welfare" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
             </div>
-            {error && <p className="text-sm text-red-600 bg-red-50 p-2 rounded">{error}</p>}
+            {error && (
+              <div className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-xl">
+                {error}
+              </div>
+            )}
             <button type="submit" disabled={isPending} className="btn-primary w-full justify-center">
               {isPending ? <Loader2 size={16} className="animate-spin" /> : 'Create Department'}
             </button>
           </form>
         </div>
 
-        <div className="md:col-span-2 card p-0 overflow-hidden h-fit">
+        <div className="md:col-span-2 glass-panel p-0 overflow-hidden h-fit rounded-2xl border border-slate-800/80 shadow-card-3d">
           <table className="w-full text-sm text-left">
-            <thead className="bg-muted border-b border-border">
+            <thead className="bg-slate-900/80 border-b border-slate-800/80">
               <tr>
-                <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Code</th>
-                <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Name</th>
-                <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Created</th>
-                <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase text-right">Actions</th>
+                <th className="px-4 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Code</th>
+                <th className="px-4 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Name</th>
+                <th className="px-4 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Created</th>
+                <th className="px-4 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-slate-800/60">
               {isLoading ? (
-                <tr><td colSpan={4} className="text-center py-10 text-muted-foreground">Loading...</td></tr>
+                <tr><td colSpan={4} className="text-center py-10 text-muted-foreground"><Loader2 size={20} className="animate-spin inline mr-2 text-cyan-400" />Loading ministries...</td></tr>
               ) : depts.length === 0 ? (
-                <tr><td colSpan={4} className="text-center py-10 text-muted-foreground">No departments found.</td></tr>
+                <tr><td colSpan={4} className="text-center py-10 text-muted-foreground">No departments registered.</td></tr>
               ) : (
                 depts.map((d) => (
-                  <tr key={d.id} className="hover:bg-muted">
-                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{d.department_code}</td>
-                    <td className="px-4 py-3 font-medium text-foreground flex items-center gap-2"><Building2 size={14} className="text-muted-foreground" /> {d.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{formatDateShort(d.created_at)}</td>
+                  <tr key={d.id} className="hover:bg-slate-800/40 transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs text-cyan-400">{d.department_code || '—'}</td>
+                    <td className="px-4 py-3 font-medium text-foreground flex items-center gap-2">
+                      <Building2 size={14} className="text-slate-400" /> {d.name}
+                    </td>
+                    <td className="px-4 py-3 text-slate-400 text-xs">{formatDateShort(d.created_at)}</td>
                     <td className="px-4 py-3 text-right">
-                      <button onClick={() => setDeleteId(d)} className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors">
-                        <Trash2 size={16} />
+                      <button 
+                        onClick={() => setDeleteId(d)} 
+                        className="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition-all"
+                        title="Delete Department"
+                      >
+                        <Trash2 size={15} />
                       </button>
                     </td>
                   </tr>
@@ -115,33 +130,33 @@ export default function DepartmentManagement() {
       </div>
 
       {deleteId && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 space-y-4 animate-fade-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4">
+          <div className="glass-panel-elevated border border-slate-700/60 rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4 animate-fade-in">
             <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2 text-red-600">
+              <div className="flex items-center gap-2 text-rose-400">
                 <AlertTriangle size={20} />
                 <h2 className="text-lg font-bold text-foreground">Delete Department</h2>
               </div>
-              <button onClick={() => { setDeleteId(null); setDeleteError(''); }} className="text-muted-foreground hover:text-muted-foreground rounded-full p-1">
+              <button onClick={() => { setDeleteId(null); setDeleteError(''); }} className="text-slate-400 hover:text-white rounded-lg p-1 transition-colors">
                 <X size={18} />
               </button>
             </div>
             
-            <p className="text-sm text-muted-foreground">
-              Are you sure you want to delete <strong>{deleteId.name}</strong>?
+            <p className="text-sm text-slate-300">
+              Are you sure you want to delete <strong className="text-foreground">{deleteId.name}</strong>? This action cannot be undone.
             </p>
             {deleteError && (
-              <div className="text-xs text-red-700 bg-red-50 p-2 rounded border border-red-200">
+              <div className="text-xs text-rose-400 bg-rose-500/10 p-3 rounded-xl border border-rose-500/20">
                 {deleteError}
               </div>
             )}
             
             <div className="flex gap-3 pt-2">
-              <button onClick={() => { setDeleteId(null); setDeleteError(''); }} className="btn-secondary flex-1">Cancel</button>
+              <button onClick={() => { setDeleteId(null); setDeleteError(''); }} className="btn-secondary flex-1 justify-center">Cancel</button>
               <button 
                 onClick={handleDelete} 
                 disabled={isDeleting}
-                className="flex-1 btn bg-red-600 hover:bg-red-700 text-white shadow-sm disabled:opacity-60"
+                className="flex-1 btn bg-rose-600 hover:bg-rose-500 text-white shadow-glow-rose justify-center disabled:opacity-60 transition-all font-semibold text-sm"
               >
                 {isDeleting ? <Loader2 size={14} className="animate-spin" /> : 'Delete'}
               </button>

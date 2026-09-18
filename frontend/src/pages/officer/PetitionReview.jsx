@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { usePetition, useUpdatePetition } from '@/hooks/usePetitions';
 import AIAnalysisPanel from '@/components/ai/AIAnalysisPanel';
 import StatusTimeline from '@/components/petition/StatusTimeline';
 import { formatDateShort } from '@/lib/utils';
-import { ArrowLeft, Loader2, MapPin, Calendar, Clock, Edit3, CheckCircle, XCircle, User, Mail, ExternalLink, ShieldCheck, ShieldAlert, Shield } from 'lucide-react';
+import { ArrowLeft, Loader2, MapPin, Calendar, Clock, Edit3, CheckCircle, XCircle, User, Mail, ExternalLink, ShieldCheck, ShieldAlert, Shield, Sparkles, FileText, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -56,18 +56,17 @@ export default function PetitionReview() {
   }, [id, petition]);
 
   if (isLoading) {
-    return <div className="flex justify-center py-20"><Loader2 size={32} className="animate-spin text-primary-400" /></div>;
+    return <div className="flex justify-center py-24"><Loader2 size={36} className="animate-spin text-blue-400" /></div>;
   }
 
   if (!petition) {
-    return <div className="card text-center py-14">Petition not found.</div>;
+    return <div className="card text-center py-16 text-muted-foreground">Petition not found in database.</div>;
   }
 
   const analysis = petition.ai_analysis;
   const hasLocation = petition.latitude != null && petition.longitude != null;
 
   const handleAction = async (actionStatus) => {
-    // Phase 2/Bugfix Validation
     if (actionStatus === 'resolved') {
       if (!form.notes.trim()) {
         alert('Resolution description is required.');
@@ -107,71 +106,105 @@ export default function PetitionReview() {
   };
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
-      {/* Left Column: Details & Map */}
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start pb-12">
+      {/* Left Column: Details & Geospatial Radar */}
       <div className="xl:col-span-2 space-y-6">
         <div>
-          <Link to="/officer/dashboard" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-3 no-underline">
-            <ArrowLeft size={14} /> Back to Queue
+          <Link
+            to="/officer/dashboard"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-400 hover:text-blue-300 mb-3 transition-colors"
+          >
+            <ArrowLeft size={14} /> Back to Department Queue
           </Link>
-          <h1 className="text-2xl font-bold text-foreground">{petition.title}</h1>
-          <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1 group relative">
-              <MapPin size={13} /> {petition.location}
-              
-              {petition.location_verification_status === 'VERIFIED' && <ShieldCheck size={13} className="text-emerald-500 ml-1" title="Location Verified" />}
-              {petition.location_verification_status === 'MISMATCH' && <ShieldAlert size={13} className="text-amber-500 ml-1" title="Location Requires Review" />}
-              {(petition.location_verification_status === 'UNAVAILABLE' || petition.location_verification_status === 'unverified') && <Shield size={13} className="text-slate-400 ml-1" title="Location Unavailable" />}
-
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/30">
+              {petition.petition_number}
+            </span>
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700/60 uppercase tracking-wider">
+              {petition.status.replace('_', ' ')}
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight leading-snug">
+            {petition.title}
+          </h1>
+          <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-muted-foreground font-medium">
+            <div className="flex items-center gap-1.5 group relative">
+              <MapPin size={13} className="text-blue-400" />
+              <span>{petition.location}</span>
+              {petition.location_verification_status === 'VERIFIED' && (
+                <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20 font-semibold">
+                  <ShieldCheck size={11} /> GPS Verified
+                </span>
+              )}
+              {petition.location_verification_status === 'MISMATCH' && (
+                <span className="inline-flex items-center gap-0.5 text-[10px] text-amber-400 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20 font-semibold">
+                  <ShieldAlert size={11} /> Review Needed
+                </span>
+              )}
               {petition.location_verification_reason && (
-                <div className="absolute left-0 top-full mt-2 hidden group-hover:block w-64 p-2 bg-slate-800 text-slate-100 text-xs rounded shadow-lg z-50 pointer-events-none">
+                <div className="absolute left-0 top-full mt-2 hidden group-hover:block w-64 p-2.5 bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl shadow-2xl z-50 pointer-events-none">
                   {petition.location_verification_reason}
                 </div>
               )}
             </div>
-            <span className="flex items-center gap-1"><Calendar size={13} /> {formatDateShort(petition.created_at)}</span>
-            <span className="flex items-center gap-1"><Clock size={13} /> ID: <code className="font-mono text-xs">{petition.id}</code></span>
+            <span className="flex items-center gap-1.5 font-mono">
+              <Calendar size={12} className="text-muted-foreground" />
+              {formatDateShort(petition.created_at)}
+            </span>
           </div>
         </div>
 
-        {/* Submitter Details */}
-        <div className="card bg-primary/5 border border-primary/10 flex flex-wrap gap-x-8 gap-y-2 py-3 px-4 rounded-xl">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary"><User size={16} /></div>
+        {/* Submitter Telemetry Card */}
+        <div className="glass-panel p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4 border border-slate-800/80">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+              <User size={18} />
+            </div>
             <div>
-              <p className="text-xs text-muted-foreground font-medium">Submitted By</p>
-              <p className="text-sm font-semibold text-foreground">{petition.submitter_name || 'Anonymous'}</p>
+              <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">Citizen Submitter</p>
+              <p className="text-sm font-bold text-foreground">{petition.submitter_name || 'Anonymous Citizen'}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground"><Mail size={16} /></div>
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-center text-muted-foreground">
+              <Mail size={16} />
+            </div>
             <div>
-              <p className="text-xs text-muted-foreground font-medium">Email Address</p>
-              <p className="text-sm font-semibold text-foreground">{petition.submitter_email || 'N/A'}</p>
+              <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">Contact Email</p>
+              <p className="text-xs font-mono text-slate-300">{petition.submitter_email || 'N/A'}</p>
             </div>
           </div>
         </div>
 
-        <div className="card">
-          <h2 className="section-title">Petition Details</h2>
-          <p className="text-foreground leading-relaxed whitespace-pre-wrap">{petition.description}</p>
+        {/* Petition Description */}
+        <div className="card space-y-2">
+          <div className="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800/60">
+            <FileText size={16} className="text-blue-400" />
+            <h2 className="section-title !mb-0">Grievance Statement</h2>
+          </div>
+          <p className="text-foreground leading-relaxed text-sm whitespace-pre-wrap font-normal">
+            {petition.description}
+          </p>
         </div>
 
         {/* Coordinates Map */}
-        <div className="card p-1 pb-2">
-          <div className="px-4 pt-3 pb-2 flex justify-between items-center">
-            <h2 className="section-title mb-0">Exact Location</h2>
+        <div className="glass-panel rounded-2xl overflow-hidden border border-slate-800/80">
+          <div className="px-5 py-3.5 flex justify-between items-center border-b border-slate-800/80 bg-slate-950/70">
+            <div className="flex items-center gap-2">
+              <MapPin size={15} className="text-cyan-400" />
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-200">Geospatial Radar Coordinates</h2>
+            </div>
             {hasLocation && (
               <a 
                 href={`https://www.google.com/maps/search/?api=1&query=${petition.latitude},${petition.longitude}`}
                 target="_blank" rel="noreferrer"
-                className="text-xs flex items-center gap-1 text-primary hover:text-primary/80 font-medium"
+                className="text-xs inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 font-semibold transition-colors"
               >
-                Open in Maps <ExternalLink size={12} />
+                External Satellite Map <ExternalLink size={11} />
               </a>
             )}
           </div>
-          <div className="h-[300px] w-full rounded-b-xl overflow-hidden bg-slate-100">
+          <div className="h-[320px] w-full bg-slate-950">
             {hasLocation ? (
               <MapContainer center={[petition.latitude, petition.longitude]} zoom={15} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
                 <TileLayer
@@ -181,32 +214,37 @@ export default function PetitionReview() {
                 <Marker position={[petition.latitude, petition.longitude]} />
               </MapContainer>
             ) : (
-              <div className="h-full flex items-center justify-center text-slate-400 flex-col gap-2">
-                <MapPin size={32} className="opacity-20" />
-                <p>No exact coordinates provided by citizen.</p>
+              <div className="h-full flex items-center justify-center text-slate-500 flex-col gap-2">
+                <MapPin size={32} className="opacity-30" />
+                <p className="text-xs">No GPS coordinates recorded for this petition.</p>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Right Column: AI & Actions */}
+      {/* Right Column: AI Analysis & Action Decision Suite */}
       <div className="space-y-6">
         <AIAnalysisPanel analysis={analysis} role="officer" petition={petition} />
 
-        {/* Officer Action Panel */}
+        {/* Officer Decision Console */}
         {petition.status !== 'resolved' && petition.status !== 'rejected' ? (
-          <div className="card border-primary/20 shadow-md">
-            <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Edit3 size={16} className="text-primary" /> Officer Decision
-            </h2>
+          <div className="glass-panel-elevated rounded-2xl p-6 border border-blue-500/30">
+            <div className="flex items-center gap-2 pb-4 mb-4 border-b border-slate-800/80">
+              <div className="h-7 w-7 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center border border-blue-400/30">
+                <Edit3 size={15} />
+              </div>
+              <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
+                Officer Determination
+              </h2>
+            </div>
 
             {overrideMode ? (
-              <div className="space-y-4 animate-fade-in bg-secondary p-4 rounded-lg border border-border mb-4">
+              <div className="space-y-4 bg-slate-950/70 p-4 rounded-xl border border-slate-800/80 mb-4">
                 <div>
-                  <label className="form-label">Override Department</label>
+                  <label className="form-label">Transfer to Department</label>
                   <select className="form-input" value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })}>
-                    <option value="">Keep AI Suggestion ({analysis?.department})</option>
+                    <option value="">Retain AI Recommendation ({analysis?.department})</option>
                     {DEPARTMENTS.map(d => (
                       <option key={d} value={d}>{d}</option>
                     ))}
@@ -215,19 +253,19 @@ export default function PetitionReview() {
                 <div>
                   <label className="form-label">Override Priority</label>
                   <select className="form-input" value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
-                    <option value="">Keep AI Suggestion ({analysis?.priority})</option>
+                    <option value="">Retain AI Priority ({analysis?.priority})</option>
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
                     <option value="high">High</option>
                     <option value="critical">Critical</option>
                   </select>
                 </div>
-                <div className="flex items-center justify-between mt-4">
-                  <button onClick={() => setOverrideMode(false)} className="text-xs text-muted-foreground hover:text-foreground underline">Cancel Override</button>
+                <div className="flex items-center justify-between pt-2">
+                  <button onClick={() => setOverrideMode(false)} className="text-xs text-muted-foreground hover:text-foreground">Cancel Override</button>
                   <button 
                     onClick={() => handleAction('under_review')} 
                     disabled={updateLoading || (!form.department && !form.priority)} 
-                    className="btn-primary text-xs py-1.5 px-3"
+                    className="btn-primary text-xs py-1.5 px-3.5"
                   >
                     Apply Override & Transfer
                   </button>
@@ -235,58 +273,76 @@ export default function PetitionReview() {
               </div>
             ) : (
               <div className="mb-4">
-                <button onClick={() => setOverrideMode(true)} className="text-sm text-primary hover:text-primary/80 underline font-medium">
-                  Override AI Suggestions
+                <button onClick={() => setOverrideMode(true)} className="text-xs text-blue-400 hover:text-blue-300 font-semibold transition-colors flex items-center gap-1">
+                  <Sparkles size={12} /> Override AI Recommendations
                 </button>
               </div>
             )}
 
-            <div className="space-y-3 mb-4">
-              <label className="form-label">Action Notes (visible to citizen)</label>
+            <div className="space-y-2 mb-4">
+              <label className="form-label">Official Determination Notes</label>
               <textarea
-                className="form-input resize-none" rows={3}
-                placeholder="e.g. Team dispatched to location."
+                className="form-input resize-none text-xs" rows={3}
+                placeholder="e.g. Field inspection completed. Works contract allocated."
                 value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })}
               />
             </div>
             
-            <div className="space-y-3 mb-4">
-              <label className="form-label">Resolution Proof (Required for Resolve)</label>
+            <div className="space-y-2 mb-5">
+              <label className="form-label flex items-center gap-1.5">
+                <Upload size={12} className="text-blue-400" />
+                Resolution Proof Attachment (Required for Resolve)
+              </label>
               <input 
                 type="file" 
                 accept="image/jpeg, image/png, image/webp" 
-                className="form-input text-sm"
+                className="form-input text-xs"
                 onChange={(e) => setResolutionFiles(Array.from(e.target.files))}
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => handleAction('resolved')} disabled={updateLoading} className="btn-accent shadow-sm">
-                <CheckCircle size={14} /> Resolve
+            <div className="grid grid-cols-2 gap-2.5">
+              <button
+                onClick={() => handleAction('resolved')}
+                disabled={updateLoading}
+                className="btn text-white font-semibold text-xs border border-emerald-400/30 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 shadow-[0_4px_15px_rgba(16,185,129,0.3)]"
+              >
+                <CheckCircle size={14} /> Resolve Grievance
               </button>
-              <button onClick={() => handleAction('rejected')} disabled={updateLoading} className="btn-danger shadow-sm">
+              <button
+                onClick={() => handleAction('rejected')}
+                disabled={updateLoading}
+                className="btn-danger text-xs font-semibold"
+              >
                 <XCircle size={14} /> Reject
               </button>
-              <button onClick={() => handleAction('duplicate')} disabled={updateLoading} className="btn-secondary col-span-2">
-                Mark as Duplicate
+              <button
+                onClick={() => handleAction('duplicate')}
+                disabled={updateLoading}
+                className="btn-secondary text-xs col-span-2 hover:border-slate-600"
+              >
+                Flag as Duplicate Entry
               </button>
             </div>
           </div>
         ) : (
-          <div className={cn("card border shadow-md", petition.status === 'resolved' ? 'bg-green-50/50 border-green-200' : 'bg-red-50/50 border-red-200')}>
-            <h2 className={cn("text-sm font-semibold flex items-center gap-2", petition.status === 'resolved' ? 'text-green-800' : 'text-red-800')}>
-              {petition.status === 'resolved' ? <CheckCircle size={16} /> : <XCircle size={16} />}
-              {petition.status === 'resolved' ? 'Petition Resolved' : 'Petition Closed / Rejected'}
+          <div className={cn(
+            "glass-panel rounded-2xl p-5 border",
+            petition.status === 'resolved' ? 'border-emerald-500/30 bg-emerald-950/20' : 'border-rose-500/30 bg-rose-950/20'
+          )}>
+            <h2 className={cn("text-sm font-bold flex items-center gap-2", petition.status === 'resolved' ? 'text-emerald-400' : 'text-rose-400')}>
+              {petition.status === 'resolved' ? <CheckCircle size={17} /> : <XCircle size={17} />}
+              {petition.status === 'resolved' ? 'Petition Formally Resolved' : 'Petition Concluded / Rejected'}
             </h2>
-            <p className={cn("text-sm mt-1", petition.status === 'resolved' ? 'text-green-600' : 'text-red-600')}>
-              This petition has been closed. You can review its history below.
+            <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+              This petition record is finalized. The action log and timeline below document all historical determinations.
             </p>
           </div>
         )}
 
         {/* Timeline */}
         <div className="card">
-          <h2 className="section-title mb-4">Status History</h2>
+          <h2 className="section-title mb-4">Milestone Audit Log</h2>
           <StatusTimeline history={petition.history ?? []} />
         </div>
       </div>

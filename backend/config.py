@@ -22,13 +22,14 @@ class Settings(BaseSettings):
     # Storage & Object Storage Provider
     upload_dir: str = "uploads"
     storage_provider: str = "local"                      # local | s3 | supabase
-    storage_bucket: str = "petition-images"
+    storage_bucket: str = "petition-evidence"
     storage_url: str = ""
     storage_api_key: str = ""
     storage_secret_key: str = ""
     storage_region: str = "auto"
     supabase_url: str = ""
     supabase_key: str = ""
+    supabase_service_role_key: str = ""
 
     # CORS
     frontend_url: str = ""

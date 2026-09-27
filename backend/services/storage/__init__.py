@@ -5,7 +5,13 @@ from __future__ import annotations
 
 import logging
 from config import settings
-from .base import BaseStorageProvider
+from .base import (
+    BaseStorageProvider,
+    StorageError,
+    StorageConfigurationError,
+    StorageUploadError,
+    StorageDeleteError,
+)
 from .local import LocalStorageProvider
 
 logger = logging.getLogger(__name__)

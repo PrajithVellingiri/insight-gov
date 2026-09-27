@@ -55,3 +55,8 @@ class LocalStorageProvider(BaseStorageProvider):
             target.unlink()
             return True
         return False
+
+    async def get_signed_url(self, stored_path: str, expires_in: int = 3600) -> str | None:
+        """Local storage does not support signed URLs."""
+        return None
+

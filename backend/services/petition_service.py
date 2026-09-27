@@ -19,6 +19,7 @@ from schemas.petition import PetitionCreate
 from services.ai_client import AIClient
 from services.chat_providers import get_chat_provider
 from services.vision_providers import get_vision_provider
+from services.storage import get_storage_provider, StorageError
 
 logger = logging.getLogger(__name__)
 
@@ -64,27 +65,60 @@ class PetitionService:
     async def create_petition(
         self, data: PetitionCreate, files: list, citizen_id: UUID, citizen_name: str
     ) -> Petition:
-        """Create, analyse, and return a petition."""
+        """Create, analyse, and return a petition with transactional image handling."""
+        import uuid as uuid_mod
+        from models.petition_image import PetitionImage
+        from services.storage import get_storage_provider, StorageError
 
-        # Calculate location integrity status
+        # 1. Validate files upfront
+        if len(files) == 0:
+            raise ValueError("At least one image is required.")
+        if len(files) > 5:
+            raise ValueError("Maximum 5 images allowed per petition.")
+
+        allowed_mimes = {"image/jpeg", "image/png", "image/webp"}
+        max_size_bytes = 5 * 1024 * 1024
+
+        read_files_data: list[tuple[bytes, str, str]] = []
+        for file in files:
+            content_type = getattr(file, "content_type", None) or "image/jpeg"
+            if content_type not in allowed_mimes:
+                raise ValueError(f"Unsupported file type '{content_type}'. Allowed: JPG, PNG, WebP.")
+
+            content = await file.read() if hasattr(file, "read") else file.file.read()
+            if len(content) > max_size_bytes:
+                orig_name = getattr(file, "filename", "file")
+                raise ValueError(f"File '{orig_name}' exceeds the 5 MB limit.")
+
+            orig_filename = getattr(file, "filename", None) or "evidence.jpg"
+            read_files_data.append((content, orig_filename, content_type))
+
+        # 2. Pre-generate petition UUID
+        petition_id = uuid_mod.uuid4()
+
+        # 3. Calculate location integrity status
         ver_status = "UNAVAILABLE"
         ver_reason = None
         ver_time = None
-        
-        # Legacy location status
+
         loc_status = "unavailable"
         if data.latitude is not None and data.longitude is not None:
             loc_status = "unverified"
 
-        # Phase 7: Calculate verification based on device coordinates
-        if data.latitude is not None and data.longitude is not None and data.device_latitude is not None and data.device_longitude is not None:
+        # Calculate verification based on device coordinates
+        if (
+            data.latitude is not None
+            and data.longitude is not None
+            and data.device_latitude is not None
+            and data.device_longitude is not None
+        ):
             distance = haversine_distance(
                 data.latitude, data.longitude,
                 data.device_latitude, data.device_longitude
             )
             threshold = getattr(settings, "location_verification_threshold_meters", 500.0)
             ver_time = datetime.now(timezone.utc)
-            
+
             if distance <= threshold:
                 ver_status = "VERIFIED"
                 ver_reason = f"Distance between submitted and device location is {distance:.1f}m (<= {threshold}m)."
@@ -95,58 +129,99 @@ class PetitionService:
             ver_status = "UNAVAILABLE"
             ver_reason = "Device geolocation was not available or permission was denied."
 
-        petition = Petition(
-            title=data.title,
-            description=data.description,
-            location=data.location,
-            latitude=data.latitude,
-            longitude=data.longitude,
-            location_source=data.location_source,
-            location_accuracy=data.location_accuracy,
-            location_status=loc_status,
-            device_latitude=data.device_latitude,
-            device_longitude=data.device_longitude,
-            device_accuracy=data.device_accuracy,
-            location_verification_status=ver_status,
-            location_verification_reason=ver_reason,
-            location_verified_at=ver_time,
-            citizen_department_id=data.citizen_department_id,
-            submitted_by=citizen_id,
-            status="pending",
-        )
-        petition = self._petition_repo.create(petition)
-        logger.info("Petition %s created (status=pending)", petition.id)
-
-        # 1.5 Save images using storage provider abstraction
-        import uuid
-        from models.petition_image import PetitionImage
-        from services.storage import get_storage_provider
-
+        # 4. Upload files to storage provider sequentially with error cleanup
         storage = get_storage_provider()
-        uploaded_image_paths = []
+        uploaded_records: list[dict] = []
+        uploaded_paths: list[str] = []
 
-        for file in files:
-            file_extension = Path(file.filename).suffix if file.filename else ".jpg"
-            safe_filename = f"{uuid.uuid4().hex}{file_extension}"
-            dest_rel_path = f"petition_images/{petition.id}/{safe_filename}"
-            content = await file.read() if hasattr(file, "read") else file.file.read()
+        try:
+            for content, orig_filename, content_type in read_files_data:
+                ext = "jpg"
+                if "." in orig_filename:
+                    ext = orig_filename.rsplit(".", 1)[-1].lower()
+                safe_uuid = uuid_mod.uuid4().hex
+                dest_path = f"{petition_id}/petition/{safe_uuid}.{ext}"
 
-            stored_path = await storage.save_file(content, dest_rel_path, file.content_type or "image/jpeg")
+                stored_path = await storage.save_file(content, dest_path, content_type)
+                uploaded_paths.append(stored_path)
 
-            img = PetitionImage(
-                petition_id=petition.id,
-                filename=file.filename or 'image.jpg',
-                stored_path=stored_path,
-                mime_type=file.content_type,
-                file_size=len(content),
-                image_type="petition",
+                uploaded_records.append({
+                    "filename": orig_filename,
+                    "stored_path": stored_path,
+                    "mime_type": content_type,
+                    "file_size": len(content),
+                    "image_type": "petition",
+                })
+        except Exception as upload_exc:
+            logger.error(
+                "Image upload failed for petition %s. Rolling back %d uploaded files: %s",
+                petition_id,
+                len(uploaded_paths),
+                upload_exc,
             )
-            self._db.add(img)
-            local_path = storage.get_local_path(stored_path)
-            uploaded_image_paths.append((local_path or dest_rel_path, file.content_type))
-        self._db.commit()
+            for path in uploaded_paths:
+                try:
+                    await storage.delete_file(path)
+                except Exception as del_err:
+                    logger.warning("Failed to clean up uploaded file '%s': %s", path, del_err)
+            raise StorageError(f"Unable to store petition evidence: {str(upload_exc)}") from upload_exc
 
-        # Execute AI analysis task synchronously
+        # 5. Database Transaction: Insert Petition + PetitionImage rows atomically
+        try:
+            petition = Petition(
+                id=petition_id,
+                title=data.title,
+                description=data.description,
+                location=data.location,
+                latitude=data.latitude,
+                longitude=data.longitude,
+                location_source=data.location_source,
+                location_accuracy=data.location_accuracy,
+                location_status=loc_status,
+                device_latitude=data.device_latitude,
+                device_longitude=data.device_longitude,
+                device_accuracy=data.device_accuracy,
+                location_verification_status=ver_status,
+                location_verification_reason=ver_reason,
+                location_verified_at=ver_time,
+                citizen_department_id=data.citizen_department_id,
+                submitted_by=citizen_id,
+                status="pending",
+            )
+            self._db.add(petition)
+
+            for rec in uploaded_records:
+                img = PetitionImage(
+                    petition_id=petition_id,
+                    filename=rec["filename"],
+                    stored_path=rec["stored_path"],
+                    mime_type=rec["mime_type"],
+                    file_size=rec["file_size"],
+                    image_type=rec["image_type"],
+                )
+                self._db.add(img)
+
+            self._db.commit()
+            self._db.refresh(petition)
+            logger.info("Petition %s and %d images committed atomically", petition.id, len(uploaded_records))
+        except Exception as db_exc:
+            self._db.rollback()
+            logger.error(
+                "Database commit failed for petition %s. Rolling back %d uploaded files: %s",
+                petition_id,
+                len(uploaded_paths),
+                db_exc,
+            )
+            for path in uploaded_paths:
+                try:
+                    await storage.delete_file(path)
+                except Exception as del_err:
+                    logger.warning(
+                        "Failed to clean up uploaded file '%s' after DB failure: %s", path, del_err
+                    )
+            raise RuntimeError(f"Database error while saving petition: {str(db_exc)}") from db_exc
+
+        # 6. Execute AI analysis task synchronously
         await self.process_ai_analysis_task(petition.id, citizen_name)
 
         return petition
@@ -298,14 +373,21 @@ class PetitionService:
             logger.info("Petition %s already has AI analysis.", petition_id)
             return
 
-        uploaded_image_paths = []
-        if petition.images:
-            from pathlib import Path
-            for img in petition.images:
-                if img.image_type == 'petition':
-                    file_path = Path(settings.upload_dir) / img.stored_path
-                    if file_path.exists():
-                        uploaded_image_paths.append((file_path, img.mime_type))
+        # 1. Fetch image bytes for Vision AI if available
+        first_img = next((img for img in (petition.images or []) if img.image_type == 'petition'), None)
+        image_bytes: bytes | None = None
+        image_mime: str = "image/jpeg"
+        if first_img:
+            image_mime = first_img.mime_type or "image/jpeg"
+            try:
+                storage = get_storage_provider()
+                local_path = storage.get_local_path(first_img.stored_path)
+                if local_path and local_path.is_file():
+                    image_bytes = local_path.read_bytes()
+                else:
+                    image_bytes = await storage.get_file_bytes(first_img.stored_path)
+            except Exception as read_err:
+                logger.warning("Could not read image bytes for petition %s AI vision: %s", petition_id, read_err)
 
         # 2. Call AI service
         provider = get_chat_provider()
@@ -325,14 +407,12 @@ class PetitionService:
 
         if analysis_data:
             # Check if there are uploaded images for Vision AI processing
-            if uploaded_image_paths:
+            if image_bytes:
                 # Use the first image for Vision Intelligence
-                first_image_path, first_mime = uploaded_image_paths[0]
                 try:
                     vision_provider = get_vision_provider()
-                    image_bytes = first_image_path.read_bytes()
                     vision_context = f"Title: {translated_title}\nDescription: {translated_description}"
-                    vision_result = await vision_provider.analyze_image(image_bytes, first_mime, vision_context)
+                    vision_result = await vision_provider.analyze_image(image_bytes, image_mime, vision_context)
                     
                     if vision_result:
                         explanation_dict = analysis_data.get("explanation", {})

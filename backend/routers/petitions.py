@@ -1,9 +1,11 @@
+import logging
 import uuid as uuid_lib
 from pathlib import Path
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import FileResponse, RedirectResponse, Response
 import pydantic
 from sqlalchemy.orm import Session
 
@@ -21,7 +23,10 @@ from schemas.petition import (
     WithdrawRequest,
 )
 from services.petition_service import PetitionService
+from services.storage import get_storage_provider, StorageError
 from config import settings
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -92,7 +97,16 @@ async def submit_petition(
     except pydantic.ValidationError as e:
         raise RequestValidationError(e.errors())
     service = PetitionService(db)
-    petition = await service.create_petition(data, files, current_user.id, current_user.name)
+    try:
+        petition = await service.create_petition(data, files, current_user.id, current_user.name)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except StorageError as e:
+        logger.error("Storage error creating petition: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Unable to store petition evidence in cloud storage. Please try again.",
+        )
     return PetitionWithAnalysis.model_validate(petition)
 
 
@@ -361,51 +375,73 @@ async def upload_petition_images(
                    f"(already has {existing_count}).",
         )
 
-    from services.storage import get_storage_provider
     storage = get_storage_provider()
-    image_folder = "petition_images" if image_type == "petition" else "resolution_proofs"
+    subfolder = "petition" if image_type == "petition" else "resolution"
 
     saved: list[PetitionImage] = []
+    uploaded_paths: list[str] = []
 
-    for file in files:
-        # Validate MIME type
-        if file.content_type not in _ALLOWED_MIME_TYPES:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unsupported file type '{file.content_type}'. "
-                       f"Allowed: JPG, PNG, WebP.",
+    try:
+        for file in files:
+            # Validate MIME type
+            if file.content_type not in _ALLOWED_MIME_TYPES:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Unsupported file type '{file.content_type}'. "
+                           f"Allowed: JPG, PNG, WebP.",
+                )
+
+            content = await file.read()
+
+            # Validate file size
+            if len(content) > _MAX_FILE_SIZE_BYTES:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"File '{file.filename}' exceeds the 5 MB size limit.",
+                )
+
+            # Build a safe unique filename and destination path
+            ext = "jpg"
+            if file.filename and "." in file.filename:
+                ext = file.filename.rsplit(".", 1)[-1].lower()
+            unique_name = f"{uuid_lib.uuid4().hex}.{ext}"
+            dest_path = f"{petition_id}/{subfolder}/{unique_name}"
+
+            stored_path = await storage.save_file(content, dest_path, file.content_type or "image/jpeg")
+            uploaded_paths.append(stored_path)
+
+            img = PetitionImage(
+                petition_id=petition_id,
+                filename=file.filename or unique_name,
+                stored_path=stored_path,
+                mime_type=file.content_type,
+                file_size=len(content),
+                image_type=image_type,
             )
+            db.add(img)
+            saved.append(img)
 
-        content = await file.read()
+        db.commit()
+    except HTTPException:
+        for path in uploaded_paths:
+            try:
+                await storage.delete_file(path)
+            except Exception as cleanup_err:
+                logger.warning("Failed to clean up uploaded file '%s': %s", path, cleanup_err)
+        raise
+    except Exception as e:
+        db.rollback()
+        for path in uploaded_paths:
+            try:
+                await storage.delete_file(path)
+            except Exception as cleanup_err:
+                logger.warning("Failed to clean up uploaded file '%s': %s", path, cleanup_err)
+        logger.error("Failed to upload images for petition %s: %s", petition_id, e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to store uploaded images. Please try again.",
+        ) from e
 
-        # Validate file size
-        if len(content) > _MAX_FILE_SIZE_BYTES:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"File '{file.filename}' exceeds the 5 MB size limit.",
-            )
-
-        # Build a safe unique filename
-        ext = "jpg"
-        if file.filename and "." in file.filename:
-            ext = file.filename.rsplit(".", 1)[-1].lower()
-        unique_name = f"{uuid_lib.uuid4()}.{ext}"
-        dest_path = f"{image_folder}/{petition_id}/{unique_name}"
-
-        stored_path = await storage.save_file(content, dest_path, file.content_type or "image/jpeg")
-
-        img = PetitionImage(
-            petition_id=petition_id,
-            filename=file.filename or unique_name,
-            stored_path=stored_path,
-            mime_type=file.content_type,
-            file_size=len(content),
-            image_type=image_type,
-        )
-        db.add(img)
-        saved.append(img)
-
-    db.commit()
     for img in saved:
         db.refresh(img)
 
@@ -413,7 +449,7 @@ async def upload_petition_images(
 
 
 @router.get(
-    "/{petition_id}/images/{filename}",
+    "/{petition_id}/images/{filename:path}",
     summary="Securely fetch a petition image",
 )
 async def get_petition_image(
@@ -422,9 +458,6 @@ async def get_petition_image(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user_from_token),
 ):
-    from fastapi.responses import FileResponse, Response
-    from services.storage import get_storage_provider
-    
     repo = PetitionRepository(db)
     petition = repo.get_by_id(petition_id)
     if not petition:
@@ -439,22 +472,30 @@ async def get_petition_image(
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied.")
 
     # Validate image exists in DB
-    from models.petition_image import PetitionImage
-    img_record = db.query(PetitionImage).filter(
-        PetitionImage.petition_id == petition_id,
-        PetitionImage.filename == filename
-    ).first()
-    
-    if not img_record:
-        img_record = db.query(PetitionImage).filter(
+    clean_fn = filename.replace("\\", "/").lstrip("/")
+    base_fn = clean_fn.rsplit("/", 1)[-1]
+
+    img_record = (
+        db.query(PetitionImage)
+        .filter(
             PetitionImage.petition_id == petition_id,
-            PetitionImage.stored_path.endswith(filename)
-        ).first()
+            (PetitionImage.stored_path == clean_fn)
+            | (PetitionImage.stored_path == f"{petition_id}/{clean_fn}")
+            | (PetitionImage.stored_path.endswith(clean_fn))
+            | (PetitionImage.filename == base_fn)
+            | (PetitionImage.filename == clean_fn),
+        )
+        .first()
+    )
 
     if not img_record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image not found.")
 
     storage = get_storage_provider()
+    signed_url = await storage.get_signed_url(img_record.stored_path, expires_in=3600)
+    if signed_url:
+        return RedirectResponse(url=signed_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+
     local_path = storage.get_local_path(img_record.stored_path)
     if local_path and local_path.is_file():
         return FileResponse(local_path, media_type=img_record.mime_type)

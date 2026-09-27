@@ -7,6 +7,26 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 
+class StorageError(Exception):
+    """Base exception for storage errors."""
+    pass
+
+
+class StorageConfigurationError(StorageError):
+    """Raised when storage provider is misconfigured or missing credentials."""
+    pass
+
+
+class StorageUploadError(StorageError):
+    """Raised when an upload to storage fails."""
+    pass
+
+
+class StorageDeleteError(StorageError):
+    """Raised when deleting an object from storage fails."""
+    pass
+
+
 class BaseStorageProvider(ABC):
     """Abstract interface for storing and retrieving uploaded petition files and resolution proofs."""
 
@@ -17,11 +37,11 @@ class BaseStorageProvider(ABC):
 
         Args:
             content: Raw file bytes.
-            destination_path: Relative storage path (e.g. 'petition_images/<id>/image.jpg').
+            destination_path: Relative storage path (e.g. '<petition_id>/petition/<unique_uuid>.jpg').
             content_type: MIME type of the file.
 
         Returns:
-            The normalized stored path or URL.
+            The normalized stored path or object key.
         """
         pass
 
@@ -45,6 +65,14 @@ class BaseStorageProvider(ABC):
         """Delete a file from storage."""
         pass
 
+    @abstractmethod
+    async def get_signed_url(self, stored_path: str, expires_in: int = 3600) -> str | None:
+        """
+        Generate a secure, time-limited signed URL for accessing the object.
+        Returns None if provider does not support signed URLs (e.g. local storage).
+        """
+        pass
+
     def get_public_url(self, stored_path: str) -> str | None:
-        """Return a direct public/signed URL if supported by the provider, else None."""
+        """Return a direct public URL if supported by the provider, else None."""
         return None

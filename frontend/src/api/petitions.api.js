@@ -4,22 +4,32 @@ const API_BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
 
 export const getImageUrl = (relativeUrl) => {
   if (!relativeUrl) return '';
+  if (relativeUrl.startsWith('http://') || relativeUrl.startsWith('https://')) {
+    return relativeUrl;
+  }
   const token = localStorage.getItem('insightgov_token');
+  const tokenParam = token ? `?token=${encodeURIComponent(token)}` : '';
   
-  // Both legacy paths ("uploads/petition_images/...") and new paths ("petition_images/...")
-  // We want to extract petitionId and filename to call the authenticated endpoint:
-  // /petitions/{petition_id}/images/{filename}
-  const cleanUrl = relativeUrl.replace(/^uploads\//, '');
+  // Clean leading uploads/ or slashes
+  const cleanUrl = relativeUrl.replace(/^uploads\//, '').replace(/^\/+/, '');
   const parts = cleanUrl.split('/');
   
-  // parts should be: ['petition_images' or 'resolution_proofs', petitionId, filename]
+  // Format 1: New standard: <petition_id>/petition/<unique_uuid>.<ext> or <petition_id>/resolution/...
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (parts.length >= 2 && uuidRegex.test(parts[0])) {
+    const petitionId = parts[0];
+    const filename = parts.slice(1).join('/');
+    return `${API_BASE}/petitions/${petitionId}/images/${filename}${tokenParam}`;
+  }
+
+  // Format 2: Legacy format: petition_images/<petition_id>/<unique_uuid>.<ext>
   if (parts.length >= 3 && (parts[0] === 'petition_images' || parts[0] === 'resolution_proofs')) {
     const petitionId = parts[1];
     const filename = parts.slice(2).join('/');
-    return `${API_BASE}/petitions/${petitionId}/images/${filename}?token=${token}`;
+    return `${API_BASE}/petitions/${petitionId}/images/${filename}${tokenParam}`;
   }
   
-  return `${API_BASE}${relativeUrl.startsWith('/') ? relativeUrl : '/' + relativeUrl}?token=${token}`;
+  return `${API_BASE}/${cleanUrl}${tokenParam}`;
 };
 
 export const getDepartments = async () => {

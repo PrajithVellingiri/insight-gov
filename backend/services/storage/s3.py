@@ -112,3 +112,23 @@ class S3StorageProvider(BaseStorageProvider):
             return True
         except Exception:
             return await self._local_fallback.delete_file(clean_path)
+
+    async def get_signed_url(self, stored_path: str, expires_in: int = 3600) -> str | None:
+        clean_path = stored_path.replace("\\", "/").lstrip("/")
+        try:
+            import boto3
+            s3_client = boto3.client(
+                "s3",
+                endpoint_url=self.endpoint_url if self.endpoint_url else None,
+                aws_access_key_id=self.access_key,
+                aws_secret_access_key=self.secret_key,
+                region_name=self.region,
+            )
+            return s3_client.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": self.bucket, "Key": clean_path},
+                ExpiresIn=expires_in,
+            )
+        except Exception:
+            return None
+
